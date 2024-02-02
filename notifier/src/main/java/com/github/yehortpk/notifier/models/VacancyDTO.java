@@ -5,11 +5,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @EqualsAndHashCode
 @Builder
 @ToString
-public class VacancyDTO {
+public class VacancyDTO implements Serializable {
     private int companyID;
     private int vacancyID;
     private String title;

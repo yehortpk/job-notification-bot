@@ -16,8 +16,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service("proxyService")
 public class ProxyService {
-    @Value("${proxy_site_url}")
+    @Value("${proxy-site-url}")
     private String proxySiteURL;
+
     private final List<ProxyDTO> proxies = new ArrayList<>();
 
     public void loadProxies() throws IOException {

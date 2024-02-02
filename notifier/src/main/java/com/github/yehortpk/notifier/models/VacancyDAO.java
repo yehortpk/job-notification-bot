@@ -11,9 +11,9 @@ import org.springframework.data.redis.core.RedisHash;
 @RedisHash("vacancy")
 @Builder
 public class VacancyDAO {
-    @Id
     private int companyID;
     private int vacancyId;
+    @Id
     private String link;
     private String title;
     private int minSalary;

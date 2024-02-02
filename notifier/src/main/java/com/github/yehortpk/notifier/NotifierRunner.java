@@ -2,12 +2,13 @@ package com.github.yehortpk.notifier;
 
 import com.github.yehortpk.notifier.entities.SomeCompany;
 import com.github.yehortpk.notifier.models.VacancyDTO;
+import com.github.yehortpk.notifier.services.NotifierService;
 import com.github.yehortpk.notifier.services.ProxyService;
+import com.github.yehortpk.notifier.services.VacancyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import com.github.yehortpk.notifier.services.VacancyService;
 
 import java.io.IOException;
 import java.util.Set;
@@ -23,6 +24,9 @@ public class NotifierRunner implements ApplicationRunner {
 
     @Autowired
     SomeCompany someCompany;
+
+    @Autowired
+    NotifierService notifierService;
 
     @Override
     public void run(ApplicationArguments args) throws IOException {
@@ -41,5 +45,7 @@ public class NotifierRunner implements ApplicationRunner {
 
         System.out.println("New vacancies:");
         newVacancies.forEach(System.out::println);
+
+        notifierService.notifyNewVacancies(newVacancies);
     }
 }
