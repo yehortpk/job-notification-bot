@@ -31,17 +31,16 @@ public class ProxyService {
                     .proxyPort(Integer.parseInt(columns.get(1).text()))
                     .countryCode(columns.get(2).text())
                     .countryTitle(columns.get(3).text())
-                    .isAnonymous(columns.get(4).text().equals("anonymous"))
+                    .anonymity(columns.get(4).text())
                     .isGoogle(columns.get(5).text().equals("yes"))
                     .isHTTPS(columns.get(6).text().equals("yes"))
                     .lastChecked(columns.get(7).text())
                     .build();
 
             // Filtering by non-https ip and anonymity
-            if(proxyDTO.isAnonymous() &&
-                    proxyDTO.getProxyPort() != 443 &&
-                    proxyDTO.getProxyPort() != 8443 &&
-                    !proxyDTO.getCountryCode().isEmpty()
+            if(
+                !proxyDTO.getCountryCode().isEmpty() &&
+                proxyDTO.getAnonymity().equals("transparent")
             ) {
                 proxies.add(proxyDTO);
             }

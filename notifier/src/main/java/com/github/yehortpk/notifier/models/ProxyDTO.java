@@ -16,7 +16,7 @@ public class ProxyDTO {
     private int proxyPort;
     private String countryCode;
     private String countryTitle;
-    private boolean isAnonymous;
+    private String anonymity;
     private boolean isGoogle;
     private boolean isHTTPS;
     private String lastChecked;

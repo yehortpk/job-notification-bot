@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.github.yehortpk.notifier.repositories.VacancyRepository;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,7 +17,9 @@ public class VacancyService {
     private VacancyRepository vacancyRepository;
 
     public Set<VacancyDAO> getPersistedVacancies() {
-        return vacancyRepository.findAll();
+        List<VacancyDAO> vacanciesList = vacancyRepository.findAll();
+
+        return new HashSet<>(vacanciesList);
     }
 
     public Set<VacancyDTO> getDifference(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {

@@ -1,9 +1,6 @@
 package com.github.yehortpk.notifier.models;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -11,6 +8,9 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @Builder
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
 public class VacancyDTO implements Serializable {
     private int companyID;
     private int vacancyID;

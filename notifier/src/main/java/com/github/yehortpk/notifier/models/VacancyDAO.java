@@ -1,15 +1,19 @@
 package com.github.yehortpk.notifier.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
-@RedisHash("vacancy")
+@Entity
+@Table(name = "vacancy")
 @Builder
+@NoArgsConstructor
 public class VacancyDAO {
     private int companyID;
     private int vacancyId;

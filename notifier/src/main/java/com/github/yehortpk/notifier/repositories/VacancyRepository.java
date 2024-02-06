@@ -1,10 +1,6 @@
 package com.github.yehortpk.notifier.repositories;
 
 import com.github.yehortpk.notifier.models.VacancyDAO;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Set;
-
-public interface VacancyRepository extends CrudRepository<VacancyDAO, String> {
-    Set<VacancyDAO> findAll();
-}
+public interface VacancyRepository extends JpaRepository<VacancyDAO, String> {}

@@ -1,5 +1,7 @@
-package com.github.yehortpk.notifier.entities;
+package com.github.yehortpk.notifier.entities.companies;
 
+import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,23 +10,26 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
-public class SomeCompany extends MultiplePageCompanySite {
-    // todo add company data db
-    private final int companyId = 1;
+@Component("n-ix")
+public class NixCompany extends MultiplePageCompanySite {
+    private CompanyDTO company;
+
+    @Override
+    public void setCompany(CompanyDTO companyDTO) {
+        this.company = companyDTO;
+    }
 
     @Override
     public String getPageTemplateLink() {
-        return "https://careers.n-ix.com/jobs/page/%s/";
+        return company.getJobsTemplateLink();
     }
 
     @Override
     public int getPagesCount(Document doc) {
-        return 3;
-//        Elements pages = doc.select(".page-numbers");
-//        Element lastPage = pages.get(pages.size() - 2);
-//
-//        return Integer.parseInt(lastPage.text());
+        Elements pages = doc.select(".page-numbers");
+        Element lastPage = pages.get(pages.size() - 2);
+
+        return Integer.parseInt(lastPage.text());
     }
 
     @Override
@@ -41,7 +46,7 @@ public class SomeCompany extends MultiplePageCompanySite {
         int vacancyId = Integer.parseInt(vacancyTitle.split("#")[1].split("\\)")[0]);
 
         return VacancyDTO.builder()
-                .companyID(companyId)
+                .companyID(company.getCompanyId())
                 .vacancyID(vacancyId)
                 .title(vacancyTitle)
                 .link(link)
