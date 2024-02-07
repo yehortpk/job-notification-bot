@@ -28,12 +28,18 @@ public abstract class MultiplePageCompanySite implements CompanySiteInterface{
         String firstPageUrl = String.format(pageTemplateLink, 1);
 
         Document firstPage = loadPage(firstPageUrl);
-
-        for (int pageId = 1; pageId <= getPagesCount(firstPage); pageId++) {
+        System.out.println("Page parsed " + firstPageUrl);
+        List<Document> pages = new ArrayList<>();
+        pages.add(firstPage);
+        for (int pageId = 2; pageId <= getPagesCount(firstPage); pageId++) {
             String pageUrl = String.format(pageTemplateLink, pageId);
 
             Document page = loadPage(pageUrl);
+            pages.add(page);
             System.out.println("Page parsed " + pageUrl);
+        }
+
+        for (Document page : pages) {
             List<Element> vacancyBlocks = getVacancyBlocks(page);
 
             for (Element vacancyBlock : vacancyBlocks) {
@@ -58,9 +64,10 @@ public abstract class MultiplePageCompanySite implements CompanySiteInterface{
             futures.add(future);
         }
 
+        int pollTimeout = 30;
         for (int i = 0; i < futures.size(); i++) {
             try {
-                Future<Document> completedFuture = completionService.poll(10, TimeUnit.SECONDS);
+                Future<Document> completedFuture = completionService.poll(pollTimeout, TimeUnit.SECONDS);
 
                 if (completedFuture != null) {
                     Document result;

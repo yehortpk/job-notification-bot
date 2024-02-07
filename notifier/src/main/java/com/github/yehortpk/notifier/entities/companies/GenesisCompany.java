@@ -5,13 +5,12 @@ import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("n_ix-company")
-public class NixCompany extends MultiplePageCompanySite {
+@Component("genesis-company")
+public class GenesisCompany extends MultiplePageCompanySite {
     private CompanyDTO company;
 
     @Override
@@ -26,22 +25,19 @@ public class NixCompany extends MultiplePageCompanySite {
 
     @Override
     public int getPagesCount(Document doc) {
-        Elements pages = doc.select(".page-numbers");
-        Element lastPage = pages.get(pages.size() - 2);
-
-        return Integer.parseInt(lastPage.text());
+        return 1;
     }
 
     @Override
     public List<Element> getVacancyBlocks(Document page) {
-        return page.select(".job-card-sm");
+        return page.select("li.position");
     }
 
     @Override
     public VacancyDTO getVacancyFromBlock(Element block) {
-        Element linkElement = block.selectFirst(".top-title-info > a");
-        String link = linkElement.attr("href");
-        String vacancyTitle = linkElement.text();
+        Element linkElement = block.selectFirst("a");
+        String link = company.getJobsTemplateLink() + linkElement.attr("href");
+        String vacancyTitle =  linkElement.selectFirst("h2").text();
 
         return VacancyDTO.builder()
                 .companyID(company.getCompanyId())
