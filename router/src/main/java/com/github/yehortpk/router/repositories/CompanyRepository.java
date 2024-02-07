@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<CompanyDAO, Long> {
-    @Query("select c from CompanyDAO c where c.isEnabled=true")
-    List<CompanyDAO> findByIsEnabledTrue();
+    CompanyDAO findByCompanyId(long companyId);
 }

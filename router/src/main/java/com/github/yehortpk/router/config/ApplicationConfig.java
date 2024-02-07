@@ -2,16 +2,19 @@ package com.github.yehortpk.router.config;
 
 import com.github.yehortpk.router.models.SubscriptionDTO;
 import com.github.yehortpk.router.models.VacancyDTO;
+import com.github.yehortpk.router.models.VacancyNotificationDTO;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,6 +95,29 @@ public class ApplicationConfig {
         factory.setConsumerFactory(subscribeConsumerFactory());
 
         return factory;
+    }
+
+    // Producer factory
+    @Value("${KAFKA_BOT_NOTIFIER_TOPIC}")
+    private String kafkaBotNotifierTopic;
+
+    @Bean
+    public ProducerFactory<String, VacancyNotificationDTO> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configProps.put(JsonSerializer.TYPE_MAPPINGS,
+                "vacancy:com.github.yehortpk.router.models.VacancyNotificationDTO");
+
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate() {
+        KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate = new KafkaTemplate<>(producerFactory());
+        kafkaTemplate.setDefaultTopic(kafkaBotNotifierTopic);
+        return kafkaTemplate;
     }
 
 }

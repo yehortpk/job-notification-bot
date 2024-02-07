@@ -1,11 +1,10 @@
 package com.github.yehortpk.router.services;
 
-import com.github.yehortpk.router.models.ClientDTO;
-import com.github.yehortpk.router.models.CompanyDTO;
-import com.github.yehortpk.router.models.VacancyDTO;
+import com.github.yehortpk.router.models.*;
 import com.github.yehortpk.router.repositories.CompanyRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,17 +14,23 @@ public class NotifierService {
     @Autowired
     CompanyRepository companyRepository;
 
+    @Autowired
+    KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate;
+
     @Transactional
     public void notifyUsers(VacancyDTO vacancy) {
-        List<CompanyDTO> companies = companyRepository.findByIsEnabledTrue()
-                .stream()
-                .map(CompanyDTO::fromDAO)
-                .toList();
+        CompanyDTO company = CompanyDTO.fromDAO(companyRepository.findByCompanyId(vacancy.getCompanyID()));
+        company.getSubscribers().forEach((subscriber) -> {
+            VacancyNotificationDTO vacancyNotification = VacancyNotificationDTO.builder()
+                    .chatId(subscriber.getChatId())
+                    .vacancyTitle(vacancy.getTitle())
+                    .companyTitle(company.getTitle())
+                    .maxSalary(vacancy.getMaxSalary())
+                    .minSalary(vacancy.getMinSalary())
+                    .link(vacancy.getLink())
+                    .build();
 
-        for (CompanyDTO company : companies) {
-            for (ClientDTO subscriber : company.getSubscribers()) {
-                System.out.printf("New vacancy: %s for client: %s\n", vacancy, subscriber);
-            }
-        }
+            kafkaTemplate.sendDefault(vacancyNotification);
+        });
     }
 }
