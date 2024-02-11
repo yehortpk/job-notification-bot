@@ -4,24 +4,28 @@ import com.github.yehortpk.notifier.models.ProxyDTO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
-@Service("proxyService")
 public class ProxyService {
-    @Value("${proxy-site-url}")
-    private String proxySiteURL;
+    private static ProxyService instance;
+
+    public static ProxyService getInstance() {
+        if (instance == null) {
+            instance = new ProxyService();
+        }
+        return instance;
+    }
 
     private final List<ProxyDTO> proxies = new ArrayList<>();
+    private static final ThreadLocal<Integer> threadLocalParam = ThreadLocal.withInitial(() -> 0);
 
     public void loadProxies() throws IOException {
+        String proxySiteURL = "https://free-proxy-list.net/";
         Document page = Jsoup.connect(proxySiteURL).get();
         List<Element> rows = page.select(".fpl-list tbody > tr");
         for (Element row : rows) {
@@ -40,7 +44,7 @@ public class ProxyService {
             // Filtering by non-https ip and anonymity
             if(
                 !proxyDTO.getCountryCode().isEmpty() &&
-                proxyDTO.getAnonymity().equals("transparent")
+                        proxyDTO.getAnonymity().equals("elite proxy")
             ) {
                 proxies.add(proxyDTO);
             }
@@ -48,9 +52,10 @@ public class ProxyService {
     }
 
     public Proxy getRandomProxy(){
-        int randomNum = ThreadLocalRandom.current().nextInt(0, proxies.size() - 1);
+        int randomNum = (threadLocalParam.get() + proxies.size()) % proxies.size();
 
         ProxyDTO randomProxy = proxies.get(randomNum);
+        threadLocalParam.set(++randomNum);
         return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(randomProxy.getProxyHost(), randomProxy.getProxyPort()));
     }
 }

@@ -9,6 +9,7 @@ import lombok.*;
 @Table(name = "vacancy")
 @Builder
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VacancyDAO {
     private int companyID;
     @Id

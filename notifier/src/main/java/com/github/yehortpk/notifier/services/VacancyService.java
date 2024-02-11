@@ -4,6 +4,7 @@ import com.github.yehortpk.notifier.entities.CompanySiteInterface;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDAO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
+import com.github.yehortpk.notifier.repositories.CompanyRepository;
 import com.github.yehortpk.notifier.repositories.VacancyRepository;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class VacancyService {
     private VacancyRepository vacancyRepository;
 
     @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
     ApplicationContext applicationContext;
 
     public Set<VacancyDAO> getPersistedVacancies() {
@@ -34,7 +38,9 @@ public class VacancyService {
         return new HashSet<>(vacanciesList);
     }
 
-    public Set<VacancyDTO> parseAllVacancies(List<CompanyDTO> companies) {
+    public Set<VacancyDTO> parseAllVacancies() {
+        List<CompanyDTO> companies = companyRepository.findByIsEnabledTrue().stream().map(CompanyDTO::fromDAO).toList();
+
         List<Future<Set<VacancyDTO>>> futures = new ArrayList<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
@@ -43,6 +49,7 @@ public class VacancyService {
                     String beanClass = companyDTO.getBeanClass();
                     CompanySiteInterface companyBean = (CompanySiteInterface) applicationContext.getBean(beanClass);
                     companyBean.setCompany(companyDTO);
+                    System.out.println("Parse vacancies for " + companyDTO.getTitle());
                     return companyBean.parseAllVacancies();
                 } catch (BeansException e) {
                     e.printStackTrace();
