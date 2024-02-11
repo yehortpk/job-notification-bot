@@ -67,7 +67,28 @@ public class TelegramServiceUtil {
                 .chatId(chatId)
                 .text(text)
                 .parseMode(ParseMode.HTML)
+                .build();
+
+        if (markup != null) {
+            sendMessage.setReplyMarkup(markup);
+        }
+
+        Message message = (Message) executor.execute(sendMessage);
+
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Sent message, ID=%s, text=%s", message.getMessageId(), message.getText()));
+        }
+
+        return message;
+    }
+
+    public Message sendReplyMessageWithMarkup(long chatId, String text, ReplyKeyboard markup, int replyMessageId) {
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .text(text)
+                .parseMode(ParseMode.HTML)
                 .replyMarkup(markup)
+                .replyToMessageId(replyMessageId)
                 .build();
 
         Message message = (Message) executor.execute(sendMessage);
@@ -78,6 +99,8 @@ public class TelegramServiceUtil {
 
         return message;
     }
+
+
 
     /**
      * Send message to user-bot chat without specific markup
@@ -145,20 +168,4 @@ public class TelegramServiceUtil {
         }
     }
 
-    /**
-     * Send request to Telegram API file storage to get full info about file
-     *
-     * @param fileId File id
-     * @return {@link File} file object with full info, including full filepath
-     */
-    public File getFile(String fileId) {
-        GetFile getFile = new GetFile(fileId);
-        File file = (File) executor.execute(getFile);
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("File instance accepted, filepath=%s", file.getFilePath()));
-        }
-
-        return file;
-    }
 }

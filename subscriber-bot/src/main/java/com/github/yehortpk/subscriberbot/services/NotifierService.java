@@ -17,7 +17,7 @@ public class NotifierService {
 
     private String getFormattedMessage(VacancyNotificationDTO vacancy){
         StringBuilder stringBuilder = new StringBuilder();
-        String titlePart = String.format("%s в %s\n", vacancy.getVacancyTitle(), vacancy.getCompanyTitle());
+        String titlePart = String.format("<b>%s</b> in <i>%s</i>\n", vacancy.getVacancyTitle(), vacancy.getCompanyTitle());
         stringBuilder.append(titlePart);
 
         String salaryPart = "Salary: " + (vacancy.getMaxSalary() == 0 ? "not specified":

@@ -3,7 +3,7 @@ package com.github.yehortpk.subscriberbot.dtos;
 import lombok.*;
 
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

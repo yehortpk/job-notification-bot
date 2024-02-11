@@ -6,6 +6,8 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.util.LinkedList;
+
 /**
  * Model that responsible for store and transferring current user's state
  */
@@ -28,4 +30,7 @@ public class UserDAO {
      */
     @JsonProperty("user_state")
     private UserState userState;
+
+    @JsonProperty("request_callback_data")
+    private LinkedList<String> requestCallbackData = new LinkedList<>();
 }

@@ -86,7 +86,6 @@ public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBo
         if (log.isDebugEnabled()) {
             log.debug("Final user dto: " + user);
         }
-        stateService.saveUser(user);
     }
 
     /**
@@ -96,7 +95,7 @@ public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBo
      * @return {@link UserDTO} user instance
      */
     private UserDTO getUserByChatId(long chatId) {
-        UserDTO user = stateService.getState(chatId);
+        UserDTO user = stateService.getUser(chatId);System.out.println("UserState = " + user.getUserState());
         if (user.getChatId() == 0) {
             user = new UserDTO(chatId, UserState.START_STATE);
         }

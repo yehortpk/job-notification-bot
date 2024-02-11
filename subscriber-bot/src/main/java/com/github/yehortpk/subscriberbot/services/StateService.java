@@ -15,11 +15,11 @@ public class StateService {
         stateRepository.save(user.toDAO());
     }
 
-    public UserDTO getState(long chatId) {
+    public UserDTO getUser(long chatId) {
         UserDAO user = stateRepository.findById(chatId).orElseGet(() -> {
             UserDAO userDAO = new UserDAO();
             userDAO.setChatId(chatId);
-            return  userDAO;
+            return userDAO;
         });
 
         return UserDTO.fromDAO(user);
