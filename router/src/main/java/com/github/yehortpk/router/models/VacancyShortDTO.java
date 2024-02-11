@@ -3,11 +3,14 @@ package com.github.yehortpk.router.models;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubscriptionDTO {
-    private long chatId;
-    private long companyId;
+public class VacancyShortDTO {
+    private int companyId;
+    private String vacancyTitle;
+    private String vacancyURL;
 }

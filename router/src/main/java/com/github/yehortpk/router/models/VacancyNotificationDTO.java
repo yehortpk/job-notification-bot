@@ -3,7 +3,7 @@ package com.github.yehortpk.router.models;
 import lombok.*;
 
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @Builder
 public class VacancyNotificationDTO {

@@ -1,6 +1,5 @@
 package com.github.yehortpk.router.config;
 
-import com.github.yehortpk.router.models.SubscriptionDTO;
 import com.github.yehortpk.router.models.VacancyDTO;
 import com.github.yehortpk.router.models.VacancyNotificationDTO;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -35,17 +34,6 @@ public class ApplicationConfig {
         return new NewTopic(notifierTopic, 1, (short) 1);
     }
 
-    @Value("${KAFKA_SUBSCRIBE_TOPIC}")
-    private String subscribeTopic;
-
-    @Value("${subscribe-topic-consumer-group-id}")
-    private String subscribeTopicConsumerGroupId;
-
-    @Bean
-    public NewTopic subscribeTopic() {
-        return new NewTopic(subscribeTopic, 1, (short) 1);
-    }
-
     private Map<String, Object> getConsumerFactoryProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
@@ -70,29 +58,10 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, SubscriptionDTO> subscribeConsumerFactory() {
-        Map<String, Object> props = getConsumerFactoryProps();
-
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, subscribeTopicConsumerGroupId);
-        props.put(JsonDeserializer.TYPE_MAPPINGS, "subscription:com.github.yehortpk.router.models.SubscriptionDTO");
-
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> notifierContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(notifierConsumerFactory());
-
-        return factory;
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, SubscriptionDTO> subscribeContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, SubscriptionDTO> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(subscribeConsumerFactory());
 
         return factory;
     }

@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class ClientDAO {
     @EqualsAndHashCode.Include
@@ -20,8 +20,4 @@ public class ClientDAO {
     private long chatId;
     @ManyToMany(mappedBy = "subscribers")
     private List<CompanyDAO> subscriptions;
-
-    public ClientDAO(long chatId) {
-        this.chatId = chatId;
-    }
 }

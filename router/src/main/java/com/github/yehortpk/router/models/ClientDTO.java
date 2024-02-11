@@ -2,6 +2,10 @@ package com.github.yehortpk.router.models;
 
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -9,17 +13,16 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class ClientDTO {
-    @EqualsAndHashCode.Include
-    @ToString.Include
     private long chatId;
+    private Set<CompanyDTO> subscriptions;
 
-    public static ClientDTO fromDAO(ClientDAO dao) {
-        return new ClientDTO(dao.getChatId());
+    public static ClientDTO fromDAOWithoutSubscriptions(ClientDAO dao) {
+        return new ClientDTO(dao.getChatId(), new HashSet<>());
     }
 
-    public ClientDAO toDAO() {
-        ClientDAO clientDAO = new ClientDAO();
-        clientDAO.setChatId(this.getChatId());
-        return clientDAO;
+    public static ClientDTO fromDAO(ClientDAO dao) {
+        return new ClientDTO(dao.getChatId(), dao.getSubscriptions().stream()
+                .map(CompanyDTO::fromDAOWithoutClients)
+                .collect(Collectors.toSet()));
     }
 }

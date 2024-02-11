@@ -8,7 +8,7 @@ import java.util.Set;
 @Entity
 @Table(name = "company")
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Builder
 @NoArgsConstructor
@@ -33,5 +33,9 @@ public class CompanyDAO {
 
     public void addSubscription(ClientDAO client) {
         subscribers.add(client);
+    }
+
+    public void removeSubscription(ClientDAO client) {
+        subscribers.remove(client);
     }
 }
