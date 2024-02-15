@@ -1,20 +1,18 @@
 package com.github.yehortpk.notifier.services;
 
-import com.github.yehortpk.notifier.entities.CompanySiteInterface;
+import com.github.yehortpk.notifier.entities.CompanySite;
+import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.parsers.ThreadsPageParser;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDAO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import com.github.yehortpk.notifier.repositories.CompanyRepository;
 import com.github.yehortpk.notifier.repositories.VacancyRepository;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,7 +28,10 @@ public class VacancyService {
     private CompanyRepository companyRepository;
 
     @Autowired
-    ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    ProxyService proxyService;
 
     public Set<VacancyDAO> getPersistedVacancies() {
         List<VacancyDAO> vacanciesList = vacancyRepository.findAll();
@@ -44,21 +45,20 @@ public class VacancyService {
         List<Future<Set<VacancyDTO>>> futures = new ArrayList<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
-            Future<Set<VacancyDTO>> future = executor.submit(() -> {
-                try {
-                    String beanClass = companyDTO.getBeanClass();
-                    CompanySiteInterface companyBean = (CompanySiteInterface) applicationContext.getBean(beanClass);
-                    companyBean.setCompany(companyDTO);
-                    System.out.println("Parse vacancies for " + companyDTO.getTitle());
-                    return companyBean.parseAllVacancies();
-                } catch (BeansException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e.getMessage());
-                }
+            String beanClass = companyDTO.getBeanClass();
+            CompanySite bean = (CompanySite) applicationContext.getBean(beanClass);
 
-            });
-            futures.add(future);
+            if (bean instanceof MultiplePageCompanySite multiPageBean) {
+                multiPageBean.setCompany(companyDTO);
 
+                Map<String, String> headers = multiPageBean.getHeaders();
+                ThreadsPageParser pageParser = new ThreadsPageParser();
+                pageParser.setHeaders(headers);
+                pageParser.setProxyService(proxyService);
+                multiPageBean.setPageParser(pageParser);
+                Future<Set<VacancyDTO>> future = executor.submit(multiPageBean::parseAllVacancies);
+                futures.add(future);
+            }
         }
         Set<VacancyDTO> vacancies = new HashSet<>();
         for (Future<Set<VacancyDTO>> future : futures) {
@@ -70,7 +70,7 @@ public class VacancyService {
             }
         }
 
-        executor.shutdown();
+        executor.close();
         return vacancies;
     }
 
@@ -86,11 +86,6 @@ public class VacancyService {
         result.removeAll(allVacancies);
 
         return result;
-    }
-
-    public void removeVacancies(Set<VacancyDTO> outdatedVacancies) {
-        Set<VacancyDAO> vacancies = outdatedVacancies.stream().map(VacancyDTO::toDAO).collect(Collectors.toSet());
-        vacancyRepository.deleteAll(vacancies);
     }
 
     public void addVacancies(Set<VacancyDTO> newVacancies) {
