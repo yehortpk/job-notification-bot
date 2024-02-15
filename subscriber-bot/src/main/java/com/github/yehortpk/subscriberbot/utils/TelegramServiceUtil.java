@@ -2,17 +2,13 @@ package com.github.yehortpk.subscriberbot.utils;
 
 import com.github.yehortpk.subscriberbot.Executor;
 import com.github.yehortpk.subscriberbot.QuizCreatorBot;
-import com.github.yehortpk.subscriberbot.exceptions.TelegramRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -32,29 +28,6 @@ public class TelegramServiceUtil {
     }
 
     /**
-     * Removes markup from specific message
-     *
-     * @param chatId    Bot-user chatId
-     * @param messageId Message where markup need to be removed
-     */
-    public void removeMarkup(long chatId, int messageId) {
-        EditMessageReplyMarkup editMessageReplyMarkup = EditMessageReplyMarkup.builder()
-                .messageId(messageId)
-                .chatId(chatId)
-                .replyMarkup(null)
-                .build();
-
-        try {
-            Message message = (Message) executor.execute(editMessageReplyMarkup);
-            if (log.isDebugEnabled()) {
-                log.debug("Removed markup from message, ID=" + message.getMessageId());
-            }
-        } catch (TelegramRuntimeException e) {
-            log.error("Previous message hasn't markup");
-        }
-    }
-
-    /**
      * Send message to user-bot chat with specific markup
      *
      * @param chatId Bot-user chatId
@@ -67,6 +40,7 @@ public class TelegramServiceUtil {
                 .chatId(chatId)
                 .text(text)
                 .parseMode(ParseMode.HTML)
+                .disableWebPagePreview(true)
                 .build();
 
         if (markup != null) {
@@ -82,26 +56,6 @@ public class TelegramServiceUtil {
         return message;
     }
 
-    public Message sendReplyMessageWithMarkup(long chatId, String text, ReplyKeyboard markup, int replyMessageId) {
-        SendMessage sendMessage = SendMessage.builder()
-                .chatId(chatId)
-                .text(text)
-                .parseMode(ParseMode.HTML)
-                .replyMarkup(markup)
-                .replyToMessageId(replyMessageId)
-                .build();
-
-        Message message = (Message) executor.execute(sendMessage);
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Sent message, ID=%s, text=%s", message.getMessageId(), message.getText()));
-        }
-
-        return message;
-    }
-
-
-
     /**
      * Send message to user-bot chat without specific markup
      *
@@ -114,36 +68,13 @@ public class TelegramServiceUtil {
                 .chatId(chatId)
                 .text(text)
                 .parseMode(ParseMode.HTML)
+                .disableWebPagePreview(true)
                 .build();
 
         Message message = (Message) executor.execute(sendMessage);
 
         if (log.isDebugEnabled()) {
             log.debug(String.format("Sent message, ID=%s, text=%s", message.getMessageId(), message.getText()));
-        }
-
-        return message;
-    }
-
-    /**
-     * Send info message to user-bot chat. Info message sends without notification and wrapped by {@code </i>} tag
-     *
-     * @param chatId Bot-user chatId
-     * @param text   Message to send
-     * @return {@link Message} message that was sent
-     */
-    public Message sendInfoMessage(long chatId, String text) {
-        SendMessage sendInfoMessage = SendMessage.builder()
-                .chatId(chatId)
-                .disableNotification(true)
-                .text(text)
-                .parseMode(ParseMode.HTML)
-                .build();
-
-        Message message = (Message) executor.execute(sendInfoMessage);
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Sent info message, ID=%s, text=%s", message.getMessageId(), message.getText()));
         }
 
         return message;

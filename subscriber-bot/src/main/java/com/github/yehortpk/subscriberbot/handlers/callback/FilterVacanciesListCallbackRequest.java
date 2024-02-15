@@ -46,7 +46,7 @@ public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandl
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.append(String.format("There is %s vacancies by this filter:\n", vacanciesByFilter.size()));
+            stringBuilder.append(String.format("There are %s vacancies by this filter:\n", vacanciesByFilter.size()));
             vacanciesByCompany.forEach((companyId, vacancies) -> {
                 String companyTitle = companiesMap.get(Long.valueOf(companyId));
                 stringBuilder.append(String.format("\nVacancies for <b>%s</b> company\n", companyTitle));
