@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class FilterParser {
     private final List<String[]> binaryMatches = new ArrayList<>();
     private final List<String> negativeMatches = new ArrayList<>();
-    private final List<String> defaultMatches = new ArrayList<>();
+    private final List<String> mandatoryMatches = new ArrayList<>();
 
     public FilterParser(String filter) {
         String regex = "\\(([^)]+)\\)|-([\\w-]+)|(\\w+)";
@@ -25,7 +25,7 @@ public class FilterParser {
             String defaultElement = matcher.group(3);
 
             if (defaultElement != null) {
-                defaultMatches.add(defaultElement);
+                mandatoryMatches.add(defaultElement);
             }
 
             if (negative != null) {

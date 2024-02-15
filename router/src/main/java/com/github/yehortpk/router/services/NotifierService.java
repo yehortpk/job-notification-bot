@@ -63,7 +63,7 @@ public class NotifierService {
 
         List<String[]> binaryMatches = filterParser.getBinaryMatches();
         List<String> negativeMatches = filterParser.getNegativeMatches();
-        List<String> defaultMatches = filterParser.getDefaultMatches();
+        List<String> mandatoryMatches = filterParser.getMandatoryMatches();
 
         input = input.toLowerCase();
 
@@ -73,21 +73,23 @@ public class NotifierService {
             }
         }
 
-        for (String defaultMatch : defaultMatches) {
-            if (input.contains(defaultMatch)) {
-                return true;
+        for (String defaultMatch : mandatoryMatches) {
+            if (!input.contains(defaultMatch)) {
+                return false;
             }
         }
 
+        boolean result = true;
         for (String[] binaryMatch : binaryMatches) {
             for (String match : binaryMatch) {
                 if (input.contains(match)) {
                     return true;
                 }
             }
+            result = false;
         }
 
-        return false;
+        return result;
     }
 
 }
