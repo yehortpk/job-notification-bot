@@ -1,4 +1,4 @@
-FROM gradle:8.3.0-jdk17 as notifier
+FROM gradle:8.6.0-jdk21 as notifier
 WORKDIR /app
 
 # Copy the Gradle build files (e.g., build.gradle and settings.gradle)
