@@ -1,14 +1,12 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component("global_logic-company")
 public class GlobalLogicCompany extends MultiplePageCompanySite {
@@ -33,10 +31,5 @@ public class GlobalLogicCompany extends MultiplePageCompanySite {
                 .link(linkElement.attr("href"))
                 .title(linkElement.text())
                 .build();
-    }
-
-    @Override
-    public Map<String, String> getHeaders() {
-        return new HashMap<>();
     }
 }

@@ -1,6 +1,6 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import lombok.ToString;
 import org.jsoup.nodes.Document;
@@ -37,7 +37,7 @@ public class GenesisCompany extends MultiplePageCompanySite {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, String> createHeaders() {
         HashMap<String, String> result = new HashMap<>();
         result.put("Cookie", "_ga=GA1.2.1778922810.1707678925; _gid=GA1.2.6595246.1707678925; _gat=1; _ga_RJW" +
                 "NTZKGN2=GS1.2.1707678932.1.1.1707678942.50.0.0");

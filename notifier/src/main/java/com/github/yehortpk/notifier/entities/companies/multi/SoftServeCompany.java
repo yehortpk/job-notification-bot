@@ -1,6 +1,6 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -35,7 +35,7 @@ public class SoftServeCompany extends MultiplePageCompanySite {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, String> createHeaders() {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Cookie", "visid_incap_2401886=tBaF0JU+TliT8yqJRINequNCymUAAAAAQUIPAAAAAABCHWT4hR8Ccncu8OaXnvsj; i"+
                 "ncap_ses_1185_2401886=IoWXaRqztD3q1T9Mg/dxEOVCymUAAAAAI1vk3MxyTwNF+oc83fhrOQ==; _gcl_au=1.1.778519904"+

@@ -1,15 +1,13 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component("luxoft-company")
 public class LuxoftCompany extends MultiplePageCompanySite {
@@ -37,10 +35,5 @@ public class LuxoftCompany extends MultiplePageCompanySite {
                 .title(vacancySeniority + " " + vacancyTitle)
                 .build();
 
-    }
-
-    @Override
-    public Map<String, String> getHeaders() {
-        return new HashMap<>();
     }
 }

@@ -1,6 +1,6 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import lombok.ToString;
 import org.jsoup.nodes.Document;
@@ -41,7 +41,7 @@ public class NixCompany extends MultiplePageCompanySite {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
+    public Map<String, String> createHeaders() {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("Connection", "keep-alive");
         headers.put("Accept-Encoding", "gzip, deflate, br");
