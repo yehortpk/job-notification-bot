@@ -1,8 +1,6 @@
 package com.github.yehortpk.notifier.services;
 
-import com.github.yehortpk.notifier.entities.CompanySite;
-import com.github.yehortpk.notifier.entities.MultiplePageCompanySite;
-import com.github.yehortpk.notifier.entities.parsers.ThreadsPageParser;
+import com.github.yehortpk.notifier.entities.companies.CompanySiteImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDAO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
@@ -30,9 +28,6 @@ public class VacancyService {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
-    ProxyService proxyService;
-
     public Set<VacancyDAO> getPersistedVacancies() {
         List<VacancyDAO> vacanciesList = vacancyRepository.findAll();
 
@@ -46,19 +41,11 @@ public class VacancyService {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
             String beanClass = companyDTO.getBeanClass();
-            CompanySite bean = (CompanySite) applicationContext.getBean(beanClass);
+            CompanySiteImpl bean = (CompanySiteImpl) applicationContext.getBean(beanClass);
 
-            if (bean instanceof MultiplePageCompanySite multiPageBean) {
-                multiPageBean.setCompany(companyDTO);
-
-                Map<String, String> headers = multiPageBean.getHeaders();
-                ThreadsPageParser pageParser = new ThreadsPageParser();
-                pageParser.setHeaders(headers);
-                pageParser.setProxyService(proxyService);
-                multiPageBean.setPageParser(pageParser);
-                Future<Set<VacancyDTO>> future = executor.submit(multiPageBean::parseAllVacancies);
-                futures.add(future);
-            }
+            bean.setCompany(companyDTO);
+            Future<Set<VacancyDTO>> future = executor.submit(bean::parseAllVacancies);
+            futures.add(future);
         }
         Set<VacancyDTO> vacancies = new HashSet<>();
         for (Future<Set<VacancyDTO>> future : futures) {
@@ -86,6 +73,11 @@ public class VacancyService {
         result.removeAll(allVacancies);
 
         return result;
+    }
+
+    public void removeVacancies(Set<VacancyDTO> outdatedVacancies) {
+        Set<VacancyDAO> vacancies = outdatedVacancies.stream().map(VacancyDTO::toDAO).collect(Collectors.toSet());
+        vacancyRepository.deleteAll(vacancies);
     }
 
     public void addVacancies(Set<VacancyDTO> newVacancies) {

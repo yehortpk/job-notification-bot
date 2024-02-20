@@ -20,6 +20,9 @@ configurations {
 
 application {
 	mainClassName 'com.github.yehortpk.notifier.NotifierApplication'
+	applicationDefaultJvmArgs = [
+			"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+	]
 }
 
 repositories {
@@ -35,13 +38,16 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.16.1'
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.3'
 
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 
 	// https://mvnrepository.com/artifact/org.jsoup/jsoup
 	implementation 'org.jsoup:jsoup:1.17.2'
+
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.named('test') {

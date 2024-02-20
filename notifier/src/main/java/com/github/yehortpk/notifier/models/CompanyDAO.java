@@ -9,7 +9,7 @@ import lombok.*;
 @Entity
 @Table(name = "company")
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Builder
 @NoArgsConstructor
@@ -18,6 +18,7 @@ public class CompanyDAO {
     @Id
     private int companyId;
     private String jobsTemplateLink;
+    private String singlePageRequestLink;
     private String beanClass;
     @ToString.Include
     private String title;

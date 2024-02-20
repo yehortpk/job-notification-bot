@@ -1,14 +1,16 @@
-package com.github.yehortpk.notifier.entities;
+package com.github.yehortpk.notifier.entities.companies;
 
-import com.github.yehortpk.notifier.entities.parsers.PageParser;
-import com.github.yehortpk.notifier.entities.parsers.ThreadsPageParser;
+import com.github.yehortpk.notifier.entities.PageLoader;
+import com.github.yehortpk.notifier.entities.parsers.PageParserImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
+import com.github.yehortpk.notifier.services.ProxyService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -19,22 +21,22 @@ import java.util.concurrent.*;
 
 @Component
 @Setter
-@Getter
 @ToString
+@Getter
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.NO)
 public abstract class CompanySiteImpl implements CompanySite{
-    private ThreadsPageParser pageParser;
+    @Autowired
+    ProxyService proxyService;
+
     private CompanyDTO company;
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
         Set<VacancyDTO> vacancies = new HashSet<>();
 
-        String pageTemplateLink = company.getJobsTemplateLink();
+        String pageTemplateLink = getPageUrl(1);
 
-        String firstPageUrl = String.format(pageTemplateLink, 1);
-
-        Document firstPage = pageParser.loadPage(firstPageUrl);
+        Document firstPage = parsePage(pageTemplateLink, 1);
         List<Document> pages = new ArrayList<>();
         pages.add(firstPage);
 
@@ -44,8 +46,10 @@ public abstract class CompanySiteImpl implements CompanySite{
             ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(pagesCount - 1);
 
             for (int pageId = 2; pageId <= pagesCount; pageId++) {
-                String pageUrl = String.format(pageTemplateLink, pageId);
-                Future<Document> future = executor.submit(new PageLoader(pageParser, pageUrl));
+                String pageUrl = getPageUrl(pageId);
+
+                int finalPageId = pageId;
+                Future<Document> future = executor.submit(() -> parsePage(pageUrl, finalPageId));
                 futures.add(future);
             }
 
@@ -54,7 +58,7 @@ public abstract class CompanySiteImpl implements CompanySite{
                     Document page = future.get();
                     pages.add(page);
                 } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("Page wasn't parsed");
+                    System.out.printf("Page wasn't parsed: " + e.getMessage());
                 }
             }
 
@@ -73,23 +77,17 @@ public abstract class CompanySiteImpl implements CompanySite{
 
         return vacancies;
     }
+
+    private Document parsePage(String pageUrl, int pageId) {
+        PageParserImpl pageParser = createPageParser(pageUrl, pageId);
+        pageParser.setHeaders(createHeaders());
+
+        return new PageLoader(proxyService, pageParser).loadPage();
+    }
+
     public abstract int getPagesCount(Document doc);
     public abstract List<Element> getVacancyBlocks(Document page);
     public abstract VacancyDTO getVacancyFromBlock(Element block);
-    public abstract Map<String, String> getHeaders();
-}
-
-class PageLoader implements Callable<Document> {
-    private final String pageUrl;
-    private final PageParser pageParser;
-
-    PageLoader(PageParser pageParser, String pageUrl) {
-        this.pageUrl = pageUrl;
-        this.pageParser = pageParser;
-    }
-
-    @Override
-    public Document call() {
-        return pageParser.loadPage(pageUrl);
-    }
+    protected abstract PageParserImpl createPageParser(String pageUrl, int pageId);
+    protected abstract String getPageUrl(int pageId);
 }

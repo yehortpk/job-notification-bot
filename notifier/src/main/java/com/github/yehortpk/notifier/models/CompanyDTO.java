@@ -8,10 +8,11 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CompanyDTO {
     private int companyId;
     private String jobsTemplateLink;
+    private String singlePageRequestLink;
     private String beanClass;
     @ToString.Include
     private String title;
@@ -23,6 +24,7 @@ public class CompanyDTO {
         return CompanyDTO.builder()
                 .companyId(dao.getCompanyId())
                 .jobsTemplateLink(dao.getJobsTemplateLink())
+                .singlePageRequestLink(dao.getSinglePageRequestLink())
                 .beanClass(dao.getBeanClass())
                 .title(dao.getTitle())
                 .link(dao.getLink())
