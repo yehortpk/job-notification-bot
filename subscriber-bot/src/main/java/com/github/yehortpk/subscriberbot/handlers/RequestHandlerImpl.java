@@ -17,22 +17,6 @@ public abstract class RequestHandlerImpl implements RequestHandler {
 
     private final int TG_MESSAGE_MAX_LENGTH = 4000;
 
-    // todo remove previous message
-//    @Override
-//    public void handle(UserRequestDTO userRequest) {
-//        long chatId = userRequest.getUser().getChatId();
-//        Message previousMessage = userRequest.getUpdate().getMessage().getReplyToMessage();
-//        if (previousMessage.hasReplyMarkup()) {
-//            telegramServiceUtil.deleteMessage(chatId, previousMessage.getMessageId());
-//        }
-//
-//        SendMessage sendMessage = handleRequest(userRequest);
-//        int messageId = userRequest.getUpdate().getMessage().getMessageId();
-//
-//        telegramServiceUtil.sendReplyMessageWithMarkup(chatId, sendMessage.getText(),
-//                sendMessage.getReplyMarkup(), messageId);
-//    }
-
     @Override
     public void handle(UserRequestDTO userRequest) {
         SendMessage sendMessage = handleRequest(userRequest);
@@ -42,10 +26,12 @@ public abstract class RequestHandlerImpl implements RequestHandler {
 
         if(text.length() > TG_MESSAGE_MAX_LENGTH) {
             List<String> dividedLargeText = getDividedLargeText(text);
-            for (String textPart : dividedLargeText) {
+            for (int i = 0; i < dividedLargeText.size() - 1; i++) {
+                String textPart = dividedLargeText.get(i);
                 telegramServiceUtil.sendMessageWithoutMarkup(chatId, textPart);
             }
-            telegramServiceUtil.sendMessageWithMarkup(chatId, "", markup);
+            String lastTextPart = dividedLargeText.get(dividedLargeText.size() - 1);
+            telegramServiceUtil.sendMessageWithMarkup(chatId, lastTextPart, markup);
         } else {
             telegramServiceUtil.sendMessageWithMarkup(chatId, text, markup);
         }
@@ -79,9 +65,6 @@ public abstract class RequestHandlerImpl implements RequestHandler {
             );
 
             residuals = (i + 1) * TG_MESSAGE_MAX_LENGTH - closedTagIndex;
-
-            System.out.printf("Part %s: %s, [%s-%s] residuals: %s%n", i + 1, taggedSubstring.length(), lowerBoundIndex, closedTagIndex, residuals);
-//            System.out.printf("Part %s%n: %s%n", i + 1, taggedSubstring);
             result.add(taggedSubstring);
         }
 
