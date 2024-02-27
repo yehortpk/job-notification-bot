@@ -1,9 +1,9 @@
 package com.github.yehortpk.notifier.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 
 @Entity
@@ -25,4 +25,8 @@ public class CompanyDAO {
     @EqualsAndHashCode.Include
     private String link;
     private boolean isEnabled;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private List<CompanyData> data;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    private List<CompanyHeader> headers;
 }

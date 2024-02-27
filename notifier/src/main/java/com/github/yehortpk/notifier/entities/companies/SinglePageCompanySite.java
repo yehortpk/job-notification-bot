@@ -8,8 +8,6 @@ import lombok.ToString;
 import org.jsoup.Connection;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @ToString(callSuper = true)
 @Getter
@@ -20,7 +18,6 @@ public abstract class SinglePageCompanySite extends CompanySiteImpl {
             return  new MultiPageParser(pageUrl, pageId);
         }
         SinglePageParser singlePageParser = new SinglePageParser(pageUrl, pageId);
-        singlePageParser.setData(createData(pageUrl, pageId));
         singlePageParser.setParseMethod(Connection.Method.POST);
         return singlePageParser;
     }
@@ -33,7 +30,4 @@ public abstract class SinglePageCompanySite extends CompanySiteImpl {
 
         return this.getCompany().getSinglePageRequestLink();
     }
-
-
-    protected abstract Map<String, String> createData(String pageUrl, int pageId);
 }

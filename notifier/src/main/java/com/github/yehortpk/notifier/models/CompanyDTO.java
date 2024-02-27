@@ -5,6 +5,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Getter
 @Builder
 @ToString
@@ -19,6 +22,8 @@ public class CompanyDTO {
     @EqualsAndHashCode.Include
     private String link;
     private boolean isEnabled;
+    private Map<String, String> data;
+    private Map<String, String> headers;
 
     public static CompanyDTO fromDAO(CompanyDAO dao) {
         return CompanyDTO.builder()
@@ -29,6 +34,16 @@ public class CompanyDTO {
                 .title(dao.getTitle())
                 .link(dao.getLink())
                 .isEnabled(dao.isEnabled())
+                .data(dao.getData().stream().collect(
+                        Collectors.toMap(
+                                CompanyData::getKey,
+                                CompanyData::getValue
+                        )))
+                .headers(dao.getHeaders().stream().collect(
+                        Collectors.toMap(
+                                CompanyHeader::getKey,
+                                CompanyHeader::getValue
+                        )))
                 .build();
     }
 }

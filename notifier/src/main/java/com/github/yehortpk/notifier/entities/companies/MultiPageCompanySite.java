@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ToString(callSuper = true)
 @Getter
-public abstract class MultiplePageCompanySite extends CompanySiteImpl {
+public abstract class MultiPageCompanySite extends CompanySiteImpl {
     @Override
     public PageParserImpl createPageParser(String pageUrl, int pageId) {
         return new MultiPageParser(pageUrl, pageId);

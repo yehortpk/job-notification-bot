@@ -81,8 +81,23 @@ public abstract class CompanySiteImpl implements CompanySite{
     private Document parsePage(String pageUrl, int pageId) {
         PageParserImpl pageParser = createPageParser(pageUrl, pageId);
         pageParser.setHeaders(createHeaders());
+        pageParser.setData(createData(pageUrl, pageId));
 
         return new PageLoader(proxyService, pageParser).loadPage();
+    }
+
+    public Map<String, String> createHeaders() {
+        return new HashMap<>(company.getHeaders());
+    }
+
+    protected Map<String, String> createData(String pageUrl, int pageId) {
+        HashMap<String, String> data = new HashMap<>(company.getData());
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            if (Objects.equals(entry.getValue(), "{page}")) {
+                data.put(entry.getKey(), String.valueOf(pageId));
+            }
+        }
+        return data;
     }
 
     public abstract int getPagesCount(Document doc);

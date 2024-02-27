@@ -14,34 +14,37 @@ import java.net.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 @Setter
 public class SinglePageParser extends PageParserImpl {
-    private Map<String, String> data;
-
     public SinglePageParser(String pageUrl, int pageId) {
         super(pageUrl, pageId);
     }
 
     @Override
-    public Callable<Document> parsePage(Proxy proxy) {
-        return () -> {
-            Connection con = HttpConnection.connect(pageUrl);
-            Connection.Response response = con.method(parseMethod)
+    public Document parsePage(Proxy proxy) {
+        pageUrl = pageUrl.formatted(pageId);
+        Connection con = HttpConnection.connect(pageUrl);
+        Connection.Response response;
+        try {
+            response = con.method(parseMethod)
                     .data(data)
-                    .headers(this.headers)
+                    .headers(headers)
                     .ignoreContentType(true)
                     .proxy(proxy)
                     .userAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316" +
                             " Firefox/3.6.2")
                     .ignoreContentType(true)
                     .execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            synchronized (SinglePageParser.class) {
-                return parseBody(response);
-            }
-        };
+        synchronized (SinglePageParser.class) {
+            Document document = parseBody(response);
+            System.out.printf("Page parsed: %s page_id:%s, proxy:%s%n", pageUrl, pageId, proxy);
+            return document;
+        }
     }
 
     @Override
@@ -61,7 +64,10 @@ public class SinglePageParser extends PageParserImpl {
         }
 
         synchronized (SinglePageParser.class) {
-            return parseBody(response);
+            Document document = parseBody(response);
+
+            System.out.printf("Page parsed: %s page_id:%s without proxy%n", pageUrl, pageId);
+            return document;
         }
     }
 
@@ -111,7 +117,6 @@ public class SinglePageParser extends PageParserImpl {
             bodyElement.appendChild(createElementFromJson(element, obj));
         }
 
-        System.out.printf("Page parsed: %s page_id:%s%n", pageUrl, pageId);
         return document;
     }
 }
