@@ -52,15 +52,5 @@ public class SigmaSoftwareCompany extends SinglePageCompanySite {
 
         return data;
     }
-
-    @Override
-    public Map<String, String> createHeaders() {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("_gid", "GA1.2.136264293.1708371289");
-        headers.put("_dc_gtm_UA-135271238-1", "1");
-        headers.put("_ga_2P234L6SM7", "GS1.1.1708371289.1.0.1708371289.60.0.0");
-
-        return headers;
-    }
 }
 

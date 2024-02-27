@@ -8,16 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("infopulse-company")
-public class InfopulseCompany extends MultiPageCompanySite {
-
+@Component("autodoc-company")
+public class AutodocCompany extends MultiPageCompanySite {
     @Override
     public int getPagesCount(Document doc) {
-        final int VACANCIES_PER_PAGE_DEFAULT = 10;
+        final int VACANCIES_PER_PAGE_DEFAULT = 25;
 
-        String vacanciesCountBlock = doc.selectFirst(".jobs__container__result__amount").text();
-        int totalVacancies = Integer.parseInt(vacanciesCountBlock.split("\\D+")[1]);
-        int vacanciesPerPage = doc.select(".job-card:not(.hidden)").size();
+        String vacanciesCountBlock = doc.selectFirst(".all-jobs-block__find").text();
+        int totalVacancies = Integer.parseInt(vacanciesCountBlock.split("\\D+")[0]);
+        int vacanciesPerPage = doc.select(".all-jobs-block__table tbody > tr").size();
 
         if (vacanciesPerPage == 0) {
             vacanciesPerPage = VACANCIES_PER_PAGE_DEFAULT;
@@ -28,15 +27,14 @@ public class InfopulseCompany extends MultiPageCompanySite {
 
     @Override
     public List<Element> getVacancyBlocks(Document page) {
-        return page.select(".job-card:not(.hidden)");
+        return page.select(".all-jobs-block__table tbody > tr a");
     }
 
     @Override
     public VacancyDTO getVacancyFromBlock(Element block) {
-        Element linkElement = block.selectFirst("a.job-card__title");
         return VacancyDTO.builder()
-                .title(linkElement.text())
-                .link(super.getCompany().getLink() + linkElement.attr("href"))
+                .title(block.text())
+                .link(block.attr("href"))
                 .build();
     }
 }

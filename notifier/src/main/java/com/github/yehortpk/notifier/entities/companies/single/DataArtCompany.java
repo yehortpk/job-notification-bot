@@ -9,9 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component("data_art-company")
 public class DataArtCompany extends SinglePageCompanySite {
@@ -44,13 +42,5 @@ public class DataArtCompany extends SinglePageCompanySite {
                 .title(block.selectFirst("div[data-key=title] > div").text())
                 .link(super.getCompany().getLink() + block.selectFirst("div[data-key=slug] > div").text())
                 .build();
-    }
-
-    @Override
-    protected Map<String, String> createData(String pageUrl, int pageId) {
-        HashMap<String, String> data = new HashMap<>();
-        data.put("countries", "10");
-        data.put("page", String.valueOf(pageId));
-        return data;
     }
 }

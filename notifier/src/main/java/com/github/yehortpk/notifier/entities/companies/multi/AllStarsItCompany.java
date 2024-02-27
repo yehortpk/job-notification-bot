@@ -1,6 +1,6 @@
-package com.github.yehortpk.notifier.entities.companies.single;
+package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiPageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component("allstars-company")
-public class AllStarsItCompany extends MultiplePageCompanySite {
+public class AllStarsItCompany extends MultiPageCompanySite {
     @Override
     public int getPagesCount(Document doc) {
         // Site work only with js, so without it return 1 page

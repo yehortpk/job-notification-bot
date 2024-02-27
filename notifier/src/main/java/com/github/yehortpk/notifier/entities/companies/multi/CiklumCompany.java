@@ -1,6 +1,6 @@
 package com.github.yehortpk.notifier.entities.companies.multi;
 
-import com.github.yehortpk.notifier.entities.companies.MultiplePageCompanySite;
+import com.github.yehortpk.notifier.entities.companies.MultiPageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component("ciklum-company")
-public class CiklumCompany extends MultiplePageCompanySite {
+public class CiklumCompany extends MultiPageCompanySite {
     @Override
     public int getPagesCount(Document doc) {
         Elements pages = doc.select("a.page-numbers");

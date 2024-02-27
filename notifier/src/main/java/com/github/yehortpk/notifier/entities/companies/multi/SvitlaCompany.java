@@ -9,31 +9,24 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("luxoft-company")
-public class LuxoftCompany extends MultiPageCompanySite {
-
+@Component("svitla-company")
+public class SvitlaCompany extends MultiPageCompanySite {
     @Override
     public int getPagesCount(Document doc) {
-        Elements pages = doc.select("ul.pagination > li > a");
-        return Integer.parseInt(pages.get(pages.size() - 2).text());
+        Elements pagination = doc.select("ul.pagination li");
+        return Integer.parseInt(pagination.get(pagination.size() - 2).select("a").text());
     }
 
     @Override
     public List<Element> getVacancyBlocks(Document page) {
-        return page.select("tr[data-offers-id]");
+        return page.select("a.blog-1__title");
     }
 
     @Override
     public VacancyDTO getVacancyFromBlock(Element block) {
-        Element linkElement = block.selectFirst("a[data-offers]");
-        String link = super.getCompany().getLink() + linkElement.attr("href");
-        String vacancyTitle = linkElement.text();
-        String vacancySeniority = block.select("td").get(3).text();
-
         return VacancyDTO.builder()
-                .link(link)
-                .title(vacancySeniority + " " + vacancyTitle)
+                .title(block.selectFirst("h3").text().strip())
+                .link(super.getCompany().getLink() + block.attr("href"))
                 .build();
-
     }
 }
