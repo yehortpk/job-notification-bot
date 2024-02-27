@@ -37,6 +37,11 @@ public class VacancyService {
     public Set<VacancyDTO> parseAllVacancies() {
         List<CompanyDTO> companies = companyRepository.findByIsEnabledTrue().stream().map(CompanyDTO::fromDAO).toList();
 
+        if (companies.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        Set<VacancyDTO> vacancies = new HashSet<>();
         List<Future<Set<VacancyDTO>>> futures = new ArrayList<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
@@ -47,13 +52,12 @@ public class VacancyService {
             Future<Set<VacancyDTO>> future = executor.submit(bean::parseAllVacancies);
             futures.add(future);
         }
-        Set<VacancyDTO> vacancies = new HashSet<>();
         for (Future<Set<VacancyDTO>> future : futures) {
             try {
                 Set<VacancyDTO> companyVacancies = future.get();
                 vacancies.addAll(companyVacancies);
             } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+                System.out.println(e.getMessage());
             }
         }
 
