@@ -47,10 +47,9 @@ public class ProxyService {
                     .lastChecked(columns.get(7).text())
                     .build();
 
-            // Filtering by non-https ip and anonymity
             if(
                 !proxyDTO.getCountryCode().isEmpty()
-//                        &&  proxyDTO.getAnonymity().equals("elite proxy")
+                        &&  !proxyDTO.getAnonymity().equals("transparent")
             ) {
                 proxies.add(proxyDTO);
             }
