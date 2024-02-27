@@ -21,7 +21,7 @@ public class PageLoader {
 
     public Document loadPage() {
         int initialThreadsCount = proxyService.getProxies().size();
-        int initialThreadsTimeout = 0;
+        int initialThreadsTimeout = 50;
 
         return loadPage(initialThreadsCount, initialPollTimeout, initialThreadsTimeout);
     }
@@ -32,7 +32,8 @@ public class PageLoader {
             try {
                 return pageParser.parsePage();
             } catch (Exception e) {
-                throw new RuntimeException("Can't parse page %s, error: %s" + e.getMessage());
+                throw new RuntimeException(String.format("Can't parse page %s, error: %s",
+                        pageParser.getPageUrl(), e.getMessage()));
             }
         }
 
@@ -44,10 +45,13 @@ public class PageLoader {
 
         for (int i = 0; i < threadsCount; i++) {
             Proxy randomProxy = proxyService.getRandomProxy();
-            Callable<Document> task = pageParser.parsePage(randomProxy);
+            int currentThreadsTimeout = threadsTimeout * i;
+            Callable<Document> task = () -> {
+                Thread.sleep(currentThreadsTimeout);
+                return pageParser.parsePage(randomProxy);
+            };
             Future<Document> future = completionService.submit(task);
             futures.add(future);
-            Thread.sleep(threadsTimeout);
         }
 
         for (int i = 0; i < futures.size(); i++) {
@@ -67,7 +71,7 @@ public class PageLoader {
 
                     futures.forEach((fut) -> fut.cancel(true));
 
-                    executor.shutdown();
+                    executor.close();
                     return result;
 
                 }
