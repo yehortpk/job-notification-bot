@@ -6,7 +6,8 @@ import com.github.yehortpk.notifier.services.ProxyService;
 import com.github.yehortpk.notifier.services.VacancyService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class NotifierRunner {
+public class NotifierRunner implements ApplicationRunner {
     @Autowired
     ProxyService proxyService;
 
@@ -24,9 +25,9 @@ public class NotifierRunner {
     @Autowired
     NotifierService notifierService;
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Override
     @Transactional
-    public void notifyNewVacancies () throws IOException {
+    public void run (ApplicationArguments args) throws IOException {
         proxyService.loadProxies();
 
         Set<VacancyDTO> parsedVacancies = vacancyService.parseAllVacancies();
@@ -56,7 +57,5 @@ public class NotifierRunner {
         newVacancies.clear();
         outdatedVacancies.clear();
     }
-
-
 }
 
