@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 @Component
-public class FilterInfoCallbackRequestHandler extends CallbackDataRequestHandlerImpl{
+public class SubscriptionFilterInfoCallbackRequestHandler extends CallbackDataRequestHandlerImpl{
 
     @Autowired
     StateService stateService;

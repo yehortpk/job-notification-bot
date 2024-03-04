@@ -7,6 +7,11 @@ import java.util.List;
 
 public class SubscriptionInfoMenuMarkup {
     public static InlineKeyboardMarkup getMarkup(int companyId, String companyTitle) {
+        InlineKeyboardButton vacanciesButton = InlineKeyboardButton.builder()
+                .text("Company vacancies")
+                .callbackData(String.format("company=%s:%s", companyId, companyTitle))
+                .build();
+
         InlineKeyboardButton filtersButton = InlineKeyboardButton.builder()
                 .text("Filters")
                 .callbackData(String.format("filters=%s:%s", companyId, companyTitle))

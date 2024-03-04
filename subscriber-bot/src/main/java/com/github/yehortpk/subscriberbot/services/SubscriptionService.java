@@ -9,8 +9,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 // todo change from router service to a new one with rest
@@ -65,10 +68,9 @@ public class SubscriptionService {
         ParameterizedTypeReference<List<FilterShortInfoDTO>> parameterizedTypeReference
                 = new ParameterizedTypeReference<>() {
         };
-        List<FilterShortInfoDTO> subscriptions = restTemplate.exchange(finalUrl,
-                HttpMethod.GET, null, parameterizedTypeReference).getBody();
 
-        return subscriptions;
+        return restTemplate.exchange(finalUrl,
+                HttpMethod.GET, null, parameterizedTypeReference).getBody();
     }
 
     public FilterShortInfoDTO getFilter(int filterId) {
@@ -91,8 +93,39 @@ public class SubscriptionService {
         restTemplate.postForEntity(filterURL, new FilterShortDTO(companyId, chatId, filter), Void.class);
     }
 
+    public List<VacancyShortDTO> getCompanyVacancies(int companyId) {
+        String finalURL =  companyURL + "/" + companyId + "/vacancies/";
+
+        ParameterizedTypeReference<List<VacancyShortDTO>> parameterizedTypeReference
+                = new ParameterizedTypeReference<>() {
+        };
+
+        return restTemplate.exchange(finalURL,
+                HttpMethod.GET, null, parameterizedTypeReference).getBody();
+    }
+
+    public List<VacancyShortDTO> getCompanyVacancies(int companyId, int filterId) {
+        String baseUrl =  companyURL + "/" + companyId + "/vacancies/";
+
+        ParameterizedTypeReference<List<VacancyShortDTO>> parameterizedTypeReference
+                = new ParameterizedTypeReference<>() {
+        };
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("filter_id", String.valueOf(filterId));
+
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            builder.queryParam(entry.getKey(), entry.getValue());
+        }
+
+        return restTemplate.exchange(builder.toUriString(),
+                HttpMethod.GET, null, parameterizedTypeReference).getBody();
+    }
+
     public List<VacancyShortDTO> getVacanciesByFilter(int filterId) {
-        String finalURL =  filterURL+ "/vacancies/" + filterId;
+        String finalURL =  filterURL + "/vacancies/" + filterId;
 
         ParameterizedTypeReference<List<VacancyShortDTO>> parameterizedTypeReference
                 = new ParameterizedTypeReference<>() {

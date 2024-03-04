@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandlerImpl{
+public class SubscriptionFilterVacanciesListCallbackRequest extends CallbackDataRequestHandlerImpl{
     @Autowired
     SubscriptionService subscriptionService;
 
