@@ -1,0 +1,123 @@
+version: '3'
+services:
+  notifier:
+    build:
+      context: notifier
+      dockerfile: debug.Dockerfile
+    container_name: notifier
+    working_dir: /app
+    volumes:
+      - ./notifier/src:/app/src
+      - ./notifier/build.gradle:/app/build.gradle
+    networks:
+      - app-network
+    ports:
+    - "5006:5005"
+    environment:
+      - KAFKA_NOTIFIER_TOPIC=vacancies
+    profiles:
+      - notifier
+      - app
+
+  router:
+    build:
+      context: router
+      dockerfile: debug.Dockerfile
+    container_name: router
+    working_dir: /app
+    depends_on:
+      - kafka
+    networks:
+      - app-network
+    ports:
+      - "8080"
+    environment:
+      - KAFKA_NOTIFIER_TOPIC=vacancies
+      - KAFKA_SUBSCRIBE_TOPIC=subscriptions
+      - KAFKA_BOT_NOTIFIER_TOPIC=bot-notifier
+    env_file:
+      - .env
+    profiles:
+      - router
+      - app
+  
+  subscriber-bot:
+    build:
+      context: subscriber-bot
+      dockerfile: debug.Dockerfile
+    container_name: subscriber-bot
+    working_dir: /app
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    ports:
+    - "5005:5005"
+    environment:
+      - KAFKA_SUBSCRIBE_TOPIC=subscriptions
+      - KAFKA_BOT_NOTIFIER_TOPIC=bot-notifier
+    env_file:
+      - .env
+    profiles:
+      - bot
+      - app
+  
+  redis:
+    image: redis:7.2.4
+    container_name: redis
+    volumes:
+      -  redis-data:/data
+    ports:
+      - "6379"
+    networks:
+      - app-network
+    profiles:
+      - app
+      - bot
+  
+  kafka:
+    image: bitnami/kafka:3.6.1
+    container_name: kafka
+    volumes:
+      -  kafka-data:/bitnami/kafka
+    ports:
+      - "9092:9092"
+    networks:
+      - app-network
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER      
+      - KAFKA_LOG4J_ROOT_LOGLEVEL=error
+    profiles:
+      - app
+      - router
+  
+  mysql:
+    image: mysql:8.3.0
+    container_name: mysql
+    volumes:
+      -  mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    environment:
+      - MYSQL_DATABASE=notifier
+    env_file:
+      - .env
+    profiles:
+      - app
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  kafka-data:
+  mysql-data:
+  redis-data:
