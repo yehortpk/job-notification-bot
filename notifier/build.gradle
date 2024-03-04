@@ -54,6 +54,10 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v109
 	implementation 'org.seleniumhq.selenium:selenium-devtools-v109:4.8.3'
+
+	// https://mvnrepository.com/artifact/org.jspecify/jspecify
+	implementation 'org.jspecify:jspecify:0.3.0'
+
 }
 
 tasks.named('test') {
