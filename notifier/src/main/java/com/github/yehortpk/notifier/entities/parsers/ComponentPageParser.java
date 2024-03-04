@@ -34,12 +34,16 @@ public class ComponentPageParser extends PageParserImpl {
     public Document parsePage(Proxy proxy) {String[] proxyData = retrieveDataFromProxy(proxy);
         ChromeOptions chromeOptions = getChromeOptions();
         chromeOptions.addArguments(String.format("--proxy-server=%s:%s", proxyData[0], proxyData[1]));
-        return parsePage(chromeOptions, proxy);
+        Document document = parsePage(chromeOptions, proxy);
+        System.out.printf("Page %s parsed with proxy %s %n", pageUrl, proxy);
+        return document;
     }
 
     @Override
     public Document parsePage() {
-        return parsePage(getChromeOptions(), null);
+        Document document = parsePage(getChromeOptions(), null);
+        System.out.printf("Page %s parsed without proxy %n", pageUrl);
+        return document;
     }
 
     protected Document parsePage (ChromeOptions chromeOptions, @Nullable Proxy proxy) {
