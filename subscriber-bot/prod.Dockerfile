@@ -1,4 +1,4 @@
-FROM ubuntu:latest as notifier-prod-build
+FROM ubuntu:latest as subscriber-bot-prod-git
 WORKDIR /app
 
 ARG PROJECT_URL
@@ -20,9 +20,9 @@ FROM gradle:8.6.0-jdk21 as notifier-prod
 
 ARG PROJECT_PATH
 
-COPY --from=notifier-prod-build /app/$PROJECT_PATH/subscriber-bot/src /app/src
+COPY --from=subscriber-bot-prod-git /app/$PROJECT_PATH/subscriber-bot/src /app/src
 # Copy the Gradle build files (e.g., build.gradle and settings.gradle)
-COPY --from=notifier-prod-build /app/$PROJECT_PATH/subscriber-bot/build.gradle /app/build.gradle
+COPY --from=subscriber-bot-prod-git /app/$PROJECT_PATH/subscriber-bot/build.gradle /app/build.gradle
 
 ENV SPRING_PROFILES_ACTIVE=prod
 

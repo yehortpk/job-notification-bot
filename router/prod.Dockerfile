@@ -1,4 +1,4 @@
-FROM ubuntu:latest as notifier-prod-build
+FROM ubuntu:latest as router-prod-git
 WORKDIR /app
 
 ARG PROJECT_URL
@@ -17,13 +17,13 @@ RUN echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 RUN git clone $PROJECT_URL
 
 
-FROM gradle:8.6.0-jdk21 as notifier-prod
+FROM gradle:8.6.0-jdk21 as notifier-prod-build
 
 ARG PROJECT_PATH
 
-COPY --from=notifier-prod-build /app/$PROJECT_PATH/router/src /app/src
+COPY --from=router-prod-git /app/$PROJECT_PATH/router/src /app/src
 # Copy the Gradle build files (e.g., build.gradle and settings.gradle)
-COPY --from=notifier-prod-build /app/$PROJECT_PATH/router/build.gradle /app/build.gradle
+COPY --from=router-prod-git /app/$PROJECT_PATH/router/build.gradle /app/build.gradle
 
 ENV SPRING_PROFILES_ACTIVE=prod
 
