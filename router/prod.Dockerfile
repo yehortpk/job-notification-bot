@@ -17,7 +17,7 @@ RUN echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 RUN git clone $PROJECT_URL
 
 
-FROM gradle:8.6.0-jdk21 as notifier-prod-build
+FROM gradle:8.6.0-jdk21 as router-prod-build
 
 ARG PROJECT_PATH
 
