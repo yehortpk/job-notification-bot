@@ -11,9 +11,6 @@ services:
       args: *project-args
     container_name: prod-notifier
     working_dir: /app
-    volumes:
-      - ./notifier/src:/app/src
-      - ./notifier/build.gradle:/app/build.gradle
     env_file:
     - .env-prod
     networks:
@@ -23,8 +20,8 @@ services:
     environment:
       KAFKA_NOTIFIER_TOPIC: vacancies
     profiles:
-      - notifier
-      - app
+      - prod-notifier
+      - prod-app
 
   prod-router:
     build:
@@ -46,8 +43,8 @@ services:
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
     profiles:
-      - router
-      - app
+      - prod-router
+      - prod-app
   
   prod-subscriber-bot:
     build:
@@ -68,8 +65,8 @@ services:
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
     profiles:
-      - bot
-      - app
+      - prod-bot
+      - prod-app
   
   prod-redis:
     image: redis:7.2.4
@@ -83,8 +80,8 @@ services:
     networks:
       - ${PROD_NETWORK}
     profiles:
-      - app
-      - bot
+      - prod-app
+      - prod-bot
   
   prod-kafka:
     image: bitnami/kafka:3.6.1
@@ -106,8 +103,8 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER      
       - KAFKA_LOG4J_ROOT_LOGLEVEL=error
     profiles:
-      - app
-      - router
+      - prod-app
+      - prod-router
   
   prod-mysql:
     image: mysql:8.3.0
@@ -125,7 +122,7 @@ services:
       - MYSQL_DATABASE=notifier
       - MYSQL_ROOT_PASSWORD=${MYSQL_PROD_PASSWORD}
     profiles:
-      - app
+      - prod-app
 
 networks:
   app-prod-network:

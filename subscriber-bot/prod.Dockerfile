@@ -14,7 +14,7 @@ RUN chmod 600 /root/.ssh/id_rsa
 
 RUN echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 
-RUN git clone $PROJECT_URL
+RUN git clone -b main $PROJECT_URL
 
 FROM gradle:8.6.0-jdk21 as subscriber-bot-prod-build
 

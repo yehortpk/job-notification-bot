@@ -9,11 +9,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y wget gnupg unzip
 
 # Download and install ChromeDriver
-RUN wget https://chromedriver.storage.googleapis.com/109.0.5414.25/chromedriver_linux64.zip \
+RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip \
     && unzip chromedriver_linux64.zip -d /usr/local/bin \
     && rm chromedriver_linux64.zip
 
-RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_109.0.5414.119-1_amd64.deb \
+RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb \
       && apt install -y /tmp/chrome.deb \
       && rm /tmp/chrome.deb
 
