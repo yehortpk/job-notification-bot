@@ -2,40 +2,30 @@ package com.github.yehortpk.notifier.services;
 
 import com.github.yehortpk.notifier.entities.companies.CompanySiteImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
-import com.github.yehortpk.notifier.models.VacancyDAO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
-import com.github.yehortpk.notifier.repositories.CompanyRepository;
-import com.github.yehortpk.notifier.repositories.VacancyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 @Service
 public class VacancyService {
     @Autowired
-    private VacancyRepository vacancyRepository;
-
-    @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
-    public Set<VacancyDAO> getPersistedVacancies() {
-        List<VacancyDAO> vacanciesList = vacancyRepository.findAll();
-
-        return new HashSet<>(vacanciesList);
-    }
+    @Autowired
+    private CompanyService companyService;
 
     public Set<VacancyDTO> parseAllVacancies() {
-        List<CompanyDTO> companies = companyRepository.findByIsEnabledTrue().stream().map(CompanyDTO::fromDAO).toList();
+        List<CompanyDTO> companies = companyService.getCompaniesList();
 
         if (companies.isEmpty()) {
             return new HashSet<>();
@@ -65,7 +55,7 @@ public class VacancyService {
         return vacancies;
     }
 
-    public Set<VacancyDTO> getDifference(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
+    public Set<VacancyDTO> getNewVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
         Set<VacancyDTO> result = new HashSet<>(allVacancies);
         result.removeAll(persistedVacancies);
 
@@ -77,15 +67,5 @@ public class VacancyService {
         result.removeAll(allVacancies);
 
         return result;
-    }
-
-    public void removeVacancies(Set<VacancyDTO> outdatedVacancies) {
-        Set<VacancyDAO> vacancies = outdatedVacancies.stream().map(VacancyDTO::toDAO).collect(Collectors.toSet());
-        vacancyRepository.deleteAll(vacancies);
-    }
-
-    public void addVacancies(Set<VacancyDTO> newVacancies) {
-        Set<VacancyDAO> vacancies = newVacancies.stream().map(VacancyDTO::toDAO).collect(Collectors.toSet());
-        vacancyRepository.saveAll(vacancies);
     }
 }
