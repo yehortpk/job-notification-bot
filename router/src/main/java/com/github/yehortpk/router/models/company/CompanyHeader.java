@@ -1,4 +1,4 @@
-package com.github.yehortpk.notifier.models;
+package com.github.yehortpk.router.models.company;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +16,7 @@ public class CompanyHeader {
     private int id;
     @ManyToOne
     @JoinColumn(name = "company_id")
-    private CompanyDAO company;
+    private Company company;
     @Column(name="header_key")
     private String key;
     @Column(name="header_value", columnDefinition = "TEXT")

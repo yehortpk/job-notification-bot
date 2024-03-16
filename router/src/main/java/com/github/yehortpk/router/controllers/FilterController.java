@@ -1,8 +1,8 @@
 package com.github.yehortpk.router.controllers;
 
-import com.github.yehortpk.router.models.FilterShortDTO;
-import com.github.yehortpk.router.models.FilterShortInfoDTO;
-import com.github.yehortpk.router.models.VacancyShortDTO;
+import com.github.yehortpk.router.models.filter.FilterShortDTO;
+import com.github.yehortpk.router.models.filter.FilterShortInfoDTO;
+import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
 import com.github.yehortpk.router.services.SubscribeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

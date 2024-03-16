@@ -1,11 +1,23 @@
 package com.github.yehortpk.router.services;
 
-import com.github.yehortpk.router.models.*;
+import com.github.yehortpk.router.models.client.Client;
+import com.github.yehortpk.router.models.client.ClientDTO;
+import com.github.yehortpk.router.models.company.Company;
+import com.github.yehortpk.router.models.company.CompanyShortInfoDTO;
+import com.github.yehortpk.router.models.filter.Filter;
+import com.github.yehortpk.router.models.filter.FilterDTO;
+import com.github.yehortpk.router.models.filter.FilterShortDTO;
+import com.github.yehortpk.router.models.filter.FilterShortInfoDTO;
+import com.github.yehortpk.router.models.subscription.SubscriptionDTO;
+import com.github.yehortpk.router.models.vacancy.Vacancy;
+import com.github.yehortpk.router.models.vacancy.VacancyDTO;
+import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
 import com.github.yehortpk.router.repositories.ClientRepository;
 import com.github.yehortpk.router.repositories.CompanyRepository;
 import com.github.yehortpk.router.repositories.FilterRepository;
 import com.github.yehortpk.router.repositories.VacancyRepository;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +25,9 @@ import java.util.*;
 
 @Service
 public class SubscribeService {
+    @Autowired
+    ModelMapper modelMapper;
+
     @Autowired
     ClientRepository clientRepository;
 
@@ -31,40 +46,39 @@ public class SubscribeService {
     @Transactional
     public void addSubscription(SubscriptionDTO subscription) {
         long chatId = subscription.getChatId();
-        ClientDAO client = clientRepository.findById(chatId)
+        Client client = clientRepository.findById(chatId)
                 .orElseGet(() -> {
-                    ClientDAO newClient = new ClientDAO(chatId, new ArrayList<>());
+                    Client newClient = new Client(chatId, new ArrayList<>());
                     clientRepository.save(newClient);
                     return  newClient;
                 });
-        CompanyDAO company = companyRepository.findById(subscription.getCompanyId()).orElseThrow();
-
+        Company company = companyRepository.findById(subscription.getCompanyId()).orElseThrow();
 
         company.addSubscription(client);
         companyRepository.save(company);
     }
 
     public List<CompanyShortInfoDTO> getSubscriptions(long chatId) {
-        ClientDAO clientDAO = clientRepository.findById(chatId)
+        Client client = clientRepository.findById(chatId)
                 .orElseGet(() -> {
-                    ClientDAO newClient = new ClientDAO(chatId, new ArrayList<>());
+                    Client newClient = new Client(chatId, new ArrayList<>());
                     clientRepository.save(newClient);
                     return  newClient;
                 });
 
-        ClientDTO clientDTO = ClientDTO.fromDAO(clientDAO);
 
-        return clientDTO.getSubscriptions().stream().map(CompanyShortInfoDTO::fromDTO).toList();
+        return client.getSubscriptions().stream().map((company) ->
+                modelMapper.map(company, CompanyShortInfoDTO.class)).toList();
     }
 
     public List<FilterShortInfoDTO> getFilters(long chatId, long companyId) {
-        List<FilterDAO> filtersDAO = filterRepository.findByCompanyIdAndClientId(companyId, chatId);
-        return filtersDAO.stream().map(FilterShortInfoDTO::fromDAO).toList();
+        List<Filter> filters = filterRepository.findByCompanyIdAndClientId(companyId, chatId);
+        return filters.stream().map((filter) -> modelMapper.map(filter, FilterShortInfoDTO.class)).toList();
     }
 
     public FilterShortInfoDTO getFilter(long filterId) {
-        Optional<FilterDAO> filer = filterRepository.findById(filterId);
-        return FilterShortInfoDTO.fromDAO(filer.orElseThrow());
+        Optional<Filter> filter = filterRepository.findById(filterId);
+        return modelMapper.map(filter.orElseThrow(), FilterShortInfoDTO.class);
     }
 
     public void deleteFilter(long filterId) {
@@ -72,30 +86,27 @@ public class SubscribeService {
     }
 
     public void deleteSubscription(long chatId, long companyId) {
-        CompanyDAO companyDAO = companyRepository.findById(companyId).orElseThrow();
-        ClientDAO clientDAO = clientRepository.findById(chatId).orElseThrow();
-        companyDAO.removeSubscription(clientDAO);
-        companyRepository.save(companyDAO);
+        Company company = companyRepository.findById(companyId).orElseThrow();
+        Client client = clientRepository.findById(chatId).orElseThrow();
+        company.removeSubscription(client);
+        companyRepository.save(company);
     }
 
     public void addFilter(FilterShortDTO filter) {
-        CompanyDAO companyDAO = companyRepository.findById(filter.getCompanyId()).orElseThrow();
-        ClientDAO clientDAO = clientRepository.findById(filter.getClientId()).orElseThrow();
-        filterRepository.save(new FilterDAO(companyDAO, clientDAO, filter.getFilter()));
+        Company company = companyRepository.findById(filter.getCompanyId()).orElseThrow();
+        Client client = clientRepository.findById(filter.getClientId()).orElseThrow();
+        filterRepository.save(new Filter(company, client, filter.getFilter()));
     }
 
     public List<VacancyShortDTO> getVacanciesByFilter(long filterId) {
-        FilterDTO filterDTO = FilterDTO.fromDAO(filterRepository.findById(filterId).orElseThrow());
-        List<VacancyDAO> allVacancies = vacancyRepository.findAll();
+        Filter filter = filterRepository.findById(filterId).orElseThrow();
+        List<Vacancy> allVacancies = vacancyRepository.findAll();
         // todo change to query
         // todo extract method from service
         List<VacancyShortDTO> result = new ArrayList<>();
-        for (VacancyDAO vacancy : allVacancies) {
-            String vacancyTitle = vacancy.getTitle();
-            if(notifierService.isApplicable(vacancyTitle, filterDTO.getFilter())) {
-                String vacancyUrl = vacancy.getLink();
-                int companyId = vacancy.getCompanyID();
-                result.add(new VacancyShortDTO(companyId, vacancyTitle, vacancyUrl));
+        for (Vacancy vacancy : allVacancies) {
+            if(notifierService.isApplicable(vacancy.getTitle(), filter.getFilter())) {
+                result.add(modelMapper.map(vacancy, VacancyShortDTO.class));
             }
         }
 

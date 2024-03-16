@@ -35,11 +35,8 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
-	// https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.16.1'
-	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
-
+	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+	implementation 'org.modelmapper:modelmapper:3.2.0'
 }
 
 tasks.named('test') {

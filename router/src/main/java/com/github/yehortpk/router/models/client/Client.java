@@ -1,5 +1,6 @@
-package com.github.yehortpk.router.models;
+package com.github.yehortpk.router.models.client;
 
+import com.github.yehortpk.router.models.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,11 +14,11 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-public class ClientDAO {
+public class Client {
     @EqualsAndHashCode.Include
     @ToString.Include
     @Id
     private long chatId;
     @ManyToMany(mappedBy = "subscribers")
-    private List<CompanyDAO> subscriptions;
+    private List<Company> subscriptions;
 }

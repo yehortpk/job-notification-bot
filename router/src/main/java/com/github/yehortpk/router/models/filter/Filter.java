@@ -1,5 +1,7 @@
-package com.github.yehortpk.router.models;
+package com.github.yehortpk.router.models.filter;
 
+import com.github.yehortpk.router.models.client.Client;
+import com.github.yehortpk.router.models.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class FilterDAO {
+public class Filter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -19,17 +21,17 @@ public class FilterDAO {
     @ManyToOne(optional = false)
     @JoinColumn(
             name="company_id", nullable=false, updatable=false)
-    private CompanyDAO company;
+    private Company company;
     @ManyToOne(optional = false)
     @JoinColumn(
             name="client_id", nullable=false, updatable=false)
-    private ClientDAO client;
+    private Client client;
     @Column(columnDefinition = "TEXT")
     private String filter;
 
-    public FilterDAO(CompanyDAO companyDAO, ClientDAO clientDAO, String filter) {
-        this.company = companyDAO;
-        this.client = clientDAO;
+    public Filter(Company company, Client client, String filter) {
+        this.company = company;
+        this.client = client;
         this.filter = filter;
     }
 }

@@ -1,4 +1,4 @@
-package com.github.yehortpk.router.models;
+package com.github.yehortpk.router.models.vacancy;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

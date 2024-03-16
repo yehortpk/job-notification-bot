@@ -1,7 +1,7 @@
 package com.github.yehortpk.router.controllers;
 
-import com.github.yehortpk.router.models.CompanyShortInfoDTO;
-import com.github.yehortpk.router.models.SubscriptionDTO;
+import com.github.yehortpk.router.models.company.CompanyShortInfoDTO;
+import com.github.yehortpk.router.models.subscription.SubscriptionDTO;
 import com.github.yehortpk.router.services.SubscribeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

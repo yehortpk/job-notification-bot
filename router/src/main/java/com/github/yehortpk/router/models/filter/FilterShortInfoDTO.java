@@ -1,4 +1,4 @@
-package com.github.yehortpk.router.models;
+package com.github.yehortpk.router.models.filter;
 
 import lombok.*;
 
@@ -8,8 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class FilterShortDTO {
-    private long companyId;
-    private long clientId;
+public class FilterShortInfoDTO {
+    private long filterId;
     private String filter;
 }
