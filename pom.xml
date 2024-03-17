@@ -19,6 +19,9 @@
 		<module>router</module>
 		<module>subscriber-bot</module>
 	</modules>
+	<properties>
+		<java.version>21</java.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
