@@ -3,35 +3,40 @@ services:
     container_name: project-builder
     image: project-builder:latest
     build:
-      context: ./
-      dockerfile: builder/builder-debug.Dockerfile
+      context: builder
+      dockerfile: builder-deploy.Dockerfile
+      args:
+        PROJECT_URL: git@github.com:yehortpk/job-notification-bot.git
+        PROJECT_PATH: job-notification-bot
     profiles:
       - app
       - notifier
       - router
       - bot
 
-  notifier:
+  notifier-deploy:
     build:
       context: notifier
-      dockerfile: debug.Dockerfile
-    container_name: notifier
+      dockerfile: deploy.Dockerfile
+    container_name: notifier-deploy
     environment:
+      SPRING_PROFILES_ACTIVE: deploy
       KAFKA_NOTIFIER_TOPIC: vacancies
     networks:
-      - debug-network
+      - deploy-network
     ports:
-      - "5005:5005"
+      - "5008:5005"
     profiles:
       - notifier
       - app
     depends_on:
       - project-builder
 
-  router:
+  router-deploy:
     image: project-builder:latest
-    container_name: router
+    container_name: router-deploy
     environment:
+      SPRING_PROFILES_ACTIVE: deploy
       KAFKA_NOTIFIER_TOPIC: vacancies
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
@@ -39,66 +44,68 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     command: ["java", "-jar", "/app/router-0.0.1-SNAPSHOT.jar"]
     networks:
-      - debug-network
+      - deploy-network
     ports:
       - "8080"
-      - "5006:5005"
+      - "5009:5005"
     profiles:
       - router
       - app
     depends_on:
-      - kafka
-      - mysql
+      - kafka-deploy
+      - mysql-deploy
       - project-builder
-
-  subscriber-bot:
+  
+  bot-deploy:
     image: project-builder:latest
-    container_name: subscriber-bot
+    container_name: bot-deploy
+    working_dir: /app
     environment:
+      SPRING_PROFILES_ACTIVE: deploy
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       TG_BOT_API_KEY: ${TG_BOT_API_KEY}
       TG_BOT_USERNAME: ${TG_BOT_USERNAME}
     command: ["java", "-jar", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar"]
     networks:
-      - debug-network
+      - deploy-network
     ports:
-      - "5007:5005"
+      - "5010:5005"
     profiles:
       - bot
       - app
     depends_on:
       - project-builder
-      - redis
+      - redis-deploy
 
-  redis:
+  redis-deploy:
     image: redis:7.2.4
-    container_name: redis
+    container_name: redis-deploy
     volumes:
-      -  redis-debug-data:/data
+      -  redis-deploy-data:/data
     ports:
       - "6379"
     networks:
-      - debug-network
+      - deploy-network
     profiles:
       - app
       - bot
-
-  kafka:
+  
+  kafka-deploy:
     image: bitnami/kafka:3.6.1
-    container_name: kafka
+    container_name: kafka-deploy
     volumes:
-      -  kafka-debug-data:/bitnami/kafka
+      -  kafka-deploy-data:/bitnami/kafka
     ports:
       - "9092"
     networks:
-      - debug-network
+      - deploy-network
     environment:
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka-deploy:9093
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG4J_ROOT_LOGLEVEL: error
     profiles:
@@ -106,17 +113,17 @@ services:
       - router
       - notifier
       - bot
-
-  mysql:
+  
+  mysql-deploy:
     image: mysql:8.3.0
-    container_name: mysql
+    container_name: mysql-deploy
     volumes:
-      -  mysql-debug-data:/var/lib/mysql
+      -  mysql-deploy-data:/var/lib/mysql
       - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
-      - debug-network
+      - deploy-network
     environment:
       MYSQL_DATABASE: notifier
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
@@ -125,10 +132,10 @@ services:
       - router
 
 networks:
-  debug-network:
+  deploy-network:
     driver: bridge
 
 volumes:
-  kafka-debug-data:
-  mysql-debug-data:
-  redis-debug-data:
+  kafka-deploy-data:
+  mysql-deploy-data:
+  redis-deploy-data:

@@ -14,4 +14,7 @@ RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/
       && apt install -y /tmp/chrome.deb \
       && rm /tmp/chrome.deb
 
+
+ENV SPRING_PROFILES_ACTIVE=deploy
+
 CMD ["java", "-jar", "/app/notifier-0.0.1-SNAPSHOT.jar"]
