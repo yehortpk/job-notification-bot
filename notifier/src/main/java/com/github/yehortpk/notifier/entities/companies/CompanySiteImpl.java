@@ -8,6 +8,7 @@ import com.github.yehortpk.notifier.services.ProxyService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.util.concurrent.*;
 @ToString
 @Getter
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.NO)
+@Slf4j
 public abstract class CompanySiteImpl implements CompanySite{
     @Autowired
     ProxyService proxyService;
@@ -58,7 +60,7 @@ public abstract class CompanySiteImpl implements CompanySite{
                     Document page = future.get();
                     pages.add(page);
                 } catch (InterruptedException | ExecutionException e) {
-                    System.out.printf("Page wasn't parsed: " + e.getMessage());
+                   log.debug("Page wasn't parsed: " + e.getMessage());
                 }
             }
 

@@ -3,6 +3,7 @@ package com.github.yehortpk.notifier.entities.parsers;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Setter
+@Slf4j
 public class SinglePageParser extends PageParserImpl {
     public SinglePageParser(String pageUrl, int pageId) {
         super(pageUrl, pageId);
@@ -42,7 +44,7 @@ public class SinglePageParser extends PageParserImpl {
 
         synchronized (SinglePageParser.class) {
             Document document = parseBody(response);
-            System.out.printf("Page parsed: %s page_id:%s, proxy:%s%n", pageUrl, pageId, proxy);
+            log.debug("Page parsed: {} page_id:{}, proxy:{}", pageUrl, pageId, proxy);
             return document;
         }
     }
@@ -66,7 +68,7 @@ public class SinglePageParser extends PageParserImpl {
         synchronized (SinglePageParser.class) {
             Document document = parseBody(response);
 
-            System.out.printf("Page parsed: %s page_id:%s without proxy%n", pageUrl, pageId);
+            log.debug("Page parsed: {} page_id:{} without proxy", pageUrl, pageId);
             return document;
         }
     }

@@ -1,6 +1,7 @@
 package com.github.yehortpk.notifier.entities.parsers;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
@@ -20,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
 @Setter
+@Slf4j
 public class ComponentPageParser extends PageParserImpl {
     private String dynamicElementQuerySelector;
     private String chromeDriverPath;
@@ -35,14 +37,14 @@ public class ComponentPageParser extends PageParserImpl {
         ChromeOptions chromeOptions = getChromeOptions();
         chromeOptions.addArguments(String.format("--proxy-server=%s:%s", proxyData[0], proxyData[1]));
         Document document = parsePage(chromeOptions, proxy);
-        System.out.printf("Page %s parsed with proxy %s %n", pageUrl, proxy);
+        log.debug("Pag {} parsed with proxy {}", pageUrl, proxy);
         return document;
     }
 
     @Override
     public Document parsePage() {
         Document document = parsePage(getChromeOptions(), null);
-        System.out.printf("Page %s parsed without proxy %n", pageUrl);
+        log.debug("Page {} parsed without proxy", pageUrl);
         return document;
     }
 

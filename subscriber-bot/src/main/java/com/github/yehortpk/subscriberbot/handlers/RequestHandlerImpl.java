@@ -2,6 +2,7 @@ package com.github.yehortpk.subscriberbot.handlers;
 
 import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public abstract class RequestHandlerImpl implements RequestHandler {
     @Autowired
     TelegramServiceUtil telegramServiceUtil;
@@ -30,7 +32,7 @@ public abstract class RequestHandlerImpl implements RequestHandler {
                 String textPart = dividedLargeText.get(i);
                 telegramServiceUtil.sendMessageWithoutMarkup(chatId, textPart);
             }
-            String lastTextPart = dividedLargeText.get(dividedLargeText.size() - 1);
+            String lastTextPart = dividedLargeText.getLast();
             telegramServiceUtil.sendMessageWithMarkup(chatId, lastTextPart, markup);
         } else {
             telegramServiceUtil.sendMessageWithMarkup(chatId, text, markup);
@@ -74,7 +76,7 @@ public abstract class RequestHandlerImpl implements RequestHandler {
         );
         result.add(lastSubstring);
 
-        System.out.printf("Last part: length: %s%n", lastSubstring.length());
+        log.debug("Last part: length: {}", lastSubstring.length());
 
         return result;
     }

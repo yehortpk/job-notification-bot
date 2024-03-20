@@ -4,6 +4,7 @@ import com.github.yehortpk.notifier.models.VacancyDTO;
 import com.github.yehortpk.notifier.services.CompanyService;
 import com.github.yehortpk.notifier.services.NotifierService;
 import com.github.yehortpk.notifier.services.VacancyService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class NotifierRunner implements ApplicationRunner {
     @Autowired
     VacancyService vacancyService;
@@ -37,18 +39,21 @@ public class NotifierRunner implements ApplicationRunner {
 
         vacanciesByCompany.forEach((companyId, vacancies) -> {
             List<VacancyDTO> persistedCompanyVacancies = companyService.getVacancies(companyId);
+            log.debug("Persisted company={}, count={}", companyId, persistedCompanyVacancies.size());
+            log.debug("parsed  count={}", vacancies.size());
             Set<VacancyDTO> persistedCompanyVacanciesSet = new HashSet<>(persistedCompanyVacancies);
-            newVacancies.addAll(vacancyService.getNewVacancies(parsedVacancies, persistedCompanyVacanciesSet));
+            Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
+            newVacancies.addAll(vacancyService.getNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
             outdatedVacancies.addAll(
-                    vacancyService.getOutdatedVacancies(parsedVacancies, persistedCompanyVacanciesSet));
+                    vacancyService.getOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
         });
 
-        System.out.println("new vacancies count: " + newVacancies.size());
-        System.out.println("outdated vacancies count: " + outdatedVacancies.size());
+        log.debug("new vacancies count: " + newVacancies.size());
+        log.debug("outdated vacancies count: " + outdatedVacancies.size());
 
         if (!newVacancies.isEmpty()) {
-            System.out.println("New vacancies:");
-            newVacancies.forEach(System.out::println);
+            log.debug("New vacancies:");
+            newVacancies.forEach((vacancy) -> log.debug(vacancy.toString()));
             notifierService.notifyNewVacancies(newVacancies);
         }
     }

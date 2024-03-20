@@ -1,6 +1,7 @@
 package com.github.yehortpk.notifier.entities.parsers;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.net.Proxy;
 
 @Setter
+@Slf4j
 public class MultiPageParser extends PageParserImpl {
     public MultiPageParser(String pageUrl, int pageId) {
         super(pageUrl, pageId);
@@ -30,7 +32,7 @@ public class MultiPageParser extends PageParserImpl {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.printf("Page %s parsed with proxy %s%n", finalPageUrl, proxy);
+        log.debug("Page {} parsed with proxy {}", finalPageUrl, proxy);
         return document;
     }
 
@@ -47,7 +49,7 @@ public class MultiPageParser extends PageParserImpl {
                     .execute()
                     .parse();
 
-            System.out.printf("Page %s parsed without proxy %n", finalPageUrl);
+            log.debug("Page {} parsed without proxy", finalPageUrl);
             return document;
         } catch (IOException e) {
             throw new RuntimeException(e);
