@@ -3,8 +3,8 @@ services:
     container_name: project-builder
     image: project-builder:latest
     build:
-      context: builder
-      dockerfile: builder-deploy.Dockerfile
+      context: docker
+      dockerfile: docker/project-builder/builder-deploy.Dockerfile
       args:
         PROJECT_URL: git@github.com:yehortpk/job-notification-bot.git
         PROJECT_PATH: job-notification-bot

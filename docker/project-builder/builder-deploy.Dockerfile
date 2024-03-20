@@ -10,12 +10,12 @@ RUN  apt-get -yq update && \
 RUN mkdir -p /root/.ssh && \
     chmod 700 /root/.ssh && \
     ssh-keyscan github.com > /root/.ssh/known_hosts
-COPY ./id_rsa /root/.ssh/id_rsa
+COPY id_rsa /root/.ssh/id_rsa
 RUN chmod 600 /root/.ssh/id_rsa
 
 RUN echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 
-RUN git clone -b change-to-maven-modules $PROJECT_URL
+RUN git clone -b main $PROJECT_URL
 RUN mv $PROJECT_PATH/* .
 RUN rm -rf $PROJECT_PATH
 
