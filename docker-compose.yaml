@@ -1,35 +1,24 @@
 services:
-  project-builder:
-    container_name: project-builder
-    image: project-builder:latest
-    build:
-      context: ./
-      dockerfile: docker/project-builder/builder-debug.Dockerfile
-    profiles:
-      - app
-      - notifier
-      - router
-      - bot
-
   notifier:
     build:
-      context: notifier
-      dockerfile: debug.Dockerfile
+      dockerfile: ./notifier/local.Dockerfile
     container_name: notifier
     environment:
       KAFKA_NOTIFIER_TOPIC: vacancies
     networks:
-      - debug-network
+      - notifier-local-network
     ports:
       - "5005:5005"
+    depends_on:
+      router:
+        condition: service_healthy
     profiles:
       - notifier
       - app
-    depends_on:
-      - project-builder
 
   router:
-    image: project-builder:latest
+    build:
+      dockerfile: ./router/local.Dockerfile
     container_name: router
     environment:
       KAFKA_NOTIFIER_TOPIC: vacancies
@@ -39,20 +28,29 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     command: ["java", "-jar", "/app/router-0.0.1-SNAPSHOT.jar"]
     networks:
-      - debug-network
+      - notifier-local-network
     ports:
-      - "8080"
+      - "8081:8080"
       - "5006:5005"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     profiles:
       - router
+      - notifier
+      - bot
       - app
-    depends_on:
-      - kafka
-      - mysql
-      - project-builder
 
   subscriber-bot:
-    image: project-builder:latest
+    build:
+      dockerfile: ./subscriber-bot/local.Dockerfile
     container_name: subscriber-bot
     environment:
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
@@ -61,28 +59,35 @@ services:
       TG_BOT_USERNAME: ${TG_BOT_USERNAME}
     command: ["java", "-jar", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar"]
     networks:
-      - debug-network
+      - notifier-local-network
     ports:
       - "5007:5005"
+    depends_on:
+      router:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     profiles:
       - bot
       - app
-    depends_on:
-      - project-builder
-      - redis
 
   redis:
     image: redis:7.2.4
     container_name: redis
     volumes:
-      -  redis-debug-data:/data
+      - notifier-redis-local-data:/data
     ports:
-      - "6379"
+      - "6379:6379"
     networks:
-      - debug-network
+      - notifier-local-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     profiles:
-      - app
       - bot
+      - app
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
@@ -90,24 +95,34 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEPER_LOG4J_ROOT_LOGLEVEL: WARN
+    volumes:
+      - notifier-zookeeper-local-data:/var/lib/zookeeper/data
+      - notifier-zookeeper-local-log:/var/lib/zookeeper/log
     ports:
-      - 22181:2181
+      - "22181:2181"
     networks:
-      - debug-network
+      - notifier-local-network
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - notifier
+      - router
+      - bot
+      - app
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
     container_name: kafka
-    depends_on:
-      - zookeeper
     ports:
-      - 29092:29092
-      - 9092
+      - "29092:29092"
+      - "9092"
     networks:
-      - debug-network
+      - notifier-local-network
     volumes:
-      - kafka-debug-data:/var/lib/kafka/data
+      - notifier-kafka-local-data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -115,36 +130,51 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      ZOOKEPER_LOG4J_ROOT_LOGLEVEL: WARN
-      KAFKA_LOG4J_LOGGERS: "kafka.controller=WARN,kafka.request.logger=WARN,kafka=WARN,kafka.log.LogCleaner=WARN,kafka.producer.async.DefaultEventHandler=WARN,state.change.logger=INFO"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     profiles:
-      - app
-      - router
       - notifier
+      - router
       - bot
+      - app
 
   mysql:
     image: mysql:8.3.0
     container_name: mysql
     volumes:
-      -  mysql-debug-data:/var/lib/mysql
+      - notifier-mysql-local-data:/var/lib/mysql
       - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
     ports:
       - "3306:3306"
     networks:
-      - debug-network
+      - notifier-local-network
     environment:
       MYSQL_DATABASE: notifier
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     profiles:
-      - app
+      - notifier
       - router
+      - bot
+      - app
 
 networks:
-  debug-network:
+  notifier-local-network:
     driver: bridge
 
 volumes:
-  kafka-debug-data:
-  mysql-debug-data:
-  redis-debug-data:
+  notifier-kafka-local-data:
+  notifier-mysql-local-data:
+  notifier-redis-local-data:
+  notifier-zookeeper-local-data:
+  notifier-zookeeper-local-log:
