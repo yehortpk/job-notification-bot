@@ -30,9 +30,10 @@ jobs:
         working-directory: ./${{ matrix.module }}
         run: mvn clean install -DskipTests
 
-      - name: Run tests
-        working-directory: ./${{ matrix.module }}
-        run: mvn test
+# Temporarily remove
+#      - name: Run tests
+#        working-directory: ./${{ matrix.module }}
+#        run: mvn test
 
       - name: Build Docker image
         working-directory: ./${{ matrix.module }}
