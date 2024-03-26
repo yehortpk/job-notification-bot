@@ -1,13 +1,23 @@
 services:
   notifier:
+    container_name: notifier-notifier-local
     build:
       dockerfile: ./notifier/local.Dockerfile
     networks:
       - notifier-local-network
     ports:
       - "5005:5005"
+    environment:
+      KAFKA_NOTIFIER_TOPIC: vacancies
+    depends_on:
+      router:
+        condition: service_healthy
+    profiles:
+      - notifier
+      - app
 
   router:
+    container_name: notifier-router-local
     build:
       dockerfile: ./router/local.Dockerfile
     networks:
@@ -15,24 +25,73 @@ services:
     ports:
       - "8081:8080"
       - "5006:5005"
+    environment:
+      KAFKA_NOTIFIER_TOPIC: vacancies
+      KAFKA_SUBSCRIBE_TOPIC: subscriptions
+      KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: [ "java", "-jar", "/app/router-0.0.1-SNAPSHOT.jar" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    profiles:
+      - router
+      - notifier
+      - bot
+      - app
 
-  subscriber-bot:
+  bot:
+    container_name: notifier-bot-local
     build:
       dockerfile: ./subscriber-bot/local.Dockerfile
     networks:
       - notifier-local-network
     ports:
       - "5007:5005"
+    environment:
+      KAFKA_SUBSCRIBE_TOPIC: subscriptions
+      KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
+      TG_BOT_API_KEY: ${TG_BOT_API_KEY}
+      TG_BOT_USERNAME: ${TG_BOT_USERNAME}
+    command: [ "java", "-jar", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar" ]
+    depends_on:
+      router:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - bot
+      - app
 
   redis:
+    image: redis:7.2.4
+    container_name: notifier-redis-local
     volumes:
       - notifier-redis-local-data:/data
     ports:
       - "6379:6379"
     networks:
       - notifier-local-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - bot
+      - app
 
   zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: notifier-zookeeper-local
     volumes:
       - notifier-zookeeper-local-data:/var/lib/zookeeper/data
       - notifier-zookeeper-local-log:/var/lib/zookeeper/log
@@ -40,8 +99,23 @@ services:
       - "22181:2181"
     networks:
       - notifier-local-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - notifier
+      - router
+      - bot
+      - app
 
   kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: notifier-kafka-local
     ports:
       - "29092:29092"
       - "9092"
@@ -49,9 +123,30 @@ services:
       - notifier-local-network
     volumes:
       - notifier-kafka-local-data:/var/lib/kafka/data
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://notifier-kafka-local:9092,PLAINTEXT_HOST://localhost:29092
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - notifier
+      - router
+      - bot
+      - app
 
   mysql:
     image: mysql:8.3.0
+    container_name: notifier-mysql-local
     volumes:
       - notifier-mysql-local-data:/var/lib/mysql
       - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
@@ -59,7 +154,19 @@ services:
       - "3306:3306"
     networks:
       - notifier-local-network
-
+    environment:
+      MYSQL_DATABASE: notifier
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - notifier
+      - router
+      - bot
+      - app
 networks:
   notifier-local-network:
     driver: bridge
