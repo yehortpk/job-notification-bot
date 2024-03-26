@@ -1,0 +1,72 @@
+services:
+  notifier:
+    build:
+      dockerfile: ./notifier/local.Dockerfile
+    networks:
+      - notifier-local-network
+    ports:
+      - "5005:5005"
+
+  router:
+    build:
+      dockerfile: ./router/local.Dockerfile
+    networks:
+      - notifier-local-network
+    ports:
+      - "8081:8080"
+      - "5006:5005"
+
+  subscriber-bot:
+    build:
+      dockerfile: ./subscriber-bot/local.Dockerfile
+    networks:
+      - notifier-local-network
+    ports:
+      - "5007:5005"
+
+  redis:
+    volumes:
+      - notifier-redis-local-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - notifier-local-network
+
+  zookeeper:
+    volumes:
+      - notifier-zookeeper-local-data:/var/lib/zookeeper/data
+      - notifier-zookeeper-local-log:/var/lib/zookeeper/log
+    ports:
+      - "22181:2181"
+    networks:
+      - notifier-local-network
+
+  kafka:
+    ports:
+      - "29092:29092"
+      - "9092"
+    networks:
+      - notifier-local-network
+    volumes:
+      - notifier-kafka-local-data:/var/lib/kafka/data
+
+  mysql:
+    image: mysql:8.3.0
+    volumes:
+      - notifier-mysql-local-data:/var/lib/mysql
+      - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - notifier-local-network
+
+networks:
+  notifier-local-network:
+    driver: bridge
+
+volumes:
+  notifier-kafka-local-data:
+  notifier-mysql-local-data:
+  notifier-redis-local-data:
+  notifier-zookeeper-local-data:
+  notifier-zookeeper-local-log:

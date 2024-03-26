@@ -1,0 +1,62 @@
+services:
+  notifier:
+    image: yehortpk/job-notification-bot-notifier:latest
+    networks:
+      - notifier-prod-network
+
+  router:
+    image: yehortpk/job-notification-bot-router:latest
+    networks:
+      - notifier-prod-network
+    ports:
+      - "8080"
+
+  bot:
+    image: yehortpk/job-notification-bot-subscriber-bot:latest
+    networks:
+      - notifier-prod-network
+
+  redis:
+    volumes:
+      -  notifier-redis-prod-data:/data
+    ports:
+      - "6379"
+    networks:
+      - notifier-prod-network
+  
+  zookeeper:
+    volumes:
+      - notifier-zookeeper-prod-data:/var/lib/zookeeper/data
+      - notifier-zookeeper-prod-log:/var/lib/zookeeper/log
+    ports:
+      - "2181"
+    networks:
+      - notifier-prod-network
+
+  kafka:
+    ports:
+      - "29092"
+      - "9092"
+    networks:
+      - notifier-prod-network
+    volumes:
+      - notifier-kafka-prod-data:/var/lib/kafka/data
+  
+  mysql:
+    volumes:
+      -  notifier-mysql-prod-data:/var/lib/mysql
+    ports:
+      - "3306"
+    networks:
+      - notifier-prod-network
+
+networks:
+  notifier-prod-network:
+    driver: bridge
+
+volumes:
+  notifier-kafka-prod-data:
+  notifier-mysql-prod-data:
+  notifier-redis-prod-data:
+  notifier-zookeeper-prod-data:
+  notifier-zookeeper-prod-log:
