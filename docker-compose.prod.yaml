@@ -11,7 +11,7 @@ services:
     ports:
       - "8080"
 
-  bot:
+  subscriber-bot:
     image: yehortpk/job-notification-bot-subscriber-bot:latest
     networks:
       - notifier-prod-network
