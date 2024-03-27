@@ -1,6 +1,6 @@
 package com.github.yehortpk.notifier.entities.companies.single;
 
-import com.github.yehortpk.notifier.entities.companies.SinglePageCompanySite;
+import com.github.yehortpk.notifier.entities.sites.SinglePageCompanySite;
 import com.github.yehortpk.notifier.entities.parsers.PageParserImpl;
 import com.github.yehortpk.notifier.entities.parsers.SinglePageParser;
 import com.github.yehortpk.notifier.models.VacancyDTO;

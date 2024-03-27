@@ -1,4 +1,4 @@
-package com.github.yehortpk.notifier.entities.companies;
+package com.github.yehortpk.notifier.entities.sites;
 
 import com.github.yehortpk.notifier.entities.PageLoader;
 import com.github.yehortpk.notifier.entities.parsers.PageParserImpl;

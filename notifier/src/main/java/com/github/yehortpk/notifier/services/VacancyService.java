@@ -1,6 +1,6 @@
 package com.github.yehortpk.notifier.services;
 
-import com.github.yehortpk.notifier.entities.companies.CompanySiteImpl;
+import com.github.yehortpk.notifier.entities.sites.CompanySiteImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.springframework.beans.factory.annotation.Autowired;

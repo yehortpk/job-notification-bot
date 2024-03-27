@@ -1,6 +1,6 @@
 package com.github.yehortpk.notifier.entities.companies.component;
 
-import com.github.yehortpk.notifier.entities.companies.ComponentPageCompanySite;
+import com.github.yehortpk.notifier.entities.sites.ComponentPageCompanySite;
 import com.github.yehortpk.notifier.models.VacancyDTO;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
