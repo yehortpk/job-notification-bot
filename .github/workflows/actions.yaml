@@ -23,7 +23,7 @@ jobs:
       - if: matrix.module == 'notifier'
         name: Import parsers implementation (only notifier)
         working-directory: ./notifier/src/main/java/com/github/yehortpk/notifier/entities/
-        run: apt update && apt install unzip && wget -O companies.zip ${{ secrets.COMPANIES_PARSER_IMPLEMENTATION_URL }} && unzip companies.zip
+        run: apt update && apt install unzip wget && wget -O companies.zip ${{ secrets.COMPANIES_PARSER_IMPLEMENTATION_URL }} && unzip companies.zip
 
       - name: Set up Java
         uses: actions/setup-java@v4
