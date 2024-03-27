@@ -9,6 +9,7 @@ on:
 
 env:
   IMAGE_PREFIX: job-notification-bot
+  COMPANIES_IMPLEMENTATION_PATH: ./notifier/src/main/java/com/github/yehortpk/notifier/entities/
 
 jobs:
   # Build and push each module (parallelized)
@@ -20,20 +21,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+        if: ${{  matrix.module == 'notifier' }}
+      - name: Import parsers implementation (only notifier)
+        working-directory: $COMPANIES_IMPLEMENTATION_PATH
+        run: apt update && apt install unzip && wget -O companies.zip | unzip companies.zip
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
 
-      - name: Build JAR
+      - name: Maven build and test
         working-directory: ./${{ matrix.module }}
-        run: mvn clean install -DskipTests
-
-      # Temporarily remove
-      #      - name: Run tests
-      #        working-directory: ./${{ matrix.module }}
-      #        run: mvn test
+        run: mvn clean install test
 
       - name: Build Docker image
         working-directory: ./${{ matrix.module }}
