@@ -9,7 +9,6 @@ on:
 
 env:
   IMAGE_PREFIX: job-notification-bot
-  COMPANIES_IMPLEMENTATION_PATH: ./notifier/src/main/java/com/github/yehortpk/notifier/entities/
 
 jobs:
   # Build and push each module (parallelized)
@@ -23,7 +22,7 @@ jobs:
 
       - if: matrix.module == 'notifier'
         name: Import parsers implementation (only notifier)
-        working-directory: $COMPANIES_IMPLEMENTATION_PATH
+        working-directory: ./notifier/src/main/java/com/github/yehortpk/notifier/entities/
         run: apt update && apt install unzip && wget -O companies.zip ${{ secrets.COMPANIES_PARSER_IMPLEMENTATION_URL }} && unzip companies.zip
 
       - name: Set up Java
