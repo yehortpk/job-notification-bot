@@ -1,9 +1,10 @@
 package com.github.yehortpk.notifier.services;
 
-import com.github.yehortpk.notifier.entities.sites.CompanySiteImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.yehortpk.notifier.parsers.site.SiteParser;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +18,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class VacancyService {
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private CompanyService companyService;
+    private final ApplicationContext applicationContext;
+    private final CompanyService companyService;
 
     public Set<VacancyDTO> parseAllVacancies() {
         List<CompanyDTO> companies = companyService.getCompaniesList();
@@ -36,9 +36,9 @@ public class VacancyService {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
             String beanClass = companyDTO.getBeanClass();
-            CompanySiteImpl bean = (CompanySiteImpl) applicationContext.getBean(beanClass);
-
+            SiteParser bean = (SiteParser) applicationContext.getBean(beanClass);
             bean.setCompany(companyDTO);
+
             Future<Set<VacancyDTO>> future = executor.submit(bean::parseAllVacancies);
             futures.add(future);
         }
@@ -47,7 +47,7 @@ public class VacancyService {
                 Set<VacancyDTO> companyVacancies = future.get();
                 vacancies.addAll(companyVacancies);
             } catch (InterruptedException | ExecutionException e) {
-                System.out.println(e.getMessage());
+                log.error("Can't parse page, {}", e.getMessage());
             }
         }
 

@@ -1,13 +1,10 @@
-package com.github.yehortpk.notifier.entities.sites;
+package com.github.yehortpk.notifier.parsers.site;
 
-import com.github.yehortpk.notifier.entities.PageLoader;
-import com.github.yehortpk.notifier.entities.parsers.PageParserImpl;
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
+import com.github.yehortpk.notifier.parsers.page.PageParser;
 import com.github.yehortpk.notifier.services.ProxyService;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,54 +15,49 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Component
 @Setter
 @ToString
-@Getter
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.NO)
 @Slf4j
-public abstract class CompanySiteImpl implements CompanySite{
+public abstract class SiteParserImpl implements SiteParser {
+    protected CompanyDTO company;
     @Autowired
-    ProxyService proxyService;
-
-    private CompanyDTO company;
+    protected ProxyService proxyService;
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
-        Set<VacancyDTO> vacancies = new HashSet<>();
-
-        String pageTemplateLink = getPageUrl(1);
-
-        Document firstPage = parsePage(pageTemplateLink, 1);
+        Document firstPage = parsePage(1);
         List<Document> pages = new ArrayList<>();
         pages.add(firstPage);
 
         int pagesCount = getPagesCount(firstPage);
         if (pagesCount > 1) {
             List<Future<Document>> futures = new ArrayList<>();
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(pagesCount - 1);
+            @Cleanup ThreadPoolExecutor executor =
+                    (ThreadPoolExecutor) Executors.newFixedThreadPool(pagesCount - 1);
 
             for (int pageId = 2; pageId <= pagesCount; pageId++) {
-                String pageUrl = getPageUrl(pageId);
-
                 int finalPageId = pageId;
-                Future<Document> future = executor.submit(() -> parsePage(pageUrl, finalPageId));
+                Future<Document> future = executor.submit(() -> parsePage(finalPageId));
                 futures.add(future);
             }
 
             for (Future<Document> future : futures) {
                 try {
-                    Document page = future.get();
-                    pages.add(page);
+                    pages.add(future.get());
                 } catch (InterruptedException | ExecutionException e) {
-                   log.debug("Page wasn't parsed: " + e.getMessage());
+                    log.error(e.getMessage());
                 }
             }
-
-            executor.close();
         }
+
+        Set<VacancyDTO> vacancies = new HashSet<>();
 
         for (Document page : pages) {
             List<Element> vacancyBlocks = getVacancyBlocks(page);
@@ -73,6 +65,7 @@ public abstract class CompanySiteImpl implements CompanySite{
             for (Element vacancyBlock : vacancyBlocks) {
                 VacancyDTO vacancy = getVacancyFromBlock(vacancyBlock);
                 vacancy.setCompanyID(company.getCompanyId());
+                vacancy.setCompanyTitle(company.getTitle());
                 vacancies.add(vacancy);
             }
         }
@@ -80,19 +73,17 @@ public abstract class CompanySiteImpl implements CompanySite{
         return vacancies;
     }
 
-    private Document parsePage(String pageUrl, int pageId) {
-        PageParserImpl pageParser = createPageParser(pageUrl, pageId);
-        pageParser.setHeaders(createHeaders());
-        pageParser.setData(createData(pageUrl, pageId));
+    private Document parsePage(int pageId) {
+        PageParser pageParser = createPageParser(pageId);
 
-        return new PageLoader(proxyService, pageParser).loadPage();
+        return pageParser.parsePage();
     }
 
     public Map<String, String> createHeaders() {
         return new HashMap<>(company.getHeaders());
     }
 
-    protected Map<String, String> createData(String pageUrl, int pageId) {
+    protected Map<String, String> createData(int pageId) {
         HashMap<String, String> data = new HashMap<>(company.getData());
         for (Map.Entry<String, String> entry : data.entrySet()) {
             if (Objects.equals(entry.getValue(), "{page}")) {
@@ -105,6 +96,5 @@ public abstract class CompanySiteImpl implements CompanySite{
     public abstract int getPagesCount(Document doc);
     public abstract List<Element> getVacancyBlocks(Document page);
     public abstract VacancyDTO getVacancyFromBlock(Element block);
-    protected abstract PageParserImpl createPageParser(String pageUrl, int pageId);
-    protected abstract String getPageUrl(int pageId);
+    protected abstract PageParser createPageParser(int pageId);
 }

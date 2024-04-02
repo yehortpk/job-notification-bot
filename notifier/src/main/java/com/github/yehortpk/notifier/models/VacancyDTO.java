@@ -13,6 +13,7 @@ import java.io.Serializable;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VacancyDTO implements Serializable {
     private int companyID;
+    private String companyTitle;
     private int vacancyID;
     private String title;
     private int minSalary;
