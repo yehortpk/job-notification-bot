@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 
 import java.net.Proxy;
 import java.util.Map;
@@ -22,13 +21,8 @@ public class PageConnectionParams {
     private String userAgent = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2)" +
             " Gecko/20100316 Firefox/3.6.2";
     private Proxy proxy;
-
-    public Connection toConnection() {
-        return Jsoup.connect(pageUrl)
-                .userAgent(userAgent)
-                .headers(headers)
-                .data(data)
-                .proxy(proxy)
-                .method(connectionMethod);
-    }
+    @Builder.Default
+    private int delay = 0;
+    @Builder.Default
+    private String dynamicElementQuerySelector = "body";
 }

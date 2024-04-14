@@ -3,6 +3,8 @@ package com.github.yehortpk.notifier.services;
 import com.github.yehortpk.notifier.models.ProxyDTO;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,8 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,6 +21,7 @@ import java.util.stream.IntStream;
 
 @Component
 @Getter
+@Slf4j
 public class ProxyService {
     @Value("${proxy-site-url}")
     private String proxySiteURL;
@@ -54,13 +56,12 @@ public class ProxyService {
                     .lastChecked(columns.get(7).text())
                     .build();
 
-            if(
-                !proxyDTO.getCountryCode().isEmpty()
-                        &&  !proxyDTO.getAnonymity().equals("transparent")
-            ) {
+            if(!proxyDTO.getCountryCode().isEmpty() &&  !proxyDTO.getAnonymity().equals("transparent")) {
                 proxies.add(proxyDTO);
             }
         }
+
+        log.info("Proxies count: {}", proxies.size());
         resetRange();
     }
 
@@ -84,5 +85,21 @@ public class ProxyService {
         ProxyDTO randomProxy = proxies.get(randomNum);
 
         return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(randomProxy.getProxyHost(), randomProxy.getProxyPort()));
+    }
+
+    @SneakyThrows
+    public boolean validateProxy(Proxy proxy) {
+        try {
+            URL url = new URI("https://www.google.com").toURL();
+            URLConnection connection = url.openConnection(proxy);
+
+            connection.setConnectTimeout(5000);
+
+            connection.connect();
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -2,7 +2,7 @@ package com.github.yehortpk.notifier.services;
 
 import com.github.yehortpk.notifier.models.CompanyDTO;
 import com.github.yehortpk.notifier.models.VacancyDTO;
-import com.github.yehortpk.notifier.parsers.site.SiteParser;
+import com.github.yehortpk.notifier.domain.parsers.site.SiteParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;

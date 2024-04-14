@@ -44,4 +44,4 @@ out/
 *.zip
 *.tar.gz
 *.rar
-/src/main/java/com/github/yehortpk/notifier/parsers/companies/
+/src/main/java/com/github/yehortpk/notifier/domain/parsers/companies/
