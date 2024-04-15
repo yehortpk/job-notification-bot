@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [notifier, router, subscriber-bot]
+        module: [parser, router, subscriber-bot]
     steps:
       - uses: actions/checkout@v4
 
-      - if: matrix.module == 'notifier'
-        name: Import parsers implementation (only notifier)
-        working-directory: ./notifier/src/main/java/com/github/yehortpk/notifier/entities/
+      - if: matrix.module == 'parser'
+        name: Import parsers implementation (only parser)
+        working-directory: ./parser/src/main/java/com/github/yehortpk/parser/entities/
         run: wget -O companies.zip ${{ secrets.COMPANIES_PARSER_IMPLEMENTATION_URL }} && unzip companies.zip
 
       - name: Set up Java

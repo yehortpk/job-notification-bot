@@ -1,16 +1,16 @@
 services:
-  notifier-prod:
-    container_name: notifier-notifier-prod
+  parser-prod:
+    container_name: notifier-parser-prod
     image: yehortpk/job-notification-bot-notifier:latest
     networks:
       - notifier-prod-network
     environment:
-      KAFKA_NOTIFIER_TOPIC: vacancies
+      KAFKA_PARSER_TOPIC: vacancies
     depends_on:
       router-prod:
         condition: service_healthy
     profiles:
-      - notifier
+      - parser
       - app
 
   router-prod:
@@ -21,7 +21,7 @@ services:
     ports:
       - "8080"
     environment:
-      KAFKA_NOTIFIER_TOPIC: vacancies
+      KAFKA_PARSER_TOPIC: vacancies
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       MYSQL_USERNAME: ${MYSQL_USERNAME}
@@ -38,7 +38,7 @@ services:
         condition: service_healthy
     profiles:
       - router
-      - notifier
+      - parser
       - bot
       - app
 
@@ -98,7 +98,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app
@@ -129,7 +129,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app
@@ -152,7 +152,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app

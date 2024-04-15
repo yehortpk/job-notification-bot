@@ -6,7 +6,7 @@ COPY pom.xml /opt/app/pom.xml
 
 COPY subscriber-bot/src /opt/app/subscriber-bot/src
 
-COPY notifier/pom.xml /opt/app/notifier/pom.xml
+COPY parser/pom.xml /opt/app/parser/pom.xml
 COPY router/pom.xml /opt/app/router/pom.xml
 
 RUN --mount=type=cache,target=/root/.m2 mvn clean install -pl subscriber-bot -DskipTests
@@ -18,4 +18,4 @@ ENV PATH="/usr/local/bin:${PATH}"
 
 COPY --from=builder /opt/app/subscriber-bot/target/subscriber-bot-0.0.1-SNAPSHOT.jar .
 
-CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/notifier-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar"]

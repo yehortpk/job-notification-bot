@@ -15,7 +15,7 @@
 	<name>job-notification-bot</name>
 	<description>Job notification bot</description>
 	<modules>
-		<module>notifier</module>
+		<module>parser</module>
 		<module>router</module>
 		<module>subscriber-bot</module>
 	</modules>

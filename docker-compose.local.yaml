@@ -1,19 +1,19 @@
 services:
-  notifier:
-    container_name: notifier-notifier-local
+  parser:
+    container_name: notifier-parser-local
     build:
-      dockerfile: ./notifier/local.Dockerfile
+      dockerfile: ./parser/local.Dockerfile
     networks:
       - notifier-local-network
     ports:
       - "5005:5005"
     environment:
-      KAFKA_NOTIFIER_TOPIC: vacancies
+      KAFKA_PARSER_TOPIC: vacancies
     depends_on:
       router:
         condition: service_healthy
     profiles:
-      - notifier
+      - parser
       - app
 
   router:
@@ -26,7 +26,7 @@ services:
       - "8081:8080"
       - "5006:5005"
     environment:
-      KAFKA_NOTIFIER_TOPIC: vacancies
+      KAFKA_PARSER_TOPIC: vacancies
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       MYSQL_USERNAME: ${MYSQL_USERNAME}
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
     profiles:
       - router
-      - notifier
+      - parser
       - bot
       - app
 
@@ -108,7 +108,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app
@@ -139,7 +139,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app
@@ -162,7 +162,7 @@ services:
       timeout: 5s
       retries: 3
     profiles:
-      - notifier
+      - parser
       - router
       - bot
       - app
