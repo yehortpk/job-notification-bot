@@ -74,7 +74,6 @@ public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBo
         } else {
             throw new MissedHandlerException("Handler is missed");
         }
-        System.out.println("User chat id = " + chatId);
         UserDTO user = getUserByChatId(chatId);
 
         List<RequestHandler> handlersList = new ArrayList<>(beanMap.values());
@@ -82,10 +81,6 @@ public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBo
         handlersList.add(applicationContext.getBean(UndefinedRequestTypeHandler.class));
         Dispatcher dispatcher = new Dispatcher(handlersList, user);
         dispatcher.dispatch(update);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Final user dto: " + user);
-        }
     }
 
     /**
@@ -95,7 +90,7 @@ public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBo
      * @return {@link UserDTO} user instance
      */
     private UserDTO getUserByChatId(long chatId) {
-        UserDTO user = stateService.getUser(chatId);System.out.println("UserState = " + user.getUserState());
+        UserDTO user = stateService.getUser(chatId);
         if (user.getChatId() == 0) {
             user = new UserDTO(chatId, UserState.START_STATE);
         }

@@ -39,8 +39,6 @@ public class NotifierRunner implements ApplicationRunner {
 
         vacanciesByCompany.forEach((companyId, vacancies) -> {
             List<VacancyDTO> persistedCompanyVacancies = companyService.getVacancies(companyId);
-            log.debug("Persisted company={}, count={}", companyId, persistedCompanyVacancies.size());
-            log.debug("parsed  count={}", vacancies.size());
             Set<VacancyDTO> persistedCompanyVacanciesSet = new HashSet<>(persistedCompanyVacancies);
             Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
             newVacancies.addAll(vacancyService.getNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
@@ -48,12 +46,12 @@ public class NotifierRunner implements ApplicationRunner {
                     vacancyService.getOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
         });
 
-        log.debug("new vacancies count: " + newVacancies.size());
-        log.debug("outdated vacancies count: " + outdatedVacancies.size());
+        log.info("new vacancies count: " + newVacancies.size());
+        log.info("outdated vacancies count: " + outdatedVacancies.size());
 
         if (!newVacancies.isEmpty()) {
-            log.debug("New vacancies:");
-            newVacancies.forEach((vacancy) -> log.debug(vacancy.toString()));
+            log.info("New vacancies:");
+            newVacancies.forEach((vacancy) -> log.info(vacancy.toString()));
             notifierService.notifyNewVacancies(newVacancies);
         }
     }

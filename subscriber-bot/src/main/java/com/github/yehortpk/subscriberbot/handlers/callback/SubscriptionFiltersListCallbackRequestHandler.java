@@ -30,7 +30,6 @@ public class SubscriptionFiltersListCallbackRequestHandler extends CallbackDataR
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {
         String callbackData = userRequest.getUpdate().getCallbackQuery().getData();
-        System.out.println(callbackData);
         String[] companyData = callbackData.split("filters=")[1].split(":");
 
         UserDTO user = userRequest.getUser();

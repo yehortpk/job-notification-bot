@@ -47,13 +47,7 @@ public class TelegramServiceUtil {
             sendMessage.setReplyMarkup(markup);
         }
 
-        Message message = (Message) executor.execute(sendMessage);
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Sent message, ID=%s, text=%s", message.getMessageId(), message.getText()));
-        }
-
-        return message;
+        return (Message) executor.execute(sendMessage);
     }
 
     /**
@@ -71,13 +65,7 @@ public class TelegramServiceUtil {
                 .disableWebPagePreview(true)
                 .build();
 
-        Message message = (Message) executor.execute(sendMessage);
-
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Sent message, ID=%s, text=%s", message.getMessageId(), message.getText()));
-        }
-
-        return message;
+        return (Message) executor.execute(sendMessage);
     }
 
     /**
@@ -95,7 +83,7 @@ public class TelegramServiceUtil {
         executor.execute(sendRemoveInfoMessage);
 
         if (log.isDebugEnabled()) {
-            log.debug(String.format("Message deleted, ID=%s", messageId));
+            log.info(String.format("Message deleted, ID=%s", messageId));
         }
     }
 

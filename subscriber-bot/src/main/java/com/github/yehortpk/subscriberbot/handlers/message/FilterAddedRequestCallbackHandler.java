@@ -21,7 +21,6 @@ public class FilterAddedRequestCallbackHandler extends StateRequestHandlerImpl i
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {
-        System.out.println("Handling");
         long chatId = userRequest.getUser().getChatId();
 
         UserDTO user = stateService.getUser(chatId);
@@ -33,7 +32,6 @@ public class FilterAddedRequestCallbackHandler extends StateRequestHandlerImpl i
 
         user.setUserState(UserState.FILTER_ADDED_STATE);
         user.addRequestCallbackData(latestCallbackData);
-        System.out.println("Add user " + user);
         stateService.saveUser(user);
 
         return SendMessage.builder()

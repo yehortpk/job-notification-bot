@@ -46,8 +46,6 @@ public abstract class RequestHandlerImpl implements RequestHandler {
     private List<String> getDividedLargeText(String text) {
         List<String> result = new ArrayList<>();
         int residuals = 0;
-        System.out.println("Text length: " + text.length());
-        System.out.println("Parts count = " + (text.length() / TG_MESSAGE_MAX_LENGTH + 1));
         for (int i = 0; i < (text.length() / TG_MESSAGE_MAX_LENGTH); i++) {
             int lowerBoundIndex = i * TG_MESSAGE_MAX_LENGTH - residuals;
 
@@ -75,8 +73,6 @@ public abstract class RequestHandlerImpl implements RequestHandler {
                 lastPartLowerBoundIndex
         );
         result.add(lastSubstring);
-
-        log.debug("Last part: length: {}", lastSubstring.length());
 
         return result;
     }
