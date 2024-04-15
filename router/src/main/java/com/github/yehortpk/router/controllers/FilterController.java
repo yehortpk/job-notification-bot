@@ -1,6 +1,6 @@
 package com.github.yehortpk.router.controllers;
 
-import com.github.yehortpk.router.models.filter.FilterShortDTO;
+import com.github.yehortpk.router.models.filter.FilterDTO;
 import com.github.yehortpk.router.models.filter.FilterShortInfoDTO;
 import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
 import com.github.yehortpk.router.services.SubscribeService;
@@ -29,7 +29,7 @@ public class FilterController {
     }
 
     @PostMapping
-    public void addFilter(@RequestBody FilterShortDTO filter) {
+    public void addFilter(@RequestBody FilterDTO filter) {
         subscribeService.addFilter(filter);
     }
 
