@@ -25,15 +25,15 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value("${notifier-topic-consumer-group-id}")
-    private String notifierTopicConsumerGroupId;
+    @Value("${parser-topic-consumer-group-id}")
+    private String parserTopicConsumerGroupId;
 
-    @Value("${KAFKA_NOTIFIER_TOPIC}")
-    private String notifierTopic;
+    @Value("${KAFKA_PARSER_TOPIC}")
+    private String parserTopic;
 
     @Bean
-    public NewTopic notifierTopic() {
-        return new NewTopic(notifierTopic, 1, (short) 1);
+    public NewTopic parserTopic() {
+        return new NewTopic(parserTopic, 1, (short) 1);
     }
 
     private Map<String, Object> getConsumerFactoryProps() {
@@ -50,20 +50,20 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, VacancyDTO> notifierConsumerFactory() {
+    public ConsumerFactory<String, VacancyDTO> parserConsumerFactory() {
         Map<String, Object> props = getConsumerFactoryProps();
 
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, notifierTopicConsumerGroupId);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, parserTopicConsumerGroupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS, "vacancy:com.github.yehortpk.router.models.vacancy.VacancyDTO");
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> notifierContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> parserContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(notifierConsumerFactory());
+        factory.setConsumerFactory(parserConsumerFactory());
         factory.setBatchListener(true);
         return factory;
     }
