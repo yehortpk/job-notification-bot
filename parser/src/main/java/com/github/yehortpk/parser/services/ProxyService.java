@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -19,21 +18,25 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * This class creates and manages pool of proxies
+ */
 @Component
 @Getter
 @Slf4j
 public class ProxyService {
-    @Value("${proxy-site-url}")
-    private String proxySiteURL;
-
     private final List<ProxyDTO> proxies = new ArrayList<>();
     private static final ThreadLocal<List<Integer>> threadLocalParam = ThreadLocal.withInitial(ArrayList::new);
 
+    /**
+     * Create and filter proxy pool of free proxies list site
+     */
     @PostConstruct
-    private void loadProxies(){
+    private void createProxyPool(){
+        final String FREE_PROXIES_SITE_URL = "https://free-proxy-list.net/";
         Document page;
         try {
-            page = Jsoup.connect(proxySiteURL)
+            page = Jsoup.connect(FREE_PROXIES_SITE_URL)
                     .userAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316" +
                             " Firefox/3.6.2")
                     .header("Content-Language", "en-US")
@@ -65,6 +68,10 @@ public class ProxyService {
         resetRange();
     }
 
+    /**
+     * Returns new local thread range
+     * @return new range of proxies list size
+     */
     private List<Integer> resetRange() {
         List<Integer> rangeList = IntStream.range(0, proxies.size())
                 .boxed()
@@ -73,6 +80,10 @@ public class ProxyService {
         return threadLocalParam.get();
     }
 
+    /**
+     * Returns random proxy from the proxy pool
+     * @return random proxy
+     */
     public Proxy getRandomProxy(){
         List<Integer> range = threadLocalParam.get();
         if(range.isEmpty()) {
@@ -87,10 +98,16 @@ public class ProxyService {
         return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(randomProxy.getProxyHost(), randomProxy.getProxyPort()));
     }
 
+    /**
+     * Validates if proxy is working
+     * @param proxy proxy for validation
+     * @return is proxy valid
+     */
     @SneakyThrows
     public boolean validateProxy(Proxy proxy) {
+        final String GOOGLE_URL = "https://www.google.com";
         try {
-            URL url = new URI("https://www.google.com").toURL();
+            URL url = new URI(GOOGLE_URL).toURL();
             URLConnection connection = url.openConnection(proxy);
 
             connection.setConnectTimeout(5000);

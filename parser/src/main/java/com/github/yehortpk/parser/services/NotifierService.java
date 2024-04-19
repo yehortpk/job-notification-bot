@@ -7,14 +7,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+/**
+ * This class sends vacancies notification for the router service
+ */
 @Service
 public class NotifierService {
     @Autowired
-    KafkaTemplate<String, VacancyDTO> kafkaTemplate;
+    KafkaTemplate<String, VacancyDTO> routerService;
 
+    /**
+     * Notify router service about new vacancies
+     * @param newVacancies set of new vacancies
+     */
     public void notifyNewVacancies(Set<VacancyDTO> newVacancies) {
         for (VacancyDTO newVacancy : newVacancies) {
-            kafkaTemplate.sendDefault(newVacancy);
+            routerService.sendDefault(newVacancy);
         }
     }
 }

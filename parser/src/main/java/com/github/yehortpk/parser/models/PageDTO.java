@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jsoup.nodes.Document;
 
+/**
+ * DTO representing {@link Document object} itself and its metadata
+ */
 @Getter
 @Setter
 @AllArgsConstructor

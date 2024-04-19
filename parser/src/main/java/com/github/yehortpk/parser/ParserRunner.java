@@ -4,8 +4,8 @@ import com.github.yehortpk.parser.models.VacancyDTO;
 import com.github.yehortpk.parser.services.CompanyService;
 import com.github.yehortpk.parser.services.NotifierService;
 import com.github.yehortpk.parser.services.VacancyService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -16,17 +16,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This class implements the {@link ApplicationRunner} interface and is responsible for parsing vacancies,
+ * identifying new and outdated ones, and notifying about new vacancies.
+ */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ParserRunner implements ApplicationRunner {
-    @Autowired
-    VacancyService vacancyService;
-
-    @Autowired
-    CompanyService companyService;
-
-    @Autowired
-    NotifierService notifierService;
+    private final VacancyService vacancyService;
+    private final CompanyService companyService;
+    private final NotifierService notifierService;
 
     @Override
     public void run (ApplicationArguments args) {
@@ -38,12 +38,12 @@ public class ParserRunner implements ApplicationRunner {
                 .collect(Collectors.groupingBy(VacancyDTO::getCompanyID));
 
         vacanciesByCompany.forEach((companyId, vacancies) -> {
-            List<VacancyDTO> persistedCompanyVacancies = companyService.getVacancies(companyId);
+            List<VacancyDTO> persistedCompanyVacancies = companyService.getPersistedVacancies(companyId);
             Set<VacancyDTO> persistedCompanyVacanciesSet = new HashSet<>(persistedCompanyVacancies);
             Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
-            newVacancies.addAll(vacancyService.getNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+            newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
             outdatedVacancies.addAll(
-                    vacancyService.getOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+                    vacancyService.calculateOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
         });
 
         log.info("new vacancies count: " + newVacancies.size());

@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Page connector based on proxy strategy. Multiple threads have its own proxy, and trying to scrap the same page. Each
+ * thread has page poll timeout, when it returns {@link TimeoutException} after the expiration of time.
+ * Every proxy thread have its own delay based on its sequence number (by default - 50ms). When the proxy is in the
+ * delay it may be cancelled by another thread that complete the page scrapping.
+ */
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
@@ -22,16 +28,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ProxyPageConnector implements PageConnector {
     @NonNull private final PageScrapper pageScrapper;
     @NonNull private final ProxyService proxyService;
+
     private final int INITIAL_POLL_TIMEOUT = 60;
-    private final int INITIAL_THREAD_TIMEOUT = 50;
-    private final int POLL_TIMEOUT_INC = 10;
-    private final int THREAD_TIMEOUT_INC = 100;
+    private final int INITIAL_DELAY_BETWEEN_THREADS = 50;
+    private final int POLL_TIMEOUT_LAMBDA = 10;
+    private final int DELAY_BETWEEN_THREADS_LAMBDA = 100;
+    private final int CONNECTION_MAX_ATTEMPTS = 3;
 
 
     @Override
     public String connectToPage(PageConnectionParams pageConnectionParams) throws IOException {
 
-        String pageBody = loadPage(INITIAL_POLL_TIMEOUT, INITIAL_THREAD_TIMEOUT, pageConnectionParams);
+        String pageBody = loadPage(INITIAL_POLL_TIMEOUT, INITIAL_DELAY_BETWEEN_THREADS, pageConnectionParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(),
@@ -39,9 +47,22 @@ public class ProxyPageConnector implements PageConnector {
         return pageBody;
     }
 
-    private String loadPage(int pollTimeout, int threadsTimeout,
+    /**
+     * Recursive method that responsible for scrap the page with {@link PageScrapper}. If all the threads fail page
+     * connection, method call itself recursively with increased pollTimeout (POLL_TIMEOUT_LAMBDA) and increased
+     * delay between threads (DELAY_BETWEEN_THREADS_LAMBDA). When the number of attempts exceeds
+     * CONNECTION_MAX_ATTEMPTS, {@link NullPointerException} will be thrown
+     *
+     * @param pollTimeout timeout for every thread to poll the page.
+     * @param threadsDelay delay between threads connection attempts
+     * @param pageConnectionParams connection parameters for the page
+     * @return page HTML
+     * @throws IOException when the number of attempts exceeds CONNECTION_MAX_ATTEMPTS
+     * @see PageConnectionParams
+     */
+    private String loadPage(int pollTimeout, int threadsDelay,
                             PageConnectionParams pageConnectionParams) throws IOException {
-        if((pollTimeout - INITIAL_POLL_TIMEOUT) > POLL_TIMEOUT_INC * 2) {
+        if((pollTimeout - INITIAL_POLL_TIMEOUT) >= POLL_TIMEOUT_LAMBDA * CONNECTION_MAX_ATTEMPTS) {
             throw new IOException();
         }
 
@@ -56,7 +77,7 @@ public class ProxyPageConnector implements PageConnector {
             Proxy randomProxy = proxyService.getRandomProxy();
             Callable<String> task = () -> {
                 if (proxyService.validateProxy(randomProxy)) {
-                    int currentThreadsTimeout = threadsTimeout * timeoutCounter.getAndIncrement();
+                    int currentThreadsTimeout = threadsDelay * timeoutCounter.getAndIncrement();
                     Thread.sleep(currentThreadsTimeout);
                     pageConnectionParams.setProxy(randomProxy);
                     return pageScrapper.scrapPage(pageConnectionParams);
@@ -100,6 +121,6 @@ public class ProxyPageConnector implements PageConnector {
         }
 
         log.error("Could not connect to the page {} for specified timeout. Retry", pageConnectionParams.getPageUrl());
-        return loadPage(pollTimeout + POLL_TIMEOUT_INC, threadsTimeout + THREAD_TIMEOUT_INC, pageConnectionParams);
+        return loadPage(pollTimeout + POLL_TIMEOUT_LAMBDA, threadsDelay + DELAY_BETWEEN_THREADS_LAMBDA, pageConnectionParams);
     }
 }

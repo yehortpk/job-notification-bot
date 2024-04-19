@@ -2,6 +2,9 @@ package com.github.yehortpk.parser.models;
 
 import lombok.*;
 
+/**
+ * DTO representing an information about the proxy
+ */
 @Getter
 @Setter
 @Builder

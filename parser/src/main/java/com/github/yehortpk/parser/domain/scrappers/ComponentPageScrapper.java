@@ -23,6 +23,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Component-based site page scrapper. Uses dynamicElementQuerySelector from {@link PageConnectionParams}
+ * to delay page scrapping until the element on the page is loaded. Works on Selenium
+ */
 @Component
 public class ComponentPageScrapper implements PageScrapper {
     @Override
@@ -34,15 +38,21 @@ public class ComponentPageScrapper implements PageScrapper {
             chromeOptions = createChromeOptions();
         }
 
-        @Cleanup WebDriver driver = getWebDriver(chromeOptions);
+        @Cleanup WebDriver driver = createWebDriver(chromeOptions);
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
 
         return scrapPage(finalPageUrl, driver, pageConnectionParams.getDynamicElementQuerySelector());
     }
 
+    /**
+     * Scraps page with specific url and specific {@link WebDriver}
+     * @param pageUrl URL to the page
+     * @param driver GoogleChrome web driver for Selenium parser
+     * @param dynamicElementQuerySelector element query selector for component section loading delay
+     * @return page HTML
+     */
     private String scrapPage(String pageUrl, WebDriver driver, String dynamicElementQuerySelector) {
         synchronized (ComponentPageScrapper.class) {
-
             driver.get(pageUrl);
 
             Wait<WebDriver> wait = new FluentWait<>(driver)
@@ -60,6 +70,11 @@ public class ComponentPageScrapper implements PageScrapper {
         }
     }
 
+    /**
+     * Retrieves data (host, port) from {@link Proxy} object
+     * @param proxy proxy object
+     * @return proxy data array with size of 2 (host and port)
+     */
     private String[] retrieveDataFromProxy(Proxy proxy) {
         InetSocketAddress address = (InetSocketAddress) proxy.address();
 
@@ -69,12 +84,23 @@ public class ComponentPageScrapper implements PageScrapper {
     @Value("${webdriver.chrome.driver}")
     private String chromeDriverPath;
 
-    private WebDriver getWebDriver(ChromeOptions chromeOptions) {
+    /**
+     * Create GoogleChrome web driver for Selenium with specific path in the system
+     * @param chromeOptions web driver options
+     * @return web driver
+     */
+    private WebDriver createWebDriver(ChromeOptions chromeOptions) {
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
         return new ChromeDriver(chromeOptions);
     }
 
+    /**
+     * Construct GET url with the data map as query params
+     * @param pageUrl base url without query params
+     * @param data data for query params
+     * @return final url
+     */
     private String constructURLWithData(String pageUrl, Map<String, String> data) {
         if (!data.isEmpty()) {
             return pageUrl + "?" + data.entrySet().stream()
@@ -89,6 +115,10 @@ public class ComponentPageScrapper implements PageScrapper {
     @Value("${webdriver.chrome.path}")
     private String chromeBinaryPath;
 
+    /**
+     * Creates Google Chrome web driver options without proxy
+     * @return web driver options
+     */
     private ChromeOptions createChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--headless", "--disable-dev-shm-usage", "--no-sandbox");
@@ -98,6 +128,11 @@ public class ComponentPageScrapper implements PageScrapper {
         return chromeOptions;
     }
 
+    /**
+     * Creates Google Chrome web driver options with proxy
+     * @param proxy proxy object
+     * @return web driver options
+     */
     private ChromeOptions createChromeOptions(Proxy proxy) {
         ChromeOptions chromeOptions = createChromeOptions();
         String[] proxyData = retrieveDataFromProxy(proxy);

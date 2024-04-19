@@ -9,6 +9,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Config for proxy parsing strategy when parser.mode property has value proxy. Uses {@link ProxyPageConnector} as
+ * a default connector.
+ */
 @Configuration
 @ConditionalOnProperty(prefix = "parser", name = "mode", havingValue = "proxy")
 public class ProxyParserConfig {

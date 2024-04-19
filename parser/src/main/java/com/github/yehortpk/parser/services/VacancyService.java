@@ -17,6 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * This class provide methods for parsing and identifying outdated/new vacancies
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +27,10 @@ public class VacancyService {
     private final ApplicationContext applicationContext;
     private final CompanyService companyService;
 
+    /**
+     * Parse vacancies from all companies returned by {@link CompanyService}
+     * @return parsed vacancies
+     */
     public Set<VacancyDTO> parseAllVacancies() {
         List<CompanyDTO> companies = companyService.getCompaniesList();
 
@@ -36,10 +43,10 @@ public class VacancyService {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
             String beanClass = companyDTO.getBeanClass();
-            SiteParser bean = (SiteParser) applicationContext.getBean(beanClass);
-            bean.setCompany(companyDTO);
+            SiteParser siteParser = (SiteParser) applicationContext.getBean(beanClass);
+            siteParser.setCompany(companyDTO);
 
-            Future<Set<VacancyDTO>> future = executor.submit(bean::parseAllVacancies);
+            Future<Set<VacancyDTO>> future = executor.submit(siteParser::parseAllVacancies);
             futures.add(future);
         }
         for (Future<Set<VacancyDTO>> future : futures) {
@@ -55,14 +62,26 @@ public class VacancyService {
         return vacancies;
     }
 
-    public Set<VacancyDTO> getNewVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
+    /**
+     * Calculate difference between parsed and persistent vacancies
+     * @param allVacancies - total vacancies set
+     * @param persistedVacancies - persistent vacancies set
+     * @return set of new vacancies
+     */
+    public Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
         Set<VacancyDTO> result = new HashSet<>(allVacancies);
         result.removeAll(persistedVacancies);
 
         return result;
     }
 
-    public Set<VacancyDTO> getOutdatedVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
+    /**
+     * Calculate difference between persistent and parsed vacancies
+     * @param allVacancies - total vacancies set
+     * @param persistedVacancies - persistent vacancies set
+     * @return set of outdated vacancies
+     */
+    public Set<VacancyDTO> calculateOutdatedVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
         Set<VacancyDTO> result = new HashSet<>(persistedVacancies);
         result.removeAll(allVacancies);
 

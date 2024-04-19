@@ -4,6 +4,9 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * DTO representing a vacancy
+ */
 @Getter
 @Builder
 @ToString
@@ -15,9 +18,15 @@ public class VacancyDTO implements Serializable {
     private int companyID;
     private String companyTitle;
     private int vacancyID;
+    /**
+     * Vacancy title
+     */
     private String title;
     private int minSalary;
     private int maxSalary;
+    /**
+     * Full link to the vacancy
+     */
     @EqualsAndHashCode.Include
     private String link;
 }

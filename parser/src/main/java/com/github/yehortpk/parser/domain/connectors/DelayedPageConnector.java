@@ -7,6 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+/**
+ * Page connector with configured delay between pages parsing. Based on the site pages parsing strategy in threads,
+ * delay is necessary for avoid ban for your IP. Delegates {@link IOException} from {@link PageScrapper}
+ *
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class DelayedPageConnector implements PageConnector {

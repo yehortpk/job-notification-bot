@@ -1,5 +1,6 @@
 package com.github.yehortpk.parser.domain.parsers.site;
 
+import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
@@ -21,6 +22,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * Default abstract implementation of {@link SiteParser}. Provides default common dataflow from a page connection and
+ * scrapping to parsing and creating {@link VacancyDTO} object. </br>
+ * <p></p>
+ * Required methods that will inherit from this class:
+ * <ul>
+ * <li>getPagesCount - the number of pages on the site</li>
+ * <li>extractVacancyBlocksFromPage - extract blocks of vacancies from {@link Document} page</li>
+ * <li>generateVacancyObjectFromBlocks - extract {@link VacancyDTO} vacancy object from vacancy block</li>
+ * </ul>
+ */
 @Component
 @Setter
 @ToString
@@ -71,12 +83,17 @@ public abstract class SiteParserImpl implements SiteParser {
         return vacancies;
     }
 
+    /**
+     * Extract vacancies from {@link Document} page
+     * @param page page
+     * @return set of vacancies from page
+     */
     private Set<VacancyDTO> extractVacanciesFromPage(PageDTO page) {
         Set<VacancyDTO> vacancies = new HashSet<>();
-        List<Element> vacancyBlocks = getVacancyBlocks(page.getDoc());
+        List<Element> vacancyBlocks = extractVacancyBlocksFromPage(page.getDoc());
 
         for (Element vacancyBlock : vacancyBlocks) {
-            VacancyDTO vacancy = getVacancyFromBlock(vacancyBlock);
+            VacancyDTO vacancy = generateVacancyObjectFromBlock(vacancyBlock);
             vacancy.setCompanyID(company.getCompanyId());
             vacancy.setCompanyTitle(company.getTitle());
             vacancies.add(vacancy);
@@ -100,8 +117,30 @@ public abstract class SiteParserImpl implements SiteParser {
         return data;
     }
 
-    public abstract int getPagesCount(Document doc);
-    public abstract List<Element> getVacancyBlocks(Document page);
-    public abstract VacancyDTO getVacancyFromBlock(Element block);
+    /**
+     * Returns number of pages with vacancies on the site
+     * @param page page
+     * @return number of pages
+     */
+    public abstract int getPagesCount(Document page);
+    /**
+     * Extracts blocks with vacancy from the page
+     * @param page page
+     * @return blocks of {@link Element} pages with vacancies
+     */
+    public abstract List<Element> extractVacancyBlocksFromPage(Document page);
+    /**
+     * Generates {@link VacancyDTO} object from block source
+     * @param block vacancy block
+     * @return vacancy object
+     */
+    public abstract VacancyDTO generateVacancyObjectFromBlock(Element block);
+
+    /**
+     * Parse page by pageId. Returns Jsoup {@link Document} object with metadata that represents the page
+     * @param pageId number of a page
+     * @return {@link PageDTO} page object
+     * @throws IOException delegates error from {@link PageConnector}
+     */
     protected abstract PageDTO parsePage(int pageId) throws IOException;
 }

@@ -11,12 +11,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Site parser based on component frameworks. Has to have single page and special element query selector which will
+ * be only available after site complete rendering. It will be a signal to page ready for parsing.
+ * Most widely used #root or #app sections
+ */
 @Component
 @ToString(callSuper = true)
 @Getter
 public abstract class ComponentSiteParser extends SiteParserImpl {
     @Autowired
-    private PageConnector componentPageScrapperLoader;
+    private PageConnector componentPageConnector;
     private final int DELAY_SEC = 1;
 
     @Override
@@ -30,7 +35,7 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
                 .delay(pageId * DELAY_SEC * 1000)
                 .build();
 
-        Document page = Jsoup.parse(componentPageScrapperLoader.connectToPage(pageConnectionParams));
+        Document page = Jsoup.parse(componentPageConnector.connectToPage(pageConnectionParams));
         return new PageDTO(pageUrl, pageId, page);
     }
 
@@ -39,5 +44,11 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
     public int getPagesCount(Document document) {
         return 1;
     }
+
+    /**
+     * Dynamic element query selector which will be available after rendering. Parser is monitoring this element. If it
+     * presents on the page it will be a signal to page ready for parsing
+     * @return element query selector
+     */
     protected abstract String createDynamicElementQuerySelector();
 }

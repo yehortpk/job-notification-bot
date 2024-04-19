@@ -11,14 +11,18 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+/**
+ * Site parser based on common page pattern but with special page info
+ */
 @Component
 @ToString(callSuper = true)
 @Getter
 public abstract class MultiPageSiteParser extends SiteParserImpl {
     @Autowired
-    private PageConnector defaultPageScrapperLoader;
+    private PageConnector defaultPageConnector;
     private final int DELAY_SEC = 1;
 
+    @Override
     public PageDTO parsePage(int pageId) throws IOException {
         String pageUrl = company.getJobsTemplateLink().replace("{page}", String.valueOf(pageId));
         PageConnectionParams pageConnectionParams = PageConnectionParams.builder()
@@ -28,7 +32,7 @@ public abstract class MultiPageSiteParser extends SiteParserImpl {
                 .delay(pageId * DELAY_SEC * 1000)
                 .build();
 
-        Document doc = Jsoup.parse(defaultPageScrapperLoader.connectToPage(pageConnectionParams));
+        Document doc = Jsoup.parse(defaultPageConnector.connectToPage(pageConnectionParams));
         return new PageDTO(pageUrl, pageId, doc);
     }
 }

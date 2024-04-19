@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Default pages scrapper. Scrap page with Jsoup library
+ */
 @Component
 public class DefaultPageScrapper implements PageScrapper {
     @Override
@@ -14,6 +17,11 @@ public class DefaultPageScrapper implements PageScrapper {
         return toConnection(pageConnectionParams).execute().body();
     }
 
+    /**
+     * Transform {@link PageConnectionParams} object into Jsoup {@link Connection}
+     * @param pageConnectionParams connection parameters of the page
+     * @return page connection object
+     */
     private Connection toConnection(PageConnectionParams pageConnectionParams) {
         return Jsoup.connect(pageConnectionParams.getPageUrl())
                 .userAgent(pageConnectionParams.getUserAgent())

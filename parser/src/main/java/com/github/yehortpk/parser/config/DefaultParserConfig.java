@@ -8,16 +8,20 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Config for delayed parsing strategy when parser.mode property has value default. Uses {@link DelayedPageConnector} as
+ * a default connector.
+ */
 @Configuration
 @ConditionalOnProperty(prefix = "parser", name = "mode", havingValue = "default")
 public class DefaultParserConfig {
     @Bean
-    public PageConnector defaultPageScrapperLoader(DefaultPageScrapper defaultPageScrapper) {
+    public PageConnector defaultPageConnector(DefaultPageScrapper defaultPageScrapper) {
         return new DelayedPageConnector(defaultPageScrapper);
     }
 
     @Bean
-    public PageConnector componentPageScrapperLoader(ComponentPageScrapper defaultPageScrapper) {
+    public PageConnector componentPageConnector(ComponentPageScrapper defaultPageScrapper) {
         return new DelayedPageConnector(defaultPageScrapper);
     }
 }
