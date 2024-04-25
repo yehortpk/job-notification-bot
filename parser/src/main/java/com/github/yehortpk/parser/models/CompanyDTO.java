@@ -23,7 +23,7 @@ public class CompanyDTO {
     @JsonProperty("company_id")
     private int companyId;
     /**
-     * URL to the job pages. Template uses in {@link MultiPageSiteParser} and {@link ComponentSiteParser}.
+     * Template URL to the job pages. Template uses in {@link MultiPageSiteParser} and {@link ComponentSiteParser}.
      * Use {page} bean for represent a page placeholder. Further, in code it will be replaced to an actual page
      */
     @JsonProperty("jobs_template_link")
@@ -34,7 +34,7 @@ public class CompanyDTO {
     @JsonProperty("single_page_request_link")
     private String singlePageRequestLink;
     /**
-     * Bean name that according to the {@link SiteParser} implementation. Used in spring bean context
+     * Bean name that accords to the {@link SiteParser} implementation. Used in spring bean context
      * to retrieve {@link SiteParser} bean for bean name
      */
     @JsonProperty("bean_class")

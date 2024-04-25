@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Value("${company-service-url}")
     private String companyServiceURL;

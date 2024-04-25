@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller responsible for handling company related requests
+ */
 @RestController
 @RequestMapping("/company")
 @RequiredArgsConstructor
@@ -21,12 +24,12 @@ public class CompanyController {
 
     @GetMapping
     public List<CompanyDTO> getCompanies() {
-        return companyService.getCompanies();
+        return companyService.getCompanies().stream().map(CompanyDTO::fromDAO).toList();
     }
 
     @GetMapping("/{company_id}/vacancies")
     public List<VacancyDTO> getVacancies(@PathVariable("company_id") int companyId) {
-        return companyService.getVacancies(companyId).stream().map((vacancy) ->
+        return companyService.getVacancies(companyId).stream().map(vacancy ->
                 modelMapper.map(vacancy, VacancyDTO.class)).toList();
     }
 }

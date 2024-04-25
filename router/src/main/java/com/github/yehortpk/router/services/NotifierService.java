@@ -4,13 +4,15 @@ import com.github.yehortpk.router.models.filter.Filter;
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
 import com.github.yehortpk.router.models.vacancy.VacancyNotificationDTO;
 import com.github.yehortpk.router.utils.FilterParser;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * This service provides notification methods
+ */
 @Service
 @RequiredArgsConstructor
 public class NotifierService {
@@ -18,7 +20,10 @@ public class NotifierService {
     private final FilterService filterService;
     private final KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate;
 
-    @Transactional
+    /**
+     * Notifies users about new vacancy
+     * @param vacancy vacancy for notification
+     */
     public void notifyUsers(VacancyDTO vacancy) {
         companyService.getSubscribers(vacancy.getCompanyID()).forEach((subscriber) -> {
             boolean isApplicable = true;
@@ -27,7 +32,8 @@ public class NotifierService {
 
             if (!filters.isEmpty()) {
                 for (Filter filter : filters) {
-                    if (isVacancyApplicable(vacancy.getTitle(), filter.getFilter())) {
+                    FilterParser filterParser = new FilterParser(filter.getFilter());
+                    if (filterParser.isVacancyApplicable(vacancy.getTitle())) {
                         isApplicable = true;
                         break;
                     } else {
@@ -51,39 +57,4 @@ public class NotifierService {
             }
         });
     }
-
-    public boolean isVacancyApplicable(String vacancyTitle, String filter) {
-        FilterParser filterParser = new FilterParser(filter);
-
-        List<String[]> binaryMatches = filterParser.getBinaryMatches();
-        List<String> negativeMatches = filterParser.getNegativeMatches();
-        List<String> mandatoryMatches = filterParser.getMandatoryMatches();
-
-        vacancyTitle = vacancyTitle.toLowerCase();
-
-        for (String negativeMatch : negativeMatches) {
-            if (vacancyTitle.contains(negativeMatch)) {
-                return false;
-            }
-        }
-
-        for (String defaultMatch : mandatoryMatches) {
-            if (!vacancyTitle.contains(defaultMatch)) {
-                return false;
-            }
-        }
-
-        boolean result = true;
-        for (String[] binaryMatch : binaryMatches) {
-            for (String match : binaryMatch) {
-                if (vacancyTitle.contains(match)) {
-                    return true;
-                }
-            }
-            result = false;
-        }
-
-        return result;
-    }
-
 }

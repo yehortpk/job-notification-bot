@@ -11,11 +11,18 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This service provides methods for control vacancies
+ */
 @Service
 @RequiredArgsConstructor
 public class VacancyService {
     final private VacancyRepository vacancyRepository;
 
+    /**
+     * Persists all the vacancies from the input list
+     * @param vacancies vacancies to persisting
+     */
     @Transactional
     public void addVacancies(List<VacancyDTO> vacancies) {
         List<Vacancy> vacancyEntities = new ArrayList<>();

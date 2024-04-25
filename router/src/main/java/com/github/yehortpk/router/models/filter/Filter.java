@@ -28,10 +28,4 @@ public class Filter {
     private Client client;
     @Column(columnDefinition = "TEXT")
     private String filter;
-
-    public Filter(Company company, Client client, String filter) {
-        this.company = company;
-        this.client = client;
-        this.filter = filter;
-    }
 }

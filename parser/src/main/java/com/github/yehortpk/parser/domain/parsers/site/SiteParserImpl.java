@@ -103,11 +103,26 @@ public abstract class SiteParserImpl implements SiteParser {
         return vacancies;
     }
 
+    /**
+     * Creates query headers for the request
+     * @return map of headers
+     */
     public Map<String, String> createHeaders() {
+        if (company.getHeaders() == null) {
+            return new HashMap<>();
+        }
         return new HashMap<>(company.getHeaders());
     }
 
+    /**
+     * Creates query data for the request
+     * @param pageId id of the page
+     * @return map of data
+     */
     protected Map<String, String> createData(int pageId) {
+        if (company.getData() == null) {
+            return new HashMap<>();
+        }
         HashMap<String, String> data = new HashMap<>(company.getData());
         for (Map.Entry<String, String> entry : data.entrySet()) {
             if (Objects.equals(entry.getValue(), "{page}")) {
