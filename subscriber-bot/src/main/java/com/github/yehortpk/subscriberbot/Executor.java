@@ -1,6 +1,7 @@
 package com.github.yehortpk.subscriberbot;
 
 import com.github.yehortpk.subscriberbot.exceptions.TelegramRuntimeException;
+import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -12,19 +13,16 @@ import java.io.Serializable;
  * Telegram Api method
  *
  */
+@RequiredArgsConstructor
 public class Executor {
-    private DefaultAbsSender bot;
-
-    public Executor(DefaultAbsSender bot){
-        this.bot = bot;
-    }
+    private final DefaultAbsSender bot;
 
     /**
      *
      * @param method {@link BotApiMethod} (Telegram API command)
      * @return the result of executing the {@link BotApiMethod} (Telegram API command)
      */
-    public Serializable execute(BotApiMethod method) {
+    public <T extends Serializable> Serializable  execute(BotApiMethod<T> method) {
         try{
             return bot.execute(method);
         } catch (TelegramApiException e) {
