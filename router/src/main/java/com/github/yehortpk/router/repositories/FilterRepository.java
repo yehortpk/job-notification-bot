@@ -12,6 +12,6 @@ public interface FilterRepository extends JpaRepository<Filter, Long> {
     List<Filter> findByCompanyIdAndClientId(long companyId, long clientId);
 
     @Modifying  // Required for update queries
-    @Query(value = "INSERT INTO Filter (company_id, client_id, filter) VALUES (:companyId, :clientId, :filter)", nativeQuery = true)
+    @Query(value = "INSERT INTO filter (company_id, client_id, filter) VALUES (:companyId, :clientId, :filter)", nativeQuery = true)
     void saveByRawIds(Long companyId, Long clientId, String filter);
 }

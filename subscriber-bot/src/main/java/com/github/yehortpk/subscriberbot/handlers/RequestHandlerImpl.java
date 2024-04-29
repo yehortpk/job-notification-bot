@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 public abstract class RequestHandlerImpl implements RequestHandler {
     @Autowired
-    TelegramServiceUtil telegramServiceUtil;
+    protected TelegramServiceUtil telegramServiceUtil;
 
     private final int TG_MESSAGE_MAX_LENGTH = 4000;
 

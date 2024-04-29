@@ -1,8 +1,7 @@
 package com.github.yehortpk.subscriberbot;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -11,11 +10,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
+@Slf4j
+@RequiredArgsConstructor
 public class MyAppRunner implements ApplicationRunner {
-    private static final Logger log = LoggerFactory.getLogger(MyAppRunner.class);
-
-    @Autowired
-    QuizCreatorBot quizCreatorBot;
+    private final QuizCreatorBot quizCreatorBot;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

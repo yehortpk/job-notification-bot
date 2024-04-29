@@ -3,13 +3,13 @@ package com.github.yehortpk.subscriberbot.handlers.callback.back;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
 import com.github.yehortpk.subscriberbot.handlers.callback.SubscriptionInfoCallbackRequestHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class FiltersListBackCallbackRequestHandler extends BackCallbackDataRequestHandlerImpl{
-    @Autowired
-    SubscriptionInfoCallbackRequestHandler subscriptionInfoCallbackRequestHandler;
+    private final SubscriptionInfoCallbackRequestHandler subscriptionInfoCallbackRequestHandler;
 
     @Override
     public UserState getExpectedState() {

@@ -8,7 +8,7 @@ import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.markups.CompaniesListMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
 import com.github.yehortpk.subscriberbot.services.SubscriptionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -16,12 +16,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class AddCommandRequestHandler extends CommandRequestHandlerImpl{
-    @Autowired
-    SubscriptionService subscriptionService;
-
-    @Autowired
-    StateService stateService;
+    private final SubscriptionService subscriptionService;
+    private final StateService stateService;
 
     @Override
     public String getCommand() {

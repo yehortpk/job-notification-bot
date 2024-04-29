@@ -3,14 +3,14 @@ package com.github.yehortpk.subscriberbot.handlers.callback;
 import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.message.commands.AddCommandRequestHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Component
+@RequiredArgsConstructor
 public class StartAddSubscriptionRequestHandler extends CallbackDataRequestHandlerImpl{
-    @Autowired
-    AddCommandRequestHandler addCommandRequestHandler;
+    private final AddCommandRequestHandler addCommandRequestHandler;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {

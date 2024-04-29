@@ -24,14 +24,13 @@ services:
       - notifier-local-network
     ports:
       - "8081:8080"
-      - "5006:5005"
+      - "5006:5006"
     environment:
       KAFKA_PARSER_TOPIC: vacancies
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    command: [ "java", "-jar", "/app/router-0.0.1-SNAPSHOT.jar" ]
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
@@ -55,13 +54,12 @@ services:
     networks:
       - notifier-local-network
     ports:
-      - "5007:5005"
+      - "5007:5007"
     environment:
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       TG_BOT_API_KEY: ${TG_BOT_API_KEY}
       TG_BOT_USERNAME: ${TG_BOT_USERNAME}
-    command: [ "java", "-jar", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar" ]
     depends_on:
       router:
         condition: service_healthy

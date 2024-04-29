@@ -7,19 +7,16 @@ import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.FilterInfoMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
 import com.github.yehortpk.subscriberbot.services.SubscriptionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 @Component
+@RequiredArgsConstructor
 public class SubscriptionFilterInfoCallbackRequestHandler extends CallbackDataRequestHandlerImpl{
-
-    @Autowired
-    StateService stateService;
-
-    @Autowired
-    SubscriptionService subscriptionService;
+    private final StateService stateService;
+    private final SubscriptionService subscriptionService;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {

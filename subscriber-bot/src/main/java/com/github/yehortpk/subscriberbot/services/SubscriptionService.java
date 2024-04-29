@@ -2,7 +2,8 @@ package com.github.yehortpk.subscriberbot.services;
 
 import com.github.yehortpk.subscriberbot.dtos.*;
 import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -16,12 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-// todo change from router service to a new one with rest
+@RequiredArgsConstructor
+@Slf4j
 public class SubscriptionService {
-    @Autowired
-    TelegramServiceUtil telegramServiceUtil;
-
-    RestTemplate restTemplate = new RestTemplate();
+    private final TelegramServiceUtil telegramServiceUtil;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${subscription-url}")
     private String subscriptionURL;
@@ -38,7 +38,7 @@ public class SubscriptionService {
 
             restTemplate.postForEntity(subscriptionURL, subscription, Void.class);
         } catch (RestClientException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             telegramServiceUtil.sendMessageWithoutMarkup(chatId, "Error occurred while adding");
         }
     }

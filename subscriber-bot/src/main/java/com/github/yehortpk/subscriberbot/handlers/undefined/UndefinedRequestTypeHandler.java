@@ -3,8 +3,6 @@ package com.github.yehortpk.subscriberbot.handlers.undefined;
 import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandler;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
-import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -13,9 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
  */
 @Component
 public class UndefinedRequestTypeHandler extends RequestHandlerImpl implements RequestHandler {
-    @Autowired
-    TelegramServiceUtil telegramServiceUtil;
-
     @Override
     public boolean isApplicable(UserRequestDTO userRequest) {
         return true;

@@ -12,6 +12,6 @@ import lombok.*;
 public class CompanyShortInfoDTO {
     @JsonProperty("company_id")
     private long companyId;
-    @JsonProperty("company_title")
+    @JsonProperty("title")
     private String companyTitle;
 }

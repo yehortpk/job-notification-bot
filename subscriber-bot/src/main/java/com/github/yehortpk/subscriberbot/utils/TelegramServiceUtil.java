@@ -2,8 +2,6 @@ package com.github.yehortpk.subscriberbot.utils;
 
 import com.github.yehortpk.subscriberbot.Executor;
 import com.github.yehortpk.subscriberbot.QuizCreatorBot;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -19,8 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
  */
 @Component
 public class TelegramServiceUtil {
-    Logger log = LoggerFactory.getLogger(TelegramServiceUtil.class);
-
     private final Executor executor;
 
     public TelegramServiceUtil(QuizCreatorBot quizCreatorBot) {
@@ -81,10 +77,6 @@ public class TelegramServiceUtil {
                 .build();
 
         executor.execute(sendRemoveInfoMessage);
-
-        if (log.isDebugEnabled()) {
-            log.info(String.format("Message deleted, ID=%s", messageId));
-        }
     }
 
 }

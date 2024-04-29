@@ -21,7 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public abstract class BackCallbackDataRequestHandlerImpl extends CallbackDataRequestHandlerImpl
         implements BackCallbackRequestHandler {
     @Autowired
-    StateService stateService;
+    protected StateService stateService;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {

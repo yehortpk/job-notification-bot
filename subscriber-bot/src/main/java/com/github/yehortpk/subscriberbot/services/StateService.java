@@ -3,13 +3,13 @@ package com.github.yehortpk.subscriberbot.services;
 import com.github.yehortpk.subscriberbot.dtos.UserDAO;
 import com.github.yehortpk.subscriberbot.dtos.UserDTO;
 import com.github.yehortpk.subscriberbot.repositories.StateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class StateService {
-    @Autowired
-    StateRepository stateRepository;
+    private final StateRepository stateRepository;
 
     public void saveUser(UserDTO user) {
         stateRepository.save(user.toDAO());

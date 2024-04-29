@@ -9,9 +9,7 @@ import com.github.yehortpk.subscriberbot.handlers.callback.CallbackRequestHandle
 import com.github.yehortpk.subscriberbot.handlers.message.MessageRequestHandler;
 import com.github.yehortpk.subscriberbot.handlers.undefined.UndefinedRequestTypeHandler;
 import com.github.yehortpk.subscriberbot.services.StateService;
-import lombok.ToString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -25,31 +23,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Telegram API bot for language grammar quizzing. Based on long polling queries (extends {@link TelegramLongPollingBot}).
+ * Telegram API bot for notifications about a new vacancy. Based on long polling queries (extends {@link TelegramLongPollingBot}).
  * Main purpose of the class to receive and handle users' {@link Update} updates, using {@link RequestHandler} handlers
  */
 @Component
-@ToString(onlyExplicitlyIncluded = true)
+@Slf4j
 public class QuizCreatorBot extends TelegramLongPollingBot implements TelegramBot {
+    private final StateService stateService;
+    private final ApplicationContext applicationContext;
+
     @Value("${TG_BOT_USERNAME}")
     private String botUsername;
-
-    private final Logger log = LoggerFactory.getLogger(QuizCreatorBot.class);
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private StateService stateService;
-
 
     @Override
     public String getBotUsername() {
         return botUsername;
     }
 
-    public QuizCreatorBot(@Value("${TG_BOT_API_KEY}") String apiKey) {
+    @Autowired
+    public QuizCreatorBot(@Value("${TG_BOT_API_KEY}") String apiKey, StateService stateService, ApplicationContext applicationContext) {
         super(apiKey);
+        this.stateService = stateService;
+        this.applicationContext = applicationContext;
     }
 
     /**

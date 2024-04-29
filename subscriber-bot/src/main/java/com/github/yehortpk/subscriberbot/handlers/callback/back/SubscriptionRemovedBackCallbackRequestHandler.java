@@ -3,13 +3,13 @@ package com.github.yehortpk.subscriberbot.handlers.callback.back;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
 import com.github.yehortpk.subscriberbot.handlers.message.commands.ListCommandRequestHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SubscriptionRemovedBackCallbackRequestHandler extends BackCallbackDataRequestHandlerImpl {
-    @Autowired
-    ListCommandRequestHandler listCommandRequestHandler;
+    private final ListCommandRequestHandler listCommandRequestHandler;
 
     @Override
     public String getExpectedData() {

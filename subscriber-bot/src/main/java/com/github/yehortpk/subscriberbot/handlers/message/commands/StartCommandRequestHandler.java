@@ -5,14 +5,14 @@ import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.MainMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Component
+@RequiredArgsConstructor
 public class StartCommandRequestHandler extends CommandRequestHandlerImpl{
-    @Autowired
-    StateService stateService;
+    private final StateService stateService;
 
     @Override
     public String getCommand() {

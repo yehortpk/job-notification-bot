@@ -2,13 +2,13 @@ package com.github.yehortpk.subscriberbot.services;
 
 import com.github.yehortpk.subscriberbot.dtos.VacancyNotificationDTO;
 import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NotifierService {
-    @Autowired
-    TelegramServiceUtil telegramServiceUtil;
+    private final TelegramServiceUtil telegramServiceUtil;
 
     public void notifyUser(VacancyNotificationDTO notification) {
         long chatId = notification.getChatId();

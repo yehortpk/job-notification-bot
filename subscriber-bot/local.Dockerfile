@@ -18,4 +18,4 @@ ENV PATH="/usr/local/bin:${PATH}"
 
 COPY --from=builder /opt/app/subscriber-bot/target/subscriber-bot-0.0.1-SNAPSHOT.jar .
 
-CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007", "/app/subscriber-bot-0.0.1-SNAPSHOT.jar"]
