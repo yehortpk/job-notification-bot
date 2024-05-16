@@ -17,12 +17,12 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(prefix = "parser", name = "mode", havingValue = "proxy")
 public class ProxyParserConfig {
     @Bean
-    public PageConnector defaultPageScrapperLoader(DefaultPageScrapper defaultPageScrapper, ProxyService proxyService) {
+    public PageConnector defaultPageConnector(DefaultPageScrapper defaultPageScrapper, ProxyService proxyService) {
         return new ProxyPageConnector(defaultPageScrapper, proxyService);
     }
 
     @Bean
-    public PageConnector componentPageScrapperLoader(ComponentPageScrapper defaultPageScrapper, ProxyService proxyService) {
-        return new ProxyPageConnector(defaultPageScrapper, proxyService);
+    public PageConnector componentPageConnector(ComponentPageScrapper componentPageScrapper, ProxyService proxyService) {
+        return new ProxyPageConnector(componentPageScrapper, proxyService);
     }
 }

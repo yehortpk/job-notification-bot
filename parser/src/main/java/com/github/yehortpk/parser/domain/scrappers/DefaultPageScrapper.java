@@ -28,6 +28,7 @@ public class DefaultPageScrapper implements PageScrapper {
                 .proxy(pageConnectionParams.getProxy())
                 .headers(pageConnectionParams.getHeaders())
                 .data(pageConnectionParams.getData())
+                .ignoreContentType(true)
                 .method(pageConnectionParams.getConnectionMethod());
     }
 

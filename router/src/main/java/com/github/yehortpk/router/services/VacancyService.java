@@ -3,12 +3,12 @@ package com.github.yehortpk.router.services;
 import com.github.yehortpk.router.models.company.Company;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
+import com.github.yehortpk.router.repositories.CompanyRepository;
 import com.github.yehortpk.router.repositories.VacancyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyService {
     final private VacancyRepository vacancyRepository;
+    final private CompanyRepository companyRepository;
 
     /**
      * Persists all the vacancies from the input list
@@ -25,23 +26,25 @@ public class VacancyService {
      */
     @Transactional
     public void addVacancies(List<VacancyDTO> vacancies) {
-        List<Vacancy> vacancyEntities = new ArrayList<>();
         for (VacancyDTO vacancy : vacancies) {
-            vacancyEntities.add(
-                    Vacancy.builder()
-                            .company(Company.builder().companyId(vacancy.getCompanyID()).build())
-                            .vacancyId(vacancy.getVacancyID())
-                            .title(vacancy.getTitle())
-                            .minSalary(vacancy.getMinSalary())
-                            .maxSalary(vacancy.getMaxSalary())
-                            .link(vacancy.getLink())
-                            .build()
-            );
+            Company vacancyCompany = companyRepository.getReferenceById((long) vacancy.getCompanyID());
+            Vacancy newVacancy = Vacancy.builder()
+                    .company(vacancyCompany)
+                    .title(vacancy.getTitle())
+                    .minSalary(vacancy.getMinSalary())
+                    .maxSalary(vacancy.getMaxSalary())
+                    .link(vacancy.getLink())
+                    .build();
+
+            vacancyRepository.save(newVacancy);
         }
-        vacancyRepository.saveAll(vacancyEntities);
     }
 
     public List<Vacancy> getAllVacancies() {
         return vacancyRepository.findAll();
+    }
+
+    public void removeVacancy(Long id) {
+        vacancyRepository.deleteById(id);
     }
 }

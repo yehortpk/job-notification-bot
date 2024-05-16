@@ -1,7 +1,9 @@
 package com.github.yehortpk.router.controllers;
 
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
+import com.github.yehortpk.router.services.NotifierService;
 import com.github.yehortpk.router.services.VacancyService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,12 +18,15 @@ import java.util.List;
 @Component
 @ConditionalOnProperty(name = "spring.kafka.bootstrap-servers")
 @RequiredArgsConstructor
-public class NotifierController {
+public class ParserController {
     private final VacancyService vacancyService;
+    private final NotifierService notifierService;
 
     @KafkaListener(topics = {"#{environment['KAFKA_PARSER_TOPIC']}"}, containerFactory = "parserContainerFactory")
+    @Transactional
     public void listenParserTopic(List<ConsumerRecord<String, VacancyDTO>> vacanciesBatch) {
         List<VacancyDTO> vacancies = vacanciesBatch.stream().map(ConsumerRecord::value).toList();
+
         vacancyService.addVacancies(vacancies);
 //        vacancies.forEach(notifierService::notifyUsers);
     }

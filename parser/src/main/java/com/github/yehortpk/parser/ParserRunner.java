@@ -50,10 +50,13 @@ public class ParserRunner implements ApplicationRunner {
         log.info("outdated vacancies count: " + outdatedVacancies.size());
 
         if (!newVacancies.isEmpty()) {
-            log.info("New vacancies:");
-            newVacancies.forEach((vacancy) -> log.info(vacancy.toString()));
             notifierService.notifyNewVacancies(newVacancies);
         }
+
+        if (!outdatedVacancies.isEmpty()) {
+            notifierService.notifyOutdatedVacancies(outdatedVacancies);
+        }
+
     }
 }
 
