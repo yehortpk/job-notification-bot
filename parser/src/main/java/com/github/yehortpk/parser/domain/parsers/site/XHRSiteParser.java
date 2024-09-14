@@ -30,7 +30,7 @@ public abstract class XHRSiteParser extends SiteParserImpl {
     @Autowired
     private PageConnector defaultPageConnector;
 
-    private final int DELAY_SEC = 1;
+    private final int DELAY_SEC = 2;
 
     /**
      * Connection method for the page. GET by default
@@ -67,6 +67,9 @@ public abstract class XHRSiteParser extends SiteParserImpl {
 
         try {
             Type type = new TypeToken<HashMap<String, Object>>() {}.getType();
+            if (finalBody.strip().startsWith("[")) {
+                finalBody = "{body:" + body + "}";
+            }
             HashMap<String, Object> hashMap = new Gson().fromJson(finalBody, type);
             Document document = new Document("");
             Element bodyElement = document.appendElement("body");
