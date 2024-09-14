@@ -28,7 +28,7 @@ RUN \
 if [ ! -f /usr/bin/google-chrome ];  then \
     apt-get update && apt-get install -y wget gnupg &&\
     # Download and install Chrome
-    wget -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb &&\
+    wget -O /tmp/chrome.deb https://mirror.cs.uchicago.edu/google-chrome/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb &&\
     apt install -y /tmp/chrome.deb && rm /tmp/chrome.deb; \
 fi
 

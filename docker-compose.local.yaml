@@ -147,6 +147,7 @@ services:
     container_name: notifier-mysql-local
     volumes:
       - notifier-mysql-local-data:/var/lib/mysql
+      - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
     ports:
       - "3306:3306"
     networks:
