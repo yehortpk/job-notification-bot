@@ -5,13 +5,11 @@ import com.github.yehortpk.parser.models.VacancyDTO;
 import com.github.yehortpk.parser.domain.parsers.site.SiteParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -38,28 +36,35 @@ public class VacancyService {
             return new HashSet<>();
         }
 
-        Set<VacancyDTO> vacancies = new HashSet<>();
-        List<Future<Set<VacancyDTO>>> futures = new ArrayList<>();
+        Set<VacancyDTO> result = new HashSet<>();
+        Map<String, Future<Set<VacancyDTO>>> futures = new HashMap<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
             String beanClass = companyDTO.getBeanClass();
-            SiteParser siteParser = (SiteParser) applicationContext.getBean(beanClass);
-            siteParser.setCompany(companyDTO);
-
-            Future<Set<VacancyDTO>> future = executor.submit(siteParser::parseAllVacancies);
-            futures.add(future);
-        }
-        for (Future<Set<VacancyDTO>> future : futures) {
             try {
-                Set<VacancyDTO> companyVacancies = future.get();
-                vacancies.addAll(companyVacancies);
+                SiteParser siteParser = (SiteParser) applicationContext.getBean(beanClass);
+                siteParser.setCompany(companyDTO);
+
+                Future<Set<VacancyDTO>> future = executor.submit(siteParser::parseAllVacancies);
+                futures.put(beanClass, future);
+            } catch (BeansException ignored) {
+                log.info("{} implementation doesn't exist", beanClass);
+            }
+        }
+
+        for (Map.Entry<String, Future<Set<VacancyDTO>>> vacanciesByCompany : futures.entrySet()) {
+            String companyBean = vacanciesByCompany.getKey();
+            Future<Set<VacancyDTO>> vacancies = vacanciesByCompany.getValue();
+            try {
+                Set<VacancyDTO> companyVacancies = vacancies.get();
+                result.addAll(companyVacancies);
             } catch (InterruptedException | ExecutionException e) {
-                log.error("Can't parse page, {}", e.getMessage());
+                log.error("Can't parse company {}, error:{}", companyBean, e.getMessage());
             }
         }
 
         executor.close();
-        return vacancies;
+        return result;
     }
 
     /**
