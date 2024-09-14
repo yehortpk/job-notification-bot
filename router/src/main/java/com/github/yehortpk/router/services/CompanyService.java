@@ -19,7 +19,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     public List<Company> getCompanies() {
-        return companyRepository.findByIsEnabledTrue();
+        return companyRepository.findAll();
     }
 
     public Set<Vacancy> getVacancies(int companyId) {

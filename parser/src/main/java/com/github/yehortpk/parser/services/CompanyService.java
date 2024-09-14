@@ -28,7 +28,9 @@ public class CompanyService {
                 = new ParameterizedTypeReference<>() {
         };
 
-        return restTemplate.exchange(companyServiceURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
+        List<CompanyDTO> companies = restTemplate.exchange(companyServiceURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
+
+        return companies.stream().filter(CompanyDTO::isEnabled).toList();
     }
 
     /**
