@@ -5,7 +5,8 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './app-layout/app-layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { TruncatePipe } from './truncate.pipe';
+import { TruncatePipe } from './pipe/truncate.pipe';
+import { appConfig } from './app.config';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { TruncatePipe } from './truncate.pipe';
   imports: [
     BrowserModule,
     TruncatePipe,
+    BrowserModule,
     RouterModule.forRoot([
       {
         path: '',
@@ -26,7 +28,7 @@ import { TruncatePipe } from './truncate.pipe';
       }
     ])
   ],
-  providers: [],
+  providers: [ ...appConfig.providers],
   bootstrap: [AppLayoutComponent]
 })
 export class AppModule { }
