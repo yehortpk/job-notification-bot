@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
-import { VacancyService } from '../vacancy.service';
-import {Vacancy} from "../../app/types/vacancy.type"
+import { Component, OnInit } from '@angular/core';
+import { VacancyService } from '../service/vacancy.service';
+import {Vacancy } from "../type/vacancy.type"
+import { PaginationService } from '../utils/pagination.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,7 +11,35 @@ import {Vacancy} from "../../app/types/vacancy.type"
 })
 export class DashboardComponent {
   vacancies: Vacancy[]
-  constructor(vacancyService: VacancyService) {
-    this.vacancies = vacancyService.getVacancies();
+  currentPage: number = 1
+  pageSize: number
+  totalVacancies: number
+  totalPages: number
+  pages: string[] = []
+
+  constructor(vacancyService: VacancyService, private paginationService: PaginationService, private router: Router, private route: ActivatedRoute) {
+    const vacanciesDto = vacancyService.getVacancies();
+    this.vacancies = vacanciesDto.vacancies;
+    this.pageSize = vacanciesDto.pageSize;
+    this.totalVacancies = vacanciesDto.totalVacancies;
+    this.totalPages = vacanciesDto.totalPages;
+
+    this.route.queryParamMap.subscribe(params => {
+      this.currentPage = parseInt(params.get('page') || '1', 10);
+    });
+    this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
+  }
+
+  onPageChange(page: number|string) {
+    if (typeof page == "string") {
+      page = Number.parseInt(page)
+    }
+
+    this.pages = this.paginationService.generatePagination(page, this.totalPages)
+    this.router.navigate(["/dashboard"], {
+      relativeTo: this.route,
+      queryParams: { page: page },
+      queryParamsHandling: 'merge'
+    });
   }
 }

@@ -5,10 +5,18 @@ export type Vacancy = {
     company: {
         id: number
         title: string
-        image_url: string
+        imageUrl: string
     },
     filter: {
         title: string
         url: string
     } 
+}
+
+export type VacanciesListDTO = {
+    vacancies: Vacancy[]
+    currentPage: number
+    pageSize: number
+    totalVacancies: number
+    totalPages: number
 }
