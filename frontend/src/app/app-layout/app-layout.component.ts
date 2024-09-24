@@ -1,9 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './app-layout.component.html',
-  styleUrls: ['./app-layout.component.css']
+  styleUrls: ['./app-layout.component.css'],
+  standalone: true,
+  imports: [RouterOutlet, CommonModule]
 })
 export class AppLayoutComponent {
   dark: boolean = false;
@@ -14,7 +18,7 @@ export class AppLayoutComponent {
   isModalOpen: boolean = false;
   trapCleanup: (() => void) | null = null;
 
-  constructor() {
+  constructor(public router: Router) {
     // Initialize data here (equivalent to the data() function in Alpine.js)
     this.dark = this.getThemeFromLocalStorage();
   }

@@ -89,12 +89,4 @@ export class VacancyService {
       totalPages: 10
     }
   }
-
-  getVacanciesRemote(): Observable<VacanciesListDTO> {
-    const routerServiceURL: string|undefined = process.env['ROUTER_SERVICE_URL']
-    if (!routerServiceURL) {
-      throw new Error('Missing required environment variable: ROUTER_SERVICE_URL');
-    }
-    return this.http.get<VacanciesListDTO>(routerServiceURL);
-  }
 }

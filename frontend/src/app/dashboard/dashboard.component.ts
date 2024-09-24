@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { VacancyService } from '../service/vacancy.service';
 import {Vacancy } from "../type/vacancy.type"
 import { PaginationService } from '../utils/pagination.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { TruncatePipe } from '../pipe/truncate.pipe';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
+  standalone: true,
+  imports: [CommonModule, TruncatePipe]
 })
 export class DashboardComponent {
   vacancies: Vacancy[]
@@ -26,8 +30,8 @@ export class DashboardComponent {
 
     this.route.queryParamMap.subscribe(params => {
       this.currentPage = parseInt(params.get('page') || '1', 10);
+      this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
     });
-    this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
   }
 
   onPageChange(page: number|string) {
@@ -35,7 +39,6 @@ export class DashboardComponent {
       page = Number.parseInt(page)
     }
 
-    this.pages = this.paginationService.generatePagination(page, this.totalPages)
     this.router.navigate(["/dashboard"], {
       relativeTo: this.route,
       queryParams: { page: page },
