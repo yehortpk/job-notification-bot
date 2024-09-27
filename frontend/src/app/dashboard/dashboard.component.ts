@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { VacancyService } from '../service/vacancy.service';
-import {Vacancy } from "../type/vacancy.type"
+import { Vacancy } from "../type/vacancy.type"
 import { PaginationService } from '../utils/pagination.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -13,25 +13,53 @@ import { TruncatePipe } from '../pipe/truncate.pipe';
   standalone: true,
   imports: [CommonModule, TruncatePipe]
 })
-export class DashboardComponent {
-  vacancies: Vacancy[]
+export class DashboardComponent implements OnInit{
+  vacancies: Vacancy[] = []
   currentPage: number = 1
-  pageSize: number
-  totalVacancies: number
-  totalPages: number
+  pageSize: number = 10
+  totalVacancies: number = 0
+  totalPages: number = 0
   pages: string[] = []
 
-  constructor(vacancyService: VacancyService, private paginationService: PaginationService, private router: Router, private route: ActivatedRoute) {
-    const vacanciesDto = vacancyService.getVacancies();
-    this.vacancies = vacanciesDto.vacancies;
-    this.pageSize = vacanciesDto.pageSize;
-    this.totalVacancies = vacanciesDto.totalVacancies;
-    this.totalPages = vacanciesDto.totalPages;
-
+  constructor(private vacancyService: VacancyService, private paginationService: PaginationService, private router: Router, private route: ActivatedRoute) {
+    this.requestVacanciesOnPage(this.currentPage);
     this.route.queryParamMap.subscribe(params => {
       this.currentPage = parseInt(params.get('page') || '1', 10);
-      this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
+      this.requestVacanciesOnPage(this.currentPage);      
     });
+  }
+
+  ngOnInit() {
+    
+  }
+
+  requestVacanciesOnPage(pageId: number) {
+    this.vacancyService.getVacanciesHttp(pageId).subscribe({
+      next: (response) => {
+        console.log(response);
+        response.vacancies.forEach((vacancy, _, __) => {
+          const dummyPictures = ['/img/dummyA.jpg', '/img/dummyB.jpg', '/img/dummyC.jpg']
+          vacancy.company.imageUrl = dummyPictures[vacancy.company.company_id % dummyPictures.length];
+
+          if (vacancy.minSalary == 0) {
+            vacancy.minSalary = "Not specified"
+          }
+
+          if (vacancy.maxSalary == 0) {
+            vacancy.maxSalary = "Not specified"
+          }
+
+        });
+        this.vacancies = response.vacancies;
+        this.totalPages = response.totalPages;
+        this.totalVacancies = response.totalVacancies
+        this.pageSize = Math.round(this.totalVacancies/this.totalPages);
+      },
+      error: (error) => {
+        console.error('An error occurred:', error);
+      }
+    });
+    this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
   }
 
   onPageChange(page: number|string) {

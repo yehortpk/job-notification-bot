@@ -1,16 +1,13 @@
 export type Vacancy = {
     title: string
-    salary: string
+    minSalary: number|string
+    maxSalary: number|string
     url: string
     company: {
-        id: number
+        company_id: number
         title: string
-        imageUrl: string
-    },
-    filter: {
-        title: string
-        url: string
-    } 
+        imageUrl: string|null
+    }
 }
 
 export type VacanciesListDTO = {

@@ -7,6 +7,9 @@ import com.github.yehortpk.router.repositories.CompanyRepository;
 import com.github.yehortpk.router.repositories.VacancyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,5 +49,9 @@ public class VacancyService {
 
     public void removeVacancy(Long id) {
         vacancyRepository.deleteById(id);
+    }
+
+    public Page<Vacancy> getVacanciesByPage(int pageId, int pageSize) {
+        return vacancyRepository.findAll(PageRequest.of(pageId, pageSize));
     }
 }

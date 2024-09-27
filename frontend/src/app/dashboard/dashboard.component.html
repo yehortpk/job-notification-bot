@@ -1,4 +1,5 @@
-<div class="container px-6 mx-auto grid">
+
+<div class="container px-6 mx-auto grid" *ngIf="vacancies.length > 0; else noVacancies">
     <h2
       class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"
     >
@@ -13,16 +14,16 @@
               class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800"
             >
               <th class="px-4 py-3">Title</th>
-              <th class="px-4 py-3">Salary</th>
+              <th class="px-4 py-3">Min Salary</th>
+              <th class="px-4 py-3">Max Salary</th>
               <th class="px-4 py-3">Company</th>
-              <th class="px-4 py-3">Filter</th>
             </tr>
           </thead>
           <tbody
             class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800"
           >
 
-            <tr class="text-gray-700 dark:text-gray-400" *ngFor="let vacancy of vacancies">
+            <tr class="text-gray-700 dark:text-gray-400"*ngFor="let vacancy of vacancies" >
               <td class="px-4 py-3">
                 <div class="flex items-center text-sm">
                   <div>
@@ -32,7 +33,9 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-sm">
-                {{vacancy.salary}}
+                {{vacancy.minSalary}}
+              </td><td class="px-4 py-3 text-sm">
+                {{vacancy.maxSalary}}
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center text-sm">
@@ -55,9 +58,9 @@
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm">
+              <!-- <td class="px-4 py-3 text-sm">
                 <a [href]="vacancy.filter.url">{{vacancy.filter.title | truncate:50}}</a>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </table>
@@ -126,4 +129,13 @@
         </span>
       </div>
     </div>
+</div>
+<ng-template #noVacancies>
+  <div class="container px-6 mx-auto grid">
+  <h2
+      class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"
+    >
+    There are currently no vacancies.
+    </h2>
   </div>
+</ng-template>
