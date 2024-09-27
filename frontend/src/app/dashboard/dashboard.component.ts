@@ -34,8 +34,19 @@ export class DashboardComponent {
       next: (response) => {
         console.log(response);
         response.vacancies.forEach((vacancy, _, __) => {
-          const dummyPictures = ['/img/dummyA.jpg', '/img/dummyB.jpg', '/img/dummyC.jpg']
-          vacancy.company.imageUrl = dummyPictures[vacancy.company.company_id % dummyPictures.length];
+
+          if(!vacancy.company.imageUrl) {
+            const dummyPictures = [
+              '/img/logo/dummyA.png',
+              '/img/logo/dummyB.png', 
+              '/img/logo/dummyC.png', 
+              '/img/logo/dummyD.png', 
+              '/img/logo/dummyE.png', 
+              '/img/logo/dummyF.png', 
+              '/img/logo/dummyG.png'
+            ]
+            vacancy.company.imageUrl = dummyPictures[vacancy.company.company_id % dummyPictures.length];
+          }
 
           if (vacancy.minSalary == 0) {
             vacancy.minSalary = "Not specified"
