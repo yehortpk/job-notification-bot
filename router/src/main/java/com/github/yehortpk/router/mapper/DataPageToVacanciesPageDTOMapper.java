@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Slf4j
-public class DataPageToVacanciesPageDTOMapper extends PropertyMap<Page, VacanciesPageDTO> {
+public class DataPageToVacanciesPageDTOMapper extends PropertyMap<Page<Vacancy>, VacanciesPageDTO> {
     @Override
     protected void configure() {
         using(new VacanciesListToVacancyCompanyDTO()).map(source.getContent(), destination.getVacancies());
