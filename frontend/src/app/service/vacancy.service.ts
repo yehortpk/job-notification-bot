@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class VacancyService {
   constructor(private http: HttpClient) { }
-  getVacanciesHttp(pageId: number): Observable<VacanciesListDTO> {
+  getVacancies(pageId: number): Observable<VacanciesListDTO> {
     const ROUTER_URL = 'http://localhost:8081/vacancy';
     return this.http.get<VacanciesListDTO>(ROUTER_URL, {params: {"page": pageId}});
   }

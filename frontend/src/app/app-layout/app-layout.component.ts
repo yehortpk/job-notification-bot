@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 
 @Component({
@@ -19,7 +19,6 @@ export class AppLayoutComponent {
   trapCleanup: (() => void) | null = null;
 
   constructor(public router: Router) {
-    // Initialize data here (equivalent to the data() function in Alpine.js)
     this.dark = this.getThemeFromLocalStorage();
   }
 

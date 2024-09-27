@@ -13,7 +13,7 @@ import { TruncatePipe } from '../pipe/truncate.pipe';
   standalone: true,
   imports: [CommonModule, TruncatePipe]
 })
-export class DashboardComponent implements OnInit{
+export class DashboardComponent {
   vacancies: Vacancy[] = []
   currentPage: number = 1
   pageSize: number = 10
@@ -29,12 +29,8 @@ export class DashboardComponent implements OnInit{
     });
   }
 
-  ngOnInit() {
-    
-  }
-
   requestVacanciesOnPage(pageId: number) {
-    this.vacancyService.getVacanciesHttp(pageId).subscribe({
+    this.vacancyService.getVacancies(pageId).subscribe({
       next: (response) => {
         console.log(response);
         response.vacancies.forEach((vacancy, _, __) => {
