@@ -1,10 +1,7 @@
 package com.github.yehortpk.router.controllers;
 
-import com.github.yehortpk.router.mapper.DataPageToVacanciesPageDTOMapper;
-import com.github.yehortpk.router.models.company.CompanyShortInfoDTO;
 import com.github.yehortpk.router.models.vacancy.VacanciesPageDTO;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
-import com.github.yehortpk.router.models.vacancy.VacancyCompanyDTO;
 import com.github.yehortpk.router.services.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
