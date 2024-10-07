@@ -44,7 +44,7 @@ export class DashboardComponent {
               '/img/logo/dummyE.png', 
               '/img/logo/dummyF.png', 
               '/img/logo/dummyG.png'
-            ]
+            ];
             vacancy.company.imageUrl = dummyPictures[vacancy.company.company_id % dummyPictures.length];
           }
 
@@ -58,15 +58,15 @@ export class DashboardComponent {
 
         });
         this.vacancies = response.vacancies;
-        this.totalPages = response.totalPages;
-        this.totalVacancies = response.totalVacancies
+        this.totalPages = response.totalPages - 1;
+        this.totalVacancies = response.totalVacancies;
         this.pageSize = Math.round(this.totalVacancies/this.totalPages);
       },
       error: (error) => {
         console.error('An error occurred:', error);
       }
     });
-    this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages)
+    this.pages = this.paginationService.generatePagination(this.currentPage, this.totalPages);
   }
 
   onPageChange(page: number|string) {

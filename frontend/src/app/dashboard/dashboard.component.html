@@ -17,6 +17,7 @@
               <th class="px-4 py-3">Min Salary</th>
               <th class="px-4 py-3">Max Salary</th>
               <th class="px-4 py-3">Company</th>
+              <th class="px-4 py-3">Parsed At</th>
             </tr>
           </thead>
           <tbody
@@ -34,7 +35,8 @@
               </td>
               <td class="px-4 py-3 text-sm">
                 {{vacancy.minSalary}}
-              </td><td class="px-4 py-3 text-sm">
+              </td>
+              <td class="px-4 py-3 text-sm">
                 {{vacancy.maxSalary}}
               </td>
               <td class="px-4 py-3">
@@ -54,13 +56,14 @@
                     ></div>
                   </div>
                   <div>
-                    <p class="font-semibold">{{vacancy.company.title}}</p>
+                    <p class="font-semibold">
+                      <a [href]="vacancy.company.company_url">{{vacancy.company.title}}</a></p>
                   </div>
                 </div>
               </td>
-              <!-- <td class="px-4 py-3 text-sm">
-                <a [href]="vacancy.filter.url">{{vacancy.filter.title | truncate:50}}</a>
-              </td> -->
+              <td class="px-4 py-3 text-sm">
+                {{vacancy.parsedAt}}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -69,7 +72,7 @@
         class="grid px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase border-t dark:border-gray-700 bg-gray-50 sm:grid-cols-9 dark:text-gray-400 dark:bg-gray-800"
       >
         <span class="flex items-center col-span-3" >
-          Showing {{currentPage * pageSize + 1}}-{{currentPage * (pageSize + 1)}} of {{totalVacancies}}
+          Showing {{(currentPage - 1) * pageSize + 1}}-{{currentPage * pageSize}} of {{totalVacancies}}
         </span>
         <span class="col-span-2"></span>
         <!-- Pagination -->
@@ -109,7 +112,7 @@
                 <button
                   class="px-3 py-1 rounded-md rounded-r-lg focus:outline-none focus:shadow-outline-purple"
                   aria-label="Next"
-                  *ngIf="currentPage < totalPages" (click)="onPageChange(currentPage + 1)"
+                  *ngIf="currentPage < totalPages - 1" (click)="onPageChange(currentPage + 1)"
                 >
                   <svg
                     class="w-4 h-4 fill-current"

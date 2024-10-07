@@ -4,6 +4,8 @@ import com.github.yehortpk.router.models.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @Entity
@@ -25,4 +27,5 @@ public class Vacancy {
     private String title;
     private int minSalary;
     private int maxSalary;
+    private LocalDateTime parsedAt;
 }

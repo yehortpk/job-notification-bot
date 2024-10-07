@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +28,12 @@ public class VacancyService {
      */
     @Transactional
     public void addVacancies(List<VacancyDTO> vacancies) {
+        List<Long> existentVacanciesID = vacancyRepository.findAllIds();
         for (VacancyDTO vacancy : vacancies) {
+            if (existentVacanciesID.contains((long) vacancy.getVacancyID())) {
+                continue;
+            }
+
             Company vacancyCompany = companyRepository.getReferenceById((long) vacancy.getCompanyID());
             Vacancy newVacancy = Vacancy.builder()
                     .company(vacancyCompany)
@@ -37,6 +41,7 @@ public class VacancyService {
                     .minSalary(vacancy.getMinSalary())
                     .maxSalary(vacancy.getMaxSalary())
                     .link(vacancy.getLink())
+                    .parsedAt(vacancy.getParsedAt())
                     .build();
 
             vacancyRepository.save(newVacancy);

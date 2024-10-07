@@ -3,6 +3,7 @@ package com.github.yehortpk.parser.models;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * DTO representing a vacancy
@@ -29,4 +30,6 @@ public class VacancyDTO implements Serializable {
      */
     @EqualsAndHashCode.Include
     private String link;
+    @Builder.Default
+    private final LocalDateTime parsedAt = LocalDateTime.now();
 }
