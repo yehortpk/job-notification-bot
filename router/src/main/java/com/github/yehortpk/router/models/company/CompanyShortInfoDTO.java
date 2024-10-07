@@ -14,4 +14,6 @@ public class CompanyShortInfoDTO {
     private long companyId;
     @JsonProperty("title")
     private String companyTitle;
+    @JsonProperty("company_url")
+    private String companyURL;
 }

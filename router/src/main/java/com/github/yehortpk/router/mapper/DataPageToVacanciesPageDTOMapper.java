@@ -33,8 +33,12 @@ class VacanciesListToVacancyCompanyDTO implements Converter<List<Vacancy>, List<
             vacancyCompanyDTO.setMinSalary(vacancy.getMinSalary());
             vacancyCompanyDTO.setMaxSalary(vacancy.getMaxSalary());
             vacancyCompanyDTO.setTitle(vacancy.getTitle());
-            vacancyCompanyDTO.setCompany(new CompanyShortInfoDTO(vacancy.getCompany().getCompanyId(),
-                    vacancy.getCompany().getTitle()));
+            vacancyCompanyDTO.setCompany(new CompanyShortInfoDTO(
+                    vacancy.getCompany().getCompanyId(),
+                    vacancy.getCompany().getTitle(),
+                    vacancy.getCompany().getLink())
+            );
+            vacancyCompanyDTO.setURL(vacancy.getLink());
 
             return  vacancyCompanyDTO;
 

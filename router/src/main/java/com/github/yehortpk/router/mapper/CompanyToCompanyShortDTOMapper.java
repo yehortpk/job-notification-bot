@@ -8,5 +8,6 @@ public class CompanyToCompanyShortDTOMapper extends PropertyMap<Company, Company
     @Override
     protected void configure() {
         map().setCompanyTitle(source.getTitle());
+        map().setCompanyURL(source.getLink());
     }
 }

@@ -7,6 +7,7 @@ export type Vacancy = {
         company_id: number
         title: string
         imageUrl: string|null
+        company_url: string
     }
 }
 
