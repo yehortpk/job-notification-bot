@@ -9,6 +9,7 @@ export type Vacancy = {
         imageUrl: string|null
         company_url: string
     }
+    parsedAt: string
 }
 
 export type VacanciesListDTO = {
