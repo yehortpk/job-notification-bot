@@ -54,12 +54,13 @@
             <version>4.18.1</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v110 -->
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v114 -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v109</artifactId>
-            <version>4.8.3</version>
+            <artifactId>selenium-devtools-v114</artifactId>
+            <version>4.12.1</version>
         </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.jspecify/jspecify -->
         <dependency>
