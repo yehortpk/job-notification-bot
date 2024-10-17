@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.domain.parsers.site;
+package com.github.yehortpk.parser.domain.parsers;
 
 import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.CompanyDTO;
@@ -10,8 +10,8 @@ import java.util.Set;
  * Interface for all parsers. Uses {@link PageConnector} to acquire page connection. Require method parseAllVacancies
  * for specific {@link CompanyDTO}
  * @see SiteParserImpl
- * @see XHRSiteParser
- * @see MultiPageSiteParser
+ * @see APISiteParser
+ * @see StaticSiteParser
  * @see ComponentSiteParser
  */
 public interface SiteParser {
@@ -22,8 +22,7 @@ public interface SiteParser {
     Set<VacancyDTO> parseAllVacancies();
 
     /**
-     * Set company as a parameter for further parsing
-     * @param company
+     * Set company as a parameter for company data extraction
      */
     void setCompany(CompanyDTO company);
 }

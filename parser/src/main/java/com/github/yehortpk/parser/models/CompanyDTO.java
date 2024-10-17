@@ -1,14 +1,11 @@
 package com.github.yehortpk.parser.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.yehortpk.parser.domain.parsers.site.ComponentSiteParser;
-import com.github.yehortpk.parser.domain.parsers.site.MultiPageSiteParser;
-import com.github.yehortpk.parser.domain.parsers.site.SiteParser;
-import com.github.yehortpk.parser.domain.parsers.site.XHRSiteParser;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import com.github.yehortpk.parser.domain.parsers.ComponentSiteParser;
+import com.github.yehortpk.parser.domain.parsers.StaticSiteParser;
+import com.github.yehortpk.parser.domain.parsers.SiteParser;
+import com.github.yehortpk.parser.domain.parsers.APISiteParser;
+import lombok.*;
 
 import java.util.Map;
 
@@ -16,6 +13,7 @@ import java.util.Map;
  * DTO representing a company.
  */
 @Getter
+@Setter
 @Builder
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -23,13 +21,13 @@ public class CompanyDTO {
     @JsonProperty("company_id")
     private int companyId;
     /**
-     * Template URL to the job pages. Template uses in {@link MultiPageSiteParser} and {@link ComponentSiteParser}.
+     * Template URL to the job pages. Template uses in {@link StaticSiteParser} and {@link ComponentSiteParser}.
      * Use {page} bean for represent a page placeholder. Further, in code it will be replaced to an actual page
      */
     @JsonProperty("jobs_template_link")
     private String jobsTemplateLink;
     /**
-     * URL for the XHR. Used in {@link XHRSiteParser}
+     * URL for the XHR. Used in {@link APISiteParser}
      */
     @JsonProperty("single_page_request_link")
     private String singlePageRequestLink;

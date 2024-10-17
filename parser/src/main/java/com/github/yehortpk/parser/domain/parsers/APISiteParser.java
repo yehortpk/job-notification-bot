@@ -1,6 +1,5 @@
-package com.github.yehortpk.parser.domain.parsers.site;
+package com.github.yehortpk.parser.domain.parsers;
 
-import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
 import com.google.gson.Gson;
@@ -11,7 +10,6 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,10 +24,7 @@ import java.util.Map;
 @Component
 @ToString(callSuper = true)
 @Getter
-public abstract class XHRSiteParser extends SiteParserImpl {
-    @Autowired
-    private PageConnector defaultPageConnector;
-
+public abstract class APISiteParser extends SiteParserImpl {
     private final int DELAY_SEC = 2;
 
     /**
@@ -43,18 +38,23 @@ public abstract class XHRSiteParser extends SiteParserImpl {
     @Override
     public PageDTO parsePage(int pageId) throws IOException {
         String pageUrl = company.getSinglePageRequestLink();
+        Map<String, String> data = new HashMap<>(company.getData());
+        if (data.containsValue("{page}")) {
+            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);
+        }
+
         PageConnectionParams pageConnectionParams = PageConnectionParams.builder()
-                .data(createData(pageId))
-                .headers(createHeaders())
+                .data(data)
+                .headers(company.getHeaders())
                 .connectionMethod(getConnectionMethod())
                 .pageUrl(pageUrl)
-                .delay(pageId * DELAY_SEC * 1000)
+                .delay(pageId + DELAY_SEC * 1000)
                 .build();
 
-        String pageBody = defaultPageConnector.connectToPage(pageConnectionParams);
+        String pageBody = defaultPageConnector.connectToPage(pageConnectionParams).getBody();
 
         Document doc = parsePageBody(pageBody);
-        return new PageDTO(pageUrl, pageId, doc);
+        return new PageDTO(pageUrl, pageId, data, doc);
     }
 
     /**
@@ -62,7 +62,7 @@ public abstract class XHRSiteParser extends SiteParserImpl {
      * @param body page body
      * @return Jsoup page document
      */
-    private Document parsePageBody(String body) {
+    protected Document parsePageBody(String body) {
         String finalBody = body.strip().replace("\n", "");
 
         try {

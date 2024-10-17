@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.domain.parsers.site;
+package com.github.yehortpk.parser.domain.parsers;
 
 import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.PageConnectionParams;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Site parser based on component frameworks. Has to have single page and special element query selector which will
@@ -27,22 +29,21 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
     @Override
     public PageDTO parsePage(int pageId) throws IOException {
         String pageUrl = company.getJobsTemplateLink();
+        Map<String, String> data = new HashMap<>(company.getData());
+        if (data.containsValue("{page}")) {
+            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);
+        }
+
         PageConnectionParams pageConnectionParams = PageConnectionParams.builder()
-                .data(createData(pageId))
-                .headers(createHeaders())
+                .data(data)
+                .headers(company.getHeaders())
                 .pageUrl(pageUrl)
                 .dynamicElementQuerySelector(createDynamicElementQuerySelector())
-                .delay(pageId * DELAY_SEC * 1000)
+                .delay(pageId + DELAY_SEC * 1000)
                 .build();
 
-        Document page = Jsoup.parse(componentPageConnector.connectToPage(pageConnectionParams));
+        Document page = Jsoup.parse(componentPageConnector.connectToPage(pageConnectionParams).getBody());
         return new PageDTO(pageUrl, pageId, page);
-    }
-
-
-    @Override
-    public int getPagesCount(Document document) {
-        return 1;
     }
 
     /**
