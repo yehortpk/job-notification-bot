@@ -2,6 +2,7 @@ package com.github.yehortpk.parser.domain.connectors;
 
 import com.github.yehortpk.parser.domain.scrappers.PageScrapper;
 import com.github.yehortpk.parser.models.PageConnectionParams;
+import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 
 import java.io.IOException;
 
@@ -12,5 +13,5 @@ import java.io.IOException;
  * @see ProxyPageConnector
  */
 public interface PageConnector {
-    String connectToPage(PageConnectionParams pageConnectionParams) throws IOException;
+    ScrapperResponseDTO connectToPage(PageConnectionParams pageConnectionParams) throws IOException;
 }

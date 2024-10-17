@@ -1,6 +1,7 @@
 package com.github.yehortpk.parser.domain.scrappers;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
+import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import lombok.Cleanup;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -8,6 +9,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.remote.ErrorHandler;
 import org.openqa.selenium.remote.http.ConnectionFailedException;
 import org.openqa.selenium.safari.ConnectionClosedException;
@@ -16,12 +18,18 @@ import org.openqa.selenium.support.ui.Wait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import org.openqa.selenium.devtools.v114.network.Network;
+import org.openqa.selenium.devtools.v114.network.model.Headers;
+
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Component-based site page scrapper. Uses dynamicElementQuerySelector from {@link PageConnectionParams}
@@ -30,7 +38,7 @@ import java.util.stream.Collectors;
 @Component
 public class ComponentPageScrapper implements PageScrapper {
     @Override
-    public String scrapPage(PageConnectionParams pageConnectionParams) {
+    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) {
         ChromeOptions chromeOptions;
         if (pageConnectionParams.getProxy() != null) {
             chromeOptions = createChromeOptions(pageConnectionParams.getProxy());
@@ -38,7 +46,7 @@ public class ComponentPageScrapper implements PageScrapper {
             chromeOptions = createChromeOptions();
         }
 
-        @Cleanup WebDriver driver = createWebDriver(chromeOptions);
+        @Cleanup ChromeDriver driver = createWebDriver(chromeOptions);
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
 
         return scrapPage(finalPageUrl, driver, pageConnectionParams.getDynamicElementQuerySelector());
@@ -51,11 +59,24 @@ public class ComponentPageScrapper implements PageScrapper {
      * @param dynamicElementQuerySelector element query selector for component section loading delay
      * @return page HTML
      */
-    private String scrapPage(String pageUrl, WebDriver driver, String dynamicElementQuerySelector) {
+    private ScrapperResponseDTO scrapPage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) {
         synchronized (ComponentPageScrapper.class) {
+            DevTools devTools = driver.getDevTools();
+            devTools.createSession();
+            devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+
+            AtomicReference<Headers> headers = new AtomicReference<>();
+            devTools.addListener(Network.responseReceived(), responseReceived -> {
+                String requestUrl = responseReceived.getResponse().getUrl();
+
+                if (requestUrl.equals(pageUrl)) {
+                    headers.set(responseReceived.getResponse().getHeaders());
+                }
+            });
+
             driver.get(pageUrl);
 
-            Wait<WebDriver> wait = new FluentWait<>(driver)
+            Wait<ChromeDriver> wait = new FluentWait<>(driver)
                     .withTimeout(Duration.of(20, ChronoUnit.SECONDS))
                     .pollingEvery(Duration.of(5, ChronoUnit.SECONDS))
                     .ignoring(NoSuchElementException.class)
@@ -66,7 +87,13 @@ public class ComponentPageScrapper implements PageScrapper {
 
             wait.until(dr -> dr.findElement(By.cssSelector(dynamicElementQuerySelector)));
 
-            return driver.getPageSource();
+            HashMap<String, String> headersMap = new HashMap<>();
+            for (String headerPart : headers.toString().split(";")) {
+                String[] headerArr = headerPart.split("=");
+                headersMap.put(headerArr[0], headerArr[1]);
+            }
+
+            return new ScrapperResponseDTO(headersMap, driver.getPageSource());
         }
     }
 
@@ -89,7 +116,7 @@ public class ComponentPageScrapper implements PageScrapper {
      * @param chromeOptions web driver options
      * @return web driver
      */
-    private WebDriver createWebDriver(ChromeOptions chromeOptions) {
+    private ChromeDriver createWebDriver(ChromeOptions chromeOptions) {
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
         return new ChromeDriver(chromeOptions);

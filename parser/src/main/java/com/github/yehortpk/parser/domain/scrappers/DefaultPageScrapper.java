@@ -1,6 +1,7 @@
 package com.github.yehortpk.parser.domain.scrappers;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
+import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,9 @@ import java.io.IOException;
 @Component
 public class DefaultPageScrapper implements PageScrapper {
     @Override
-    public String scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
-        return toConnection(pageConnectionParams).execute().body();
+    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
+        Connection.Response response = toConnection(pageConnectionParams).execute();
+        return new ScrapperResponseDTO(response.headers(), response.body());
     }
 
     /**

@@ -3,6 +3,7 @@ package com.github.yehortpk.parser.domain.connectors;
 import com.github.yehortpk.parser.exceptions.ProxyPageConnectionException;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.domain.scrappers.PageScrapper;
+import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import com.github.yehortpk.parser.services.ProxyService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +38,9 @@ public class ProxyPageConnector implements PageConnector {
 
 
     @Override
-    public String connectToPage(PageConnectionParams pageConnectionParams) throws IOException {
+    public ScrapperResponseDTO connectToPage(PageConnectionParams pageConnectionParams) throws IOException {
 
-        String pageBody = loadPage(INITIAL_POLL_TIMEOUT, INITIAL_DELAY_BETWEEN_THREADS, pageConnectionParams);
+        ScrapperResponseDTO pageBody = loadPage(INITIAL_POLL_TIMEOUT, INITIAL_DELAY_BETWEEN_THREADS, pageConnectionParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(),
@@ -60,22 +61,22 @@ public class ProxyPageConnector implements PageConnector {
      * @throws IOException when the number of attempts exceeds CONNECTION_MAX_ATTEMPTS
      * @see PageConnectionParams
      */
-    private String loadPage(int pollTimeout, int threadsDelay,
+    private ScrapperResponseDTO loadPage(int pollTimeout, int threadsDelay,
                             PageConnectionParams pageConnectionParams) throws IOException {
         if((pollTimeout - INITIAL_POLL_TIMEOUT) >= POLL_TIMEOUT_LAMBDA * CONNECTION_MAX_ATTEMPTS) {
             throw new IOException();
         }
 
-        List<Future<String>> futures = new ArrayList<>();
+        List<Future<ScrapperResponseDTO>> futures = new ArrayList<>();
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-        CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
+        CompletionService<ScrapperResponseDTO> completionService = new ExecutorCompletionService<>(executor);
 
         log.info("Connect to the page {}, data: {}, headers: {}", pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(), pageConnectionParams.getHeaders());
         AtomicInteger timeoutCounter = new AtomicInteger();
         for (int counter = 0; counter < proxyService.getProxies().size(); counter++) {
             Proxy randomProxy = proxyService.getRandomProxy();
-            Callable<String> task = () -> {
+            Callable<ScrapperResponseDTO> task = () -> {
                 if (proxyService.validateProxy(randomProxy)) {
                     int currentThreadsTimeout = threadsDelay * timeoutCounter.getAndIncrement();
                     Thread.sleep(currentThreadsTimeout);
@@ -84,17 +85,17 @@ public class ProxyPageConnector implements PageConnector {
                 }
                 throw new ProxyPageConnectionException("Proxy can't load the page");
             };
-            Future<String> future = completionService.submit(task);
+            Future<ScrapperResponseDTO> future = completionService.submit(task);
             futures.add(future);
         }
 
         for (int i = 0; i < futures.size(); i++) {
             try {
-                Future<String> completedFuture = completionService.poll(pollTimeout, TimeUnit.SECONDS);
+                Future<ScrapperResponseDTO> completedFuture = completionService.poll(pollTimeout, TimeUnit.SECONDS);
 
                 if (completedFuture != null) {
                     try {
-                        String result = completedFuture.get();
+                        ScrapperResponseDTO result = completedFuture.get();
                         futures.forEach((fut) -> fut.cancel(true));
 
                         executor.close();

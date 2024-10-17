@@ -2,6 +2,7 @@ package com.github.yehortpk.parser.domain.scrappers;
 
 import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.PageConnectionParams;
+import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,5 +21,5 @@ public interface PageScrapper {
      * @return page body
      * @throws IOException delegates {@link IOException} from {@link PageConnector}
      */
-    String scrapPage(PageConnectionParams pageConnectionParams) throws IOException;
+    ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) throws IOException;
 }
