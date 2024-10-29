@@ -39,7 +39,7 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
                 .headers(company.getHeaders())
                 .pageUrl(pageUrl)
                 .dynamicElementQuerySelector(createDynamicElementQuerySelector())
-                .delay(pageId + DELAY_SEC * 1000)
+                .delay(pageId * DELAY_SEC * 1000)
                 .build();
 
         Document page = Jsoup.parse(componentPageConnector.connectToPage(pageConnectionParams).getBody());

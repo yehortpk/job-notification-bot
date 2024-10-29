@@ -48,7 +48,7 @@ public abstract class APISiteParser extends SiteParserImpl {
                 .headers(company.getHeaders())
                 .connectionMethod(getConnectionMethod())
                 .pageUrl(pageUrl)
-                .delay(pageId + DELAY_SEC * 1000)
+                .delay(pageId * DELAY_SEC * 1000)
                 .build();
 
         String pageBody = defaultPageConnector.connectToPage(pageConnectionParams).getBody();
