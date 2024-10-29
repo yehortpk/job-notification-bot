@@ -3,18 +3,12 @@ package com.github.yehortpk.parser.domain.scrappers;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import lombok.Cleanup;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.remote.ErrorHandler;
-import org.openqa.selenium.remote.http.ConnectionFailedException;
-import org.openqa.selenium.safari.ConnectionClosedException;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +18,6 @@ import org.openqa.selenium.devtools.v114.network.model.Headers;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -74,23 +67,21 @@ public class ComponentPageScrapper implements PageScrapper {
                 }
             });
 
+
             driver.get(pageUrl);
 
-            Wait<ChromeDriver> wait = new FluentWait<>(driver)
-                    .withTimeout(Duration.of(20, ChronoUnit.SECONDS))
-                    .pollingEvery(Duration.of(5, ChronoUnit.SECONDS))
-                    .ignoring(NoSuchElementException.class)
-                    .ignoring(ConnectionClosedException.class)
-                    .ignoring(ConnectionFailedException.class)
-                    .ignoring(TimeoutException.class)
-                    .ignoring(ErrorHandler.UnknownServerException.class);
+            new FluentWait<WebDriver>(driver)
+                    .withTimeout(Duration.ofSeconds(30))
+                    .pollingEvery(Duration.ofMillis(200))
+                    .ignoring(NoSuchElementException.class, TimeoutException.class).ignoring(StaleElementReferenceException.class)
+                    .until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(dynamicElementQuerySelector)));
 
-            wait.until(dr -> dr.findElement(By.cssSelector(dynamicElementQuerySelector)));
-
-            HashMap<String, String> headersMap = new HashMap<>();
-            for (String headerPart : headers.toString().split(";")) {
-                String[] headerArr = headerPart.split("=");
-                headersMap.put(headerArr[0], headerArr[1]);
+            Map<String, String> headersMap = new HashMap<>();
+            if (headers.get() != null) {
+                headersMap = headers.get().toJson().entrySet().stream().collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().toString()
+                ));
             }
 
             return new ScrapperResponseDTO(headersMap, driver.getPageSource());
@@ -149,6 +140,10 @@ public class ComponentPageScrapper implements PageScrapper {
     private ChromeOptions createChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--headless", "--disable-dev-shm-usage", "--no-sandbox");
+        chromeOptions.addArguments("window-size=1920,1080");
+        chromeOptions.setExperimentalOption("prefs", new java.util.HashMap<String, Object>() {{
+            put("profile.managed_default_content_settings.javascript", 1); // Ensure JavaScript is enabled
+        }});
 
         chromeOptions.setBinary(chromeBinaryPath);
 
@@ -162,6 +157,10 @@ public class ComponentPageScrapper implements PageScrapper {
      */
     private ChromeOptions createChromeOptions(Proxy proxy) {
         ChromeOptions chromeOptions = createChromeOptions();
+        chromeOptions.addArguments("window-size=1920,1080");
+        chromeOptions.setExperimentalOption("prefs", new java.util.HashMap<String, Object>() {{
+            put("profile.managed_default_content_settings.javascript", 1); // Ensure JavaScript is enabled
+        }});
         String[] proxyData = retrieveDataFromProxy(proxy);
         chromeOptions.addArguments(String.format("--proxy-server=%s:%s", proxyData[0], proxyData[1]));
 
