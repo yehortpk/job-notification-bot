@@ -46,20 +46,17 @@ public abstract class SiteParserImpl implements SiteParser {
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
-        int pagesCount = 1;
+        int pagesCount;
 
         // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
-        if(isParserNeedMetadata()) {
-            try {
-                CompanySiteMetadata siteMetadata = extractSiteMetadata();
-                pagesCount = siteMetadata.getPagesCount();
-                company.setData(createData(siteMetadata.getRequestData()));
-                company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
-            } catch (IOException e) {
-                throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
-                        .formatted(company.getTitle(), e.getMessage()));
-            }
-
+        try {
+            CompanySiteMetadata siteMetadata = extractSiteMetadata();
+            pagesCount = siteMetadata.getPagesCount();
+            company.setData(createData(siteMetadata.getRequestData()));
+            company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
+        } catch (IOException e) {
+            throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
+                    .formatted(company.getTitle(), e.getMessage()));
         }
 
         List<Future<PageDTO>> page_fut = new ArrayList<>();
@@ -91,22 +88,7 @@ public abstract class SiteParserImpl implements SiteParser {
         return vacancies;
     }
 
-    private boolean isParserNeedMetadata() {
-        List<String> values = new ArrayList<>();
-        values.add(company.getJobsTemplateLink());
-        values.addAll(company.getData().values());
-        values.addAll(company.getHeaders().values());
-
-        for (String value : values) {
-            if (isValueBinding(value)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isValueBinding(String value) {
+    protected boolean isValueBinding(String value) {
         return value.matches("^\\{.*\\}$");
     }
 

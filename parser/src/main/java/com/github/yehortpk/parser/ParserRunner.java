@@ -42,8 +42,10 @@ public class ParserRunner implements ApplicationRunner {
             Set<VacancyDTO> persistedCompanyVacanciesSet = new HashSet<>(persistedCompanyVacancies);
             Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
             newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
-            outdatedVacancies.addAll(
-                    vacancyService.calculateOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+            if (!newVacancies.isEmpty()) {
+                outdatedVacancies.addAll(
+                        vacancyService.calculateOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+            }
         });
 
         log.info("new vacancies count: " + newVacancies.size());
