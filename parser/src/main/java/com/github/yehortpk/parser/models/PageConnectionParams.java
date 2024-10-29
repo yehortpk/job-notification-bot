@@ -37,4 +37,5 @@ public class PageConnectionParams {
      */
     @Builder.Default
     private String dynamicElementQuerySelector = "body";
+    private String requestBody;
 }

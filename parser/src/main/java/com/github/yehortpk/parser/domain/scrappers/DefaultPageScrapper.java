@@ -25,13 +25,18 @@ public class DefaultPageScrapper implements PageScrapper {
      * @return page connection object
      */
     private Connection toConnection(PageConnectionParams pageConnectionParams) {
-        return Jsoup.connect(pageConnectionParams.getPageUrl())
+        Connection connection = Jsoup.connect(pageConnectionParams.getPageUrl())
                 .userAgent(pageConnectionParams.getUserAgent())
                 .proxy(pageConnectionParams.getProxy())
                 .headers(pageConnectionParams.getHeaders())
                 .data(pageConnectionParams.getData())
                 .ignoreContentType(true)
                 .method(pageConnectionParams.getConnectionMethod());
+        String requestBody = pageConnectionParams.getRequestBody();
+        if (requestBody != null) {
+            connection.requestBody(requestBody);
+        }
+        return connection;
     }
 
 
