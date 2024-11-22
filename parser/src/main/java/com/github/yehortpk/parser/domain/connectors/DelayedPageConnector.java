@@ -4,6 +4,7 @@ import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.domain.scrappers.PageScrapper;
 import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -18,13 +19,11 @@ import java.io.IOException;
 public class DelayedPageConnector implements PageConnector {
     private final PageScrapper pageScrapper;
 
+    @SneakyThrows
     @Override
     public ScrapperResponseDTO connectToPage(PageConnectionParams pageConnectionParams) throws IOException {
-        try {
-            Thread.sleep(pageConnectionParams.getDelay());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Thread.sleep(pageConnectionParams.getDelay());
+
         log.info("Connect to the page {}, delay:{}ms, data: {}, headers: {}",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getDelay(),

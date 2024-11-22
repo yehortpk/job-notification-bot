@@ -54,7 +54,7 @@ public abstract class SiteParserImpl implements SiteParser {
             pagesCount = siteMetadata.getPagesCount();
             company.setData(createData(siteMetadata.getRequestData()));
             company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
                     .formatted(company.getTitle(), e.getMessage()));
         }
@@ -186,7 +186,7 @@ public abstract class SiteParserImpl implements SiteParser {
         defaultMetadata.setRequestData(new HashMap<>());
         defaultMetadata.setRequestHeaders(new HashMap<>());
 
-        return  defaultMetadata;
+        return defaultMetadata;
     }
 
     protected int getPagesCount(Document doc) {

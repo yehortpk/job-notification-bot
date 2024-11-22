@@ -37,7 +37,7 @@ public class VacancyService {
         }
 
         Set<VacancyDTO> result = new HashSet<>();
-        Map<String, Future<Set<VacancyDTO>>> futures = new HashMap<>();
+        Map<String, Future<Set<VacancyDTO>>> vacanciesByCompaniesFut = new HashMap<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
         for (CompanyDTO companyDTO : companies) {
             String beanClass = companyDTO.getBeanClass();
@@ -46,13 +46,13 @@ public class VacancyService {
                 siteParser.setCompany(companyDTO);
 
                 Future<Set<VacancyDTO>> future = executor.submit(siteParser::parseAllVacancies);
-                futures.put(beanClass, future);
+                vacanciesByCompaniesFut.put(beanClass, future);
             } catch (BeansException ignored) {
-                log.info("{} implementation doesn't exist", beanClass);
+                log.info("{} parser implementation doesn't exist", beanClass);
             }
         }
 
-        for (Map.Entry<String, Future<Set<VacancyDTO>>> vacanciesByCompany : futures.entrySet()) {
+        for (Map.Entry<String, Future<Set<VacancyDTO>>> vacanciesByCompany : vacanciesByCompaniesFut.entrySet()) {
             String companyBean = vacanciesByCompany.getKey();
             Future<Set<VacancyDTO>> vacancies = vacanciesByCompany.getValue();
             try {
