@@ -11,10 +11,10 @@ import org.openqa.selenium.TimeoutException;
 
 import java.io.IOException;
 import java.net.Proxy;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Page connector based on proxy strategy. Multiple threads have its own proxy, and trying to scrap the same page. Each
@@ -58,70 +58,75 @@ public class ProxyPageConnector implements PageConnector {
      * @param threadsDelay delay between threads connection attempts
      * @param pageConnectionParams connection parameters for the page
      * @return page HTML
-     * @throws IOException when the number of attempts exceeds CONNECTION_MAX_ATTEMPTS
      * @see PageConnectionParams
      */
     private ScrapperResponseDTO loadPage(int pollTimeout, int threadsDelay,
-                            PageConnectionParams pageConnectionParams) throws IOException {
+                                         PageConnectionParams pageConnectionParams) throws IOException {
         if((pollTimeout - INITIAL_POLL_TIMEOUT) >= POLL_TIMEOUT_LAMBDA * CONNECTION_MAX_ATTEMPTS) {
-            throw new IOException();
+            throw new IOException(String.format("Can't load page %s, data: %s",
+                    pageConnectionParams.getPageUrl(),
+                    pageConnectionParams.getData()));
         }
 
-        List<Future<ScrapperResponseDTO>> futures = new ArrayList<>();
+        Map<Future<ScrapperResponseDTO>, Proxy> pageResponseWithProxiesFut = new HashMap<>();
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
         CompletionService<ScrapperResponseDTO> completionService = new ExecutorCompletionService<>(executor);
 
-        log.info("Connect to the page {}, data: {}, headers: {}", pageConnectionParams.getPageUrl(),
-                pageConnectionParams.getData(), pageConnectionParams.getHeaders());
-        AtomicInteger timeoutCounter = new AtomicInteger();
-        for (int counter = 0; counter < proxyService.getProxies().size(); counter++) {
-            Proxy randomProxy = proxyService.getRandomProxy();
+
+        proxyService.filterValidProxies();
+        List<Proxy> proxies = proxyService.getProxies();
+        for (int counter = 0; counter < proxies.size(); counter++) {
+            Proxy proxy = proxies.get(counter);
+            int currentThreadsTimeout = threadsDelay * counter;
             Callable<ScrapperResponseDTO> task = () -> {
-                if (proxyService.validateProxy(randomProxy)) {
-                    int currentThreadsTimeout = threadsDelay * timeoutCounter.getAndIncrement();
-                    Thread.sleep(currentThreadsTimeout);
-                    pageConnectionParams.setProxy(randomProxy);
-                    return pageScrapper.scrapPage(pageConnectionParams);
-                }
-                throw new ProxyPageConnectionException("Proxy can't load the page");
+                Thread.sleep(currentThreadsTimeout);
+                return pageScrapper.scrapPage(pageConnectionParams);
             };
-            Future<ScrapperResponseDTO> future = completionService.submit(task);
-            futures.add(future);
+            Future<ScrapperResponseDTO> pageResponseWithProxy = completionService.submit(task);
+            log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",
+                    pageConnectionParams.getPageUrl(),
+                    proxy,
+                    pageConnectionParams.getData(),
+                    pageConnectionParams.getHeaders()
+            );
+            pageResponseWithProxiesFut.put(pageResponseWithProxy, proxy);
         }
 
-        for (int i = 0; i < futures.size(); i++) {
+        for (int i = 0; i < proxies.size(); i++) {
+            Future<ScrapperResponseDTO> scrapperResponseFut;
             try {
-                Future<ScrapperResponseDTO> completedFuture = completionService.poll(pollTimeout, TimeUnit.SECONDS);
-
-                if (completedFuture != null) {
-                    try {
-                        ScrapperResponseDTO result = completedFuture.get();
-                        futures.forEach((fut) -> fut.cancel(true));
-
-                        executor.close();
-                        return result;
-                    } catch (ExecutionException e) {
-                        if(!(e.getCause() instanceof TimeoutException ||
-                            e.getCause() instanceof ProxyPageConnectionException)) {
-                            log.error("Page: {}, proxy: {}, error: {}",
-                                    pageConnectionParams.getPageUrl(),
-                                    pageConnectionParams.getProxy(),
-                                    e.getCause().getMessage());
-                        }
-                    }
-                }
+                scrapperResponseFut = completionService.take();
             } catch (InterruptedException e) {
-                log.error("interrupted, error: {}", e.getMessage());
+                throw new RuntimeException("Service was interrupted");
+            }
+            try {
+                ScrapperResponseDTO result = scrapperResponseFut.get();
+                log.info("Connection to the page: {}, proxy: {}, data: {} was established",
+                        pageConnectionParams.getPageUrl(),
+                        pageResponseWithProxiesFut.get(scrapperResponseFut),
+                        pageConnectionParams.getData());
+                pageResponseWithProxiesFut.forEach((res, proxy) -> res.cancel(true));
+
+                executor.close();
+                return result;
+            } catch (InterruptedException | ExecutionException ee) {
+                if (ee.getCause() instanceof ProxyPageConnectionException) {
+                    log.error("Page: {}, proxy: {}, error: {}",
+                            pageConnectionParams.getPageUrl(),
+                            pageResponseWithProxiesFut.get(scrapperResponseFut),
+                            ee.getCause().getMessage());
+                } else {
+                    log.error("Page: {}, error: {}",
+                            pageConnectionParams.getPageUrl(),
+                            ee.getCause().getMessage());
+                }
             }
         }
 
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            log.error("interrupted, error: {}", e.getMessage());
+        if (log.isDebugEnabled()) {
+            log.error("Could not connect to the page {} for specified timeout. Retry", pageConnectionParams.getPageUrl());
         }
-
-        log.error("Could not connect to the page {} for specified timeout. Retry", pageConnectionParams.getPageUrl());
-        return loadPage(pollTimeout + POLL_TIMEOUT_LAMBDA, threadsDelay + DELAY_BETWEEN_THREADS_LAMBDA, pageConnectionParams);
+        return loadPage(pollTimeout + POLL_TIMEOUT_LAMBDA,
+                threadsDelay + DELAY_BETWEEN_THREADS_LAMBDA, pageConnectionParams);
     }
 }
