@@ -3,6 +3,8 @@ services:
     container_name: notifier-parser-local
     build:
       dockerfile: ./parser/local.Dockerfile
+    volumes:
+      - ./logs:/app/logs
     networks:
       - notifier-local-network
     ports:
