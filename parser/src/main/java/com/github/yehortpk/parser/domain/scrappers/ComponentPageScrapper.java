@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.openqa.selenium.devtools.v114.network.Network;
 import org.openqa.selenium.devtools.v114.network.model.Headers;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Duration;
@@ -37,7 +38,7 @@ import java.util.Optional;
 @Slf4j
 public class ComponentPageScrapper implements PageScrapper {
     @Override
-    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) {
+    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
         ChromeOptions chromeOptions = createChromeOptions(pageConnectionParams);
 
         @Cleanup ChromeDriver driver = createWebDriver(chromeOptions);
@@ -54,7 +55,7 @@ public class ComponentPageScrapper implements PageScrapper {
      * @param dynamicElementQuerySelector element query selector for component section loading delay
      * @return page HTML
      */
-    private ScrapperResponseDTO scrapPage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) {
+    private ScrapperResponseDTO scrapPage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) throws IOException {
         DevTools devTools = driver.getDevTools();
         devTools.createSession();
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
@@ -82,7 +83,7 @@ public class ComponentPageScrapper implements PageScrapper {
         try {
             wait.until(dr -> dr.findElement(By.cssSelector(dynamicElementQuerySelector)));
         } catch ( org.openqa.selenium.TimeoutException te) {
-            log.error("Dynamic element search timeout exception, page: {}", pageUrl);
+            throw new IOException(String.format("Dynamic element search timeout exception, page: %s", pageUrl));
         }
 
         Map<String, String> headersMap = new HashMap<>();

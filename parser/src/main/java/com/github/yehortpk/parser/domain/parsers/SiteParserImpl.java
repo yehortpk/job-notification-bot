@@ -1,7 +1,9 @@
 package com.github.yehortpk.parser.domain.parsers;
 
 import com.github.yehortpk.parser.domain.connectors.PageConnector;
+import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
+import com.github.yehortpk.parser.services.ProgressManagerService;
 import lombok.Cleanup;
 import lombok.Setter;
 import lombok.ToString;
@@ -43,10 +45,15 @@ public abstract class SiteParserImpl implements SiteParser {
     protected CompanyDTO company;
     @Autowired
     protected PageConnector defaultPageConnector;
+    @Autowired
+    private ProgressManagerService progressManagerService;
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
         int pagesCount;
+        String[] filePackages = this.getClass().getName().split("\\.");
+        String classname = filePackages[filePackages.length - 1];
+        progressManagerService.addBar(classname, 1);
 
         // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
         try {
@@ -54,7 +61,9 @@ public abstract class SiteParserImpl implements SiteParser {
             pagesCount = siteMetadata.getPagesCount();
             company.setData(createData(siteMetadata.getRequestData()));
             company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
+            progressManagerService.changeBarStepsCount(classname, pagesCount);
         } catch (Exception e) {
+            progressManagerService.markStepError(classname, 0);
             throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
                     .formatted(company.getTitle(), e.getMessage()));
         }
@@ -69,20 +78,31 @@ public abstract class SiteParserImpl implements SiteParser {
             page_fut.add(future);
         }
 
-        List<PageDTO> pages = new ArrayList<>();
-        for (Future<PageDTO> future : page_fut) {
-            try {
-                pages.add(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                log.error(e.getMessage());
-            }
-        }
-
         Set<VacancyDTO> vacancies = new HashSet<>();
 
-        for (PageDTO page : pages) {
-            vacancies.addAll(extractVacanciesFromPage(page));
-            log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
+        ThreadLocal<Integer> pagesCounter = ThreadLocal.withInitial(() -> 0);
+        for (Future<PageDTO> future : page_fut) {
+            try {
+                PageDTO page = future.get();
+                Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
+                if (vacanciesFromPage.isEmpty()) {
+                    throw new NoVacanciesOnPageException(String.format(
+                            "There is no parsed vacancies on company:%s, page:%d", this.company.getTitle(),
+                            pagesCounter.get())
+                    );
+                }
+                vacancies.addAll(vacanciesFromPage);
+                log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
+                progressManagerService.markStepDone(classname, pagesCounter.get());
+            } catch (InterruptedException| ExecutionException e) {
+                progressManagerService.markStepError(classname, pagesCounter.get());
+                log.error("company: {}, error: {} ", this.company.getTitle(), e.getCause().getMessage());
+            } catch (NoVacanciesOnPageException e) {
+                progressManagerService.markStepError(classname, pagesCounter.get());
+                log.error("company: {}, error: {} ", this.company.getTitle(), e.getMessage());
+            } finally {
+                pagesCounter.set(pagesCounter.get() + 1);
+            }
         }
 
         return vacancies;

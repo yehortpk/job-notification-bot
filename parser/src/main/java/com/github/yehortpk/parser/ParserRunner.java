@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -27,6 +28,7 @@ public class ParserRunner implements ApplicationRunner {
     private final VacancyService vacancyService;
     private final CompanyService companyService;
     private final NotifierService notifierService;
+    private final ConfigurableApplicationContext context;
 
     @Override
     public void run (ApplicationArguments args) {
@@ -48,8 +50,13 @@ public class ParserRunner implements ApplicationRunner {
             }
         });
 
-        log.info("new vacancies count: " + newVacancies.size());
-        log.info("outdated vacancies count: " + outdatedVacancies.size());
+        String parsingResultOutput = String.format("""
+                Parsing completed.
+                New vacancies count: %s
+                outdated vacancies\
+                 count: %s""", newVacancies.size(), outdatedVacancies.size());
+        System.out.println(parsingResultOutput);
+        log.info(parsingResultOutput);
 
         if (!newVacancies.isEmpty()) {
             notifierService.notifyNewVacancies(newVacancies);
@@ -59,6 +66,7 @@ public class ParserRunner implements ApplicationRunner {
             notifierService.notifyOutdatedVacancies(outdatedVacancies);
         }
 
+        context.close();
     }
 }
 
