@@ -59,4 +59,8 @@ public class VacancyService {
     public Page<Vacancy> getVacanciesByPage(int pageId, int pageSize) {
         return vacancyRepository.findAll(PageRequest.of(pageId, pageSize));
     }
+
+    public void removeVacanciesByUrlsIn(List<String> urls) {
+        vacancyRepository.deleteByLinkIn(urls);
+    }
 }

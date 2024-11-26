@@ -3,6 +3,8 @@ package com.github.yehortpk.parser.services;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +21,9 @@ public class NotifierService {
     private final RestTemplate restTemplate;
 
 
+    @Value("${router-vacancies-url}")
+    private String routerVacanciesURL;
+
     /**
      * Notify router service about new vacancies
      * @param newVacancies set of new vacancies
@@ -29,10 +34,9 @@ public class NotifierService {
         }
     }
 
-    @Value("${router-vacancies-url}")
-    private String routerVacanciesURL;
-
-    public void notifyOutdatedVacancies(Set<VacancyDTO> outdatedVacancies) {
-        outdatedVacancies.forEach(vacancy -> restTemplate.delete(routerVacanciesURL + "/" + vacancy.getVacancyID()));
+    public void notifyOutdatedVacancies(Set<String> outdatedVacanciesIds) {
+        HttpEntity<Set<String>> request =
+                new HttpEntity<>(outdatedVacanciesIds);
+        restTemplate.exchange(routerVacanciesURL, HttpMethod.DELETE, request, Void.class);
     }
 }

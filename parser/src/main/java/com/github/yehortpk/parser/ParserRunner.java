@@ -34,19 +34,20 @@ public class ParserRunner implements ApplicationRunner {
     public void run (ApplicationArguments args) {
         Set<VacancyDTO> parsedVacancies = vacancyService.parseAllVacancies();
         Set<VacancyDTO> newVacancies = new HashSet<>();
-        Set<VacancyDTO> outdatedVacancies = new HashSet<>();
+        Set<String> outdatedVacancies = new HashSet<>();
 
         Map<Integer, List<VacancyDTO>> vacanciesByCompany = parsedVacancies.stream()
                 .collect(Collectors.groupingBy(VacancyDTO::getCompanyID));
 
+        Map<Long, Set<String>> persistedVacanciesByCompanyId = companyService.getPersistedVacanciesUrlsByCompanyId();
+
         vacanciesByCompany.forEach((companyId, vacancies) -> {
-            List<VacancyDTO> persistedCompanyVacancies = companyService.getPersistedVacancies(companyId);
-            Set<VacancyDTO> persistedCompanyVacanciesSet = new HashSet<>(persistedCompanyVacancies);
+            Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.get((long) companyId);
             Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
-            newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+            newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacancies));
             if (!parsedCompanyVacanciesSet.isEmpty()) {
                 outdatedVacancies.addAll(
-                        vacancyService.calculateOutdatedVacancies(parsedCompanyVacanciesSet, persistedCompanyVacanciesSet));
+                        vacancyService.calculateOutdatedVacanciesIds(parsedCompanyVacanciesSet, persistedCompanyVacancies));
             }
         });
 

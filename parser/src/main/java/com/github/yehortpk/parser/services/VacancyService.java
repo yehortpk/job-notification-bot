@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * This class provide methods for parsing and identifying outdated/new vacancies
@@ -69,27 +70,27 @@ public class VacancyService {
 
     /**
      * Calculate difference between parsed and persistent vacancies
-     * @param allVacancies - total vacancies set
-     * @param persistedVacancies - persistent vacancies set
+     * @param parsedVacancies - total vacancies set
+     * @param persistedVacanciesUrls - persistent vacancies set
      * @return set of new vacancies
      */
-    public Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
-        Set<VacancyDTO> result = new HashSet<>(allVacancies);
-        result.removeAll(persistedVacancies);
+    public Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
+        Set<VacancyDTO> result = new HashSet<>(parsedVacancies);
+        result.removeIf(vacancyDTO -> persistedVacanciesUrls.contains(vacancyDTO.getLink()));
 
         return result;
     }
 
     /**
      * Calculate difference between persistent and parsed vacancies
-     * @param allVacancies - total vacancies set
-     * @param persistedVacancies - persistent vacancies set
+     * @param parsedVacancies - total vacancies set
+     * @param persistedVacanciesUrls - persistent vacancies set
      * @return set of outdated vacancies
      */
-    public Set<VacancyDTO> calculateOutdatedVacancies(Set<VacancyDTO> allVacancies, Set<VacancyDTO> persistedVacancies) {
-        Set<VacancyDTO> result = new HashSet<>(persistedVacancies);
-        result.removeAll(allVacancies);
+    public Set<String> calculateOutdatedVacanciesIds(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
+        Set<String> parsedVacanciesUrls = parsedVacancies.stream().map(VacancyDTO::getLink).collect(Collectors.toSet());
 
-        return result;
+        persistedVacanciesUrls.removeAll(parsedVacanciesUrls);
+        return persistedVacanciesUrls;
     }
 }

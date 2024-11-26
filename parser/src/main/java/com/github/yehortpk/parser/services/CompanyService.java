@@ -9,7 +9,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,9 @@ public class CompanyService {
 
     @Value("${company-service-url}")
     private String companyServiceURL;
+
+    @Value("${router-vacancies-url}")
+    private String vacancyServiceURL;
 
     /**
      * Returns all companies list from router company service
@@ -30,6 +36,9 @@ public class CompanyService {
 
         List<CompanyDTO> companies = restTemplate.exchange(companyServiceURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
 
+        if (companies == null) {
+            return new ArrayList<>();
+        }
         return companies.stream().filter(CompanyDTO::isEnabled).toList();
     }
 
@@ -44,6 +53,16 @@ public class CompanyService {
         };
 
         String finalURL = companyServiceURL + "/%s/vacancies".formatted(companyId);
+
+        return restTemplate.exchange(finalURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
+    }
+
+    public Map<Long, Set<String>> getPersistedVacanciesUrlsByCompanyId() {
+        ParameterizedTypeReference<Map<Long, Set<String>>> parameterizedTypeReference
+                = new ParameterizedTypeReference<>() {
+        };
+
+        String finalURL = vacancyServiceURL + "?byCompany=true";
 
         return restTemplate.exchange(finalURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
     }

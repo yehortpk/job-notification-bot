@@ -35,3 +35,4 @@ build/
 *.sql
 frontend/.editorconfig
 frontend/package-lock.json
+/logs/
