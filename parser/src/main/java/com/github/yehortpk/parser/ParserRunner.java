@@ -43,6 +43,9 @@ public class ParserRunner implements ApplicationRunner {
 
         vacanciesByCompany.forEach((companyId, vacancies) -> {
             Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.get((long) companyId);
+            if (persistedCompanyVacancies == null) {
+                persistedCompanyVacancies = new HashSet<>();
+            }
             Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
             newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacancies));
             if (!parsedCompanyVacanciesSet.isEmpty()) {

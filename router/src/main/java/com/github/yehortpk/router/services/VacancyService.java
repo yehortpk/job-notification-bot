@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,6 +30,7 @@ public class VacancyService {
     @Transactional
     public void addVacancies(List<VacancyDTO> vacancies) {
         List<Long> existentVacanciesID = vacancyRepository.findAllIds();
+        List<Vacancy> newVacancies = new ArrayList<>();
         for (VacancyDTO vacancy : vacancies) {
             if (existentVacanciesID.contains((long) vacancy.getVacancyID())) {
                 continue;
@@ -44,8 +46,9 @@ public class VacancyService {
                     .parsedAt(vacancy.getParsedAt())
                     .build();
 
-            vacancyRepository.save(newVacancy);
+            newVacancies.add(newVacancy);
         }
+        vacancyRepository.saveAll(newVacancies);
     }
 
     public List<Vacancy> getAllVacancies() {
