@@ -1,9 +1,11 @@
 package com.github.yehortpk.router.services;
 
 import com.github.yehortpk.router.models.filter.Filter;
+import com.github.yehortpk.router.models.filter.FilterDTO;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.repositories.FilterRepository;
 import com.github.yehortpk.router.utils.FilterParser;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -59,5 +61,14 @@ public class FilterService {
         }
 
         return result;
+    }
+
+    public List<Filter> getFilters(long chatId) {
+        return findByClientId(chatId);
+    }
+
+    @Transactional
+    public void addFilter(FilterDTO filter) {
+        addRawFilter(filter.getClientId(), filter.getFilter());
     }
 }

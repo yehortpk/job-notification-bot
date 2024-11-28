@@ -4,7 +4,6 @@ import com.github.yehortpk.router.models.filter.Filter;
 import com.github.yehortpk.router.models.filter.FilterDTO;
 import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
 import com.github.yehortpk.router.services.FilterService;
-import com.github.yehortpk.router.services.SubscribeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +21,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequiredArgsConstructor
 public class FilterController {
     private final ModelMapper modelMapper;
-    private final SubscribeService subscribeService;
     private final FilterService filterService;
 
     @GetMapping("/chat/{chat_id}")
     public List<FilterDTO> getFilters(
             @PathVariable("chat_id") int chatId
     ) {
-        return subscribeService.getFilters(chatId)
+        return filterService.getFilters(chatId)
                 .stream().map((filter) -> modelMapper.map(filter, FilterDTO.class)).toList();
     }
 
@@ -42,12 +40,12 @@ public class FilterController {
 
     @PostMapping
     public void addFilter(@RequestBody FilterDTO filter) {
-        subscribeService.addFilter(filter);
+        filterService.addFilter(filter);
     }
 
     @DeleteMapping("/{filter_id}")
     public void deleteFilter(@PathVariable("filter_id") long filterId) {
-        subscribeService.deleteFilter(filterId);
+        filterService.deleteFilter(filterId);
     }
 
     @GetMapping("/{filter_id}/vacancies")
