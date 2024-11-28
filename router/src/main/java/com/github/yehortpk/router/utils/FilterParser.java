@@ -3,6 +3,7 @@ package com.github.yehortpk.router.utils;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,40 +16,47 @@ import java.util.regex.Pattern;
  */
 @Getter
 public class FilterParser {
-    private final List<String[]> binaryMatches = new ArrayList<>();
+    private String companyMatch;
+    private final List<String> multiChoiceMatches = new ArrayList<>();
     private final List<String> negativeMatches = new ArrayList<>();
     private final List<String> mandatoryMatches = new ArrayList<>();
-    private final String FILTER_REGEX = "\\(([^)]+)\\)|-([\\w-]+)|(\\w+)";
+    private final String FILTER_REGEX = "^([^,]*),?\\s*(\\([^)]+\\))?\\s*([^\\-]+)?((?:\\s*-[^\\-]+)+)?";
 
     public FilterParser(String filter) {
 
         Pattern pattern = Pattern.compile(FILTER_REGEX);
-        Matcher matcher = pattern.matcher(filter.toLowerCase());
+        Matcher matcher = pattern.matcher(filter);
 
-        while (matcher.find()) {
-            String binary = matcher.group(1);
-            String negative = matcher.group(2);
-            String defaultElement = matcher.group(3);
+        if (matcher.matches()) {
+            companyMatch = !matcher.group(1).isEmpty()? matcher.group(1): null;
+            String multiChoice = matcher.group(2);
+            String mandatory = matcher.group(3);
+            String negative = matcher.group(4);
 
-            if (defaultElement != null) {
-                mandatoryMatches.add(defaultElement);
+            if (mandatory != null) {
+                mandatoryMatches.addAll(Arrays.stream(mandatory.split(" ")).map(String::strip).toList());
             }
 
             if (negative != null) {
-                negativeMatches.add(negative);
+                negativeMatches.addAll(Arrays.stream(negative.replace("-", "").split(" "))
+                        .map(String::strip).toList());
             }
 
-            if (binary != null) {
-                String[] binaryParts = binary
+            if (multiChoice != null) {
+                String[] binaryParts = multiChoice
                         .replace("(", "")
                         .replace(")", "")
                         .split("\\|");
-                binaryMatches.add(binaryParts);
+                multiChoiceMatches.addAll(Arrays.stream(binaryParts).map(String::strip).toList());
             }
         }
     }
 
     public boolean isVacancyApplicable(String vacancyTitle) {
+        if(companyMatch != null && !vacancyTitle.startsWith(companyMatch)) {
+            return false;
+        }
+
         vacancyTitle = vacancyTitle.toLowerCase();
 
         for (String negativeMatch : negativeMatches) {
@@ -64,11 +72,9 @@ public class FilterParser {
         }
 
         boolean result = true;
-        for (String[] binaryMatch : binaryMatches) {
-            for (String match : binaryMatch) {
-                if (vacancyTitle.contains(match)) {
-                    return true;
-                }
+        for (String multiChoiceMatch : multiChoiceMatches) {
+            if (vacancyTitle.contains(multiChoiceMatch)) {
+                return true;
             }
             result = false;
         }
