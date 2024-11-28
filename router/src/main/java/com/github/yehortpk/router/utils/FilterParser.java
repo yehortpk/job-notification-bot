@@ -20,7 +20,7 @@ public class FilterParser {
     private final List<String> multiChoiceMatches = new ArrayList<>();
     private final List<String> negativeMatches = new ArrayList<>();
     private final List<String> mandatoryMatches = new ArrayList<>();
-    private final String FILTER_REGEX = "^([^,]*),?\\s*(\\([^)]+\\))?\\s*([^\\-]+)?((?:\\s*-[^\\-]+)+)?";
+    private final String FILTER_REGEX = "^(.*,)?\\s*(\\([^)]+\\))?\\s*([^\\-\\s,][^\\-]*)?\\s*((?:\\s*-[^\\-\\s]+)+)?\\s*$";
 
     public FilterParser(String filter) {
 
@@ -28,10 +28,14 @@ public class FilterParser {
         Matcher matcher = pattern.matcher(filter);
 
         if (matcher.matches()) {
-            companyMatch = !matcher.group(1).isEmpty()? matcher.group(1): null;
+            companyMatch = matcher.group(1);
             String multiChoice = matcher.group(2);
             String mandatory = matcher.group(3);
             String negative = matcher.group(4);
+
+            if (companyMatch != null) {
+                companyMatch = companyMatch.split(",")[0];
+            }
 
             if (mandatory != null) {
                 mandatoryMatches.addAll(Arrays.stream(mandatory.split(" ")).map(String::strip).toList());
@@ -49,6 +53,8 @@ public class FilterParser {
                         .split("\\|");
                 multiChoiceMatches.addAll(Arrays.stream(binaryParts).map(String::strip).toList());
             }
+        } else {
+            throw  new RuntimeException("Parser couldn't match this filter: " + filter);
         }
     }
 
