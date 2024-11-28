@@ -2,14 +2,14 @@ package com.github.yehortpk.subscriberbot.handlers.callback.back;
 
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
-import com.github.yehortpk.subscriberbot.handlers.callback.SubscriptionFiltersListCallbackRequestHandler;
+import com.github.yehortpk.subscriberbot.handlers.callback.FiltersListCallbackRequestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class FilterRemovedBackCallbackRequestHandler extends BackCallbackDataRequestHandlerImpl{
-    private final SubscriptionFiltersListCallbackRequestHandler subscriptionFiltersListCallbackRequestHandler;
+    private final FiltersListCallbackRequestHandler filtersListCallbackRequestHandler;
 
     @Override
     public UserState getPreviousUserState() {
@@ -23,7 +23,7 @@ public class FilterRemovedBackCallbackRequestHandler extends BackCallbackDataReq
 
     @Override
     public RequestHandlerImpl getPreviousRequestHandler() {
-        return subscriptionFiltersListCallbackRequestHandler;
+        return filtersListCallbackRequestHandler;
     }
 
     @Override

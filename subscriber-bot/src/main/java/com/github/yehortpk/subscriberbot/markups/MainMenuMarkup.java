@@ -10,8 +10,8 @@ import java.util.List;
 
 @Getter
 enum StartButtons {
-    ADD_SUBSCRIPTION_BUTTON("Add subscription", "add-subscription"),
-    SUBSCRIPTIONS_LIST_BUTTON("Subscriptions list", "subscriptions-list");
+    ADD_SUBSCRIPTION_BUTTON("Add filter", "add-filter"),
+    SUBSCRIPTIONS_LIST_BUTTON("Filters list", "filters");
 
     private final String text;
     private final String data;

@@ -7,7 +7,7 @@ import com.github.yehortpk.subscriberbot.dtos.VacancyShortDTO;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
-import com.github.yehortpk.subscriberbot.services.SubscriptionService;
+import com.github.yehortpk.subscriberbot.services.FilterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class SubscriptionFilterVacanciesListCallbackRequest extends CallbackDataRequestHandlerImpl{
-    private final SubscriptionService subscriptionService;
+public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandlerImpl{
+    private final FilterService filterService;
     private final StateService stateService;
 
     @Override
@@ -32,10 +32,10 @@ public class SubscriptionFilterVacanciesListCallbackRequest extends CallbackData
         int filterId = Integer.parseInt(filterDetails[0]);
 
         String text;
-        List<VacancyShortDTO> vacanciesByFilter = subscriptionService.getVacanciesByFilter(filterId);
+        List<VacancyShortDTO> vacanciesByFilter = filterService.getVacanciesByFilter(filterId);
         if (!vacanciesByFilter.isEmpty()) {
             Map<Long, String> companiesMap = new HashMap<>();
-            for (CompanyShortInfoDTO company : subscriptionService.getCompaniesList()) {
+            for (CompanyShortInfoDTO company : filterService.getCompaniesList()) {
                 companiesMap.computeIfAbsent(company.getCompanyId(), k -> company.getCompanyTitle());
             }
 

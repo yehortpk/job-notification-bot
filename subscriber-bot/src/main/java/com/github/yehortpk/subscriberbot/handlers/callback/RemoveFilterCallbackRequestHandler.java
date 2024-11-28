@@ -5,7 +5,7 @@ import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
-import com.github.yehortpk.subscriberbot.services.SubscriptionService;
+import com.github.yehortpk.subscriberbot.services.FilterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class RemoveFilterCallbackRequestHandler extends CallbackDataRequestHandlerImpl{
     private final StateService stateService;
-    private final SubscriptionService subscriptionService;
+    private final FilterService filterService;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {
@@ -27,7 +27,7 @@ public class RemoveFilterCallbackRequestHandler extends CallbackDataRequestHandl
         UserDTO user = userRequest.getUser();
         long chatId = user.getChatId();
 
-        subscriptionService.deleteFilter(filterId);
+        filterService.deleteFilter(filterId);
 
         user.setUserState(UserState.FILTER_REMOVED_STATE);
         stateService.saveUser(user);

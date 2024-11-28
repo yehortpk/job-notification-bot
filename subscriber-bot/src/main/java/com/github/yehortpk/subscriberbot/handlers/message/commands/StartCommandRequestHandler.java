@@ -27,7 +27,7 @@ public class StartCommandRequestHandler extends CommandRequestHandlerImpl{
 
         return SendMessage.builder()
                 .chatId(userRequest.getUser().getChatId())
-                .text("I can help you create and manage subscriptions to vacancies.")
+                .text("I can help you create and manage your filters.")
                 .replyMarkup(MainMenuMarkup.getMarkup())
                 .build();
     }

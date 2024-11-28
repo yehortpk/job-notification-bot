@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.List;
 
 public class FilterInfoMenuMarkup {
-    public static InlineKeyboardMarkup getMarkup(int filterId, int companyId) {
+    public static InlineKeyboardMarkup getMarkup(int filterId) {
         InlineKeyboardButton removeFilterButton = InlineKeyboardButton.builder()
                 .text("Remove filter")
                 .callbackData("remove=" + filterId)
@@ -14,7 +14,7 @@ public class FilterInfoMenuMarkup {
 
         InlineKeyboardButton vacanciesButton = InlineKeyboardButton.builder()
                 .text("Vacancies list by filter")
-                .callbackData(String.format("vacancies_list=%s:%s", filterId, companyId))
+                .callbackData(String.format("vacancies_list=%s", filterId))
                 .build();
 
         InlineKeyboardButton backButton = BackInlineMarkup.getButton("filter-info");

@@ -6,7 +6,7 @@ import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.StateRequestHandlerImpl;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
-import com.github.yehortpk.subscriberbot.services.SubscriptionService;
+import com.github.yehortpk.subscriberbot.services.FilterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -15,7 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 @RequiredArgsConstructor
 public class FilterAddedRequestCallbackHandler extends StateRequestHandlerImpl implements MessageRequestHandler {
     private final StateService stateService;
-    private final SubscriptionService subscriptionService;
+    private final FilterService filterService;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {
@@ -23,10 +23,9 @@ public class FilterAddedRequestCallbackHandler extends StateRequestHandlerImpl i
 
         UserDTO user = stateService.getUser(chatId);
         String latestCallbackData = user.popLatestCallbackData();
-        int companyId = Integer.parseInt(latestCallbackData.split("add-filter=")[1]);
         String filter = userRequest.getUpdate().getMessage().getText();
 
-        subscriptionService.addFilter(chatId, companyId, filter);
+        filterService.addFilter(chatId, filter);
 
         user.setUserState(UserState.FILTER_ADDED_STATE);
         user.addRequestCallbackData(latestCallbackData);

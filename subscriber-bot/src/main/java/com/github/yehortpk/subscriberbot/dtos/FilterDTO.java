@@ -8,7 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class FilterShortInfoDTO {
-    private int filterId;
+public class FilterDTO {
+    private long filterId;
+    private long clientId;
     private String filter;
 }
