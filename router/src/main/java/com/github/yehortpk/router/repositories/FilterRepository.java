@@ -8,10 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface FilterRepository extends JpaRepository<Filter, Long> {
-    @Query(value = "select * from filter where company_id=:companyId and client_id=:clientId", nativeQuery = true)
-    List<Filter> findByCompanyIdAndClientId(long companyId, long clientId);
+    @Query(value = "select * from filter where client_id=:clientId", nativeQuery = true)
+    List<Filter> findByClientId(long clientId);
 
-    @Modifying  // Required for update queries
-    @Query(value = "INSERT INTO filter (company_id, client_id, filter) VALUES (:companyId, :clientId, :filter)", nativeQuery = true)
-    void saveByRawIds(Long companyId, Long clientId, String filter);
+    @Modifying
+    @Query(value = "INSERT INTO filter (client_id, filter) VALUES (:clientId, :filter)", nativeQuery = true)
+    void saveByRawIds(Long clientId, String filter);
 }

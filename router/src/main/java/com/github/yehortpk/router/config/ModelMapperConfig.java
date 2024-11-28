@@ -19,7 +19,7 @@ public class ModelMapperConfig {
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
 
         modelMapper.addMappings(new CompanyToCompanyShortDTOMapper());
-        modelMapper.addMappings(new FilterToFilterShortInfoDTOMapper());
+        modelMapper.addMappings(new FilterToFilterDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyShortDTOMapper());
         modelMapper.addMappings(new DataPageToVacanciesPageDTOMapper());

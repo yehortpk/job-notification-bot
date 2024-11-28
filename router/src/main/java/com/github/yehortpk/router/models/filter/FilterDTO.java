@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 public class FilterDTO {
-    private long companyId;
+    private long filterId;
     private long clientId;
     private String filter;
 }

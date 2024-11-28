@@ -27,13 +27,12 @@ public class NotifierService {
     public void notifyUsers(VacancyDTO vacancy) {
         companyService.getSubscribers(vacancy.getCompanyID()).forEach((subscriber) -> {
             boolean isApplicable = true;
-            List<Filter> filters = filterService.findByCompanyIdAndClientId(
-                    vacancy.getCompanyID(), subscriber.getChatId());
+            List<Filter> filters = filterService.findByClientId(subscriber.getChatId());
 
             if (!filters.isEmpty()) {
                 for (Filter filter : filters) {
                     FilterParser filterParser = new FilterParser(filter.getFilter());
-                    if (filterParser.isVacancyApplicable(vacancy.getTitle())) {
+                    if (filterParser.isVacancyApplicable(vacancy.getCompanyTitle() + " " + vacancy.getTitle())) {
                         isApplicable = true;
                         break;
                     } else {

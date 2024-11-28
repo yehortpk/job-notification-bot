@@ -1,7 +1,6 @@
 package com.github.yehortpk.router.models.filter;
 
 import com.github.yehortpk.router.models.client.Client;
-import com.github.yehortpk.router.models.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,12 +19,9 @@ public class Filter {
 
     @ManyToOne(optional = false)
     @JoinColumn(
-            name="company_id", nullable=false, updatable=false)
-    private Company company;
-    @ManyToOne(optional = false)
-    @JoinColumn(
             name="client_id", nullable=false, updatable=false)
     private Client client;
+
     @Column(columnDefinition = "TEXT")
     private String filter;
 }
