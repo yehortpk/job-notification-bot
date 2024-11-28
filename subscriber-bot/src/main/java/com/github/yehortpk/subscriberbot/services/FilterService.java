@@ -1,7 +1,6 @@
 package com.github.yehortpk.subscriberbot.services;
 
 import com.github.yehortpk.subscriberbot.dtos.*;
-import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,26 +15,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class FilterService {
-    private final TelegramServiceUtil telegramServiceUtil;
     private final RestTemplate restTemplate = new RestTemplate();
-
-    @Value("${subscription-url}")
-    private String subscriptionURL;
 
     @Value("${filter-url}")
     private String filterURL;
-
-    @Value("${company-url}")
-    private String companyURL;
-
-    public List<CompanyShortInfoDTO> getCompaniesList() {
-        ParameterizedTypeReference<List<CompanyShortInfoDTO>> parameterizedTypeReference
-                = new ParameterizedTypeReference<>() {
-        };
-
-        return restTemplate.exchange(companyURL,
-                HttpMethod.GET, null, parameterizedTypeReference).getBody();
-    }
 
     public List<FilterDTO> getFiltersList(long chatId) {
         String finalUrl = filterURL + String.format("/chat/%s", chatId);

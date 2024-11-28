@@ -11,7 +11,8 @@ import java.util.List;
 @Getter
 enum StartButtons {
     ADD_SUBSCRIPTION_BUTTON("Add filter", "add-filter"),
-    SUBSCRIPTIONS_LIST_BUTTON("Filters list", "filters");
+    SUBSCRIPTIONS_LIST_BUTTON("Filters list", "filters"),
+    COMPANIES_LIST_BUTTON("Companies", "companies-list");
 
     private final String text;
     private final String data;

@@ -6,6 +6,7 @@ import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.dtos.VacancyShortDTO;
 import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
+import com.github.yehortpk.subscriberbot.services.CompanyService;
 import com.github.yehortpk.subscriberbot.services.StateService;
 import com.github.yehortpk.subscriberbot.services.FilterService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandlerImpl{
     private final FilterService filterService;
     private final StateService stateService;
+    private final CompanyService companyService;
 
     @Override
     public SendMessage handleRequest(UserRequestDTO userRequest) {
@@ -35,7 +37,7 @@ public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandl
         List<VacancyShortDTO> vacanciesByFilter = filterService.getVacanciesByFilter(filterId);
         if (!vacanciesByFilter.isEmpty()) {
             Map<Long, String> companiesMap = new HashMap<>();
-            for (CompanyShortInfoDTO company : filterService.getCompaniesList()) {
+            for (CompanyShortInfoDTO company : companyService.getCompaniesList()) {
                 companiesMap.computeIfAbsent(company.getCompanyId(), k -> company.getCompanyTitle());
             }
 
@@ -61,7 +63,7 @@ public class FilterVacanciesListCallbackRequest extends CallbackDataRequestHandl
         }
 
         UserDTO user = userRequest.getUser();
-        user.setUserState(UserState.FILTER_VACANCIES_LIST);
+        user.setUserState(UserState.FILTER_VACANCIES_LIST_STATE);
         user.addRequestCallbackData(callbackData);
         stateService.saveUser(user);
 

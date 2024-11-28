@@ -1,7 +1,7 @@
 package com.github.yehortpk.router.controllers;
 
 import com.github.yehortpk.router.models.company.CompanyDTO;
-import com.github.yehortpk.router.models.vacancy.VacancyDTO;
+import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
 import com.github.yehortpk.router.services.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/company")
 @RequiredArgsConstructor
-public class CompanyController {
+public class    CompanyController {
     private final CompanyService companyService;
     private final ModelMapper modelMapper;
 
@@ -28,8 +28,8 @@ public class CompanyController {
     }
 
     @GetMapping("/{company_id}/vacancies")
-    public List<VacancyDTO> getVacancies(@PathVariable("company_id") int companyId) {
+    public List<VacancyShortDTO> getVacancies(@PathVariable("company_id") int companyId) {
         return companyService.getVacancies(companyId).stream().map(vacancy ->
-                modelMapper.map(vacancy, VacancyDTO.class)).toList();
+                modelMapper.map(vacancy, VacancyShortDTO.class)).toList();
     }
 }
