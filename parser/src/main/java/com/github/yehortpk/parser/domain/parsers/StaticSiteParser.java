@@ -36,6 +36,6 @@ public abstract class StaticSiteParser extends SiteParserImpl {
                 .build();
 
         Document doc = Jsoup.parse(defaultPageConnector.connectToPage(pageConnectionParams).getBody());
-        return new PageDTO(pageUrl, pageId, doc);
+        return new PageDTO(pageUrl, pageId, data, doc);
     }
 }
