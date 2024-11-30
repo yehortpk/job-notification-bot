@@ -51,20 +51,16 @@ public class FilterService {
     public List<Vacancy> getVacanciesByFilter(long filterId) {
         Filter filter = findById(filterId).orElseThrow();
         List<Vacancy> allVacancies = vacancyService.getAllVacancies();
+        FilterParser filterParser = new FilterParser(filter.getFilter());
 
         List<Vacancy> result = new ArrayList<>();
         for (Vacancy vacancy : allVacancies) {
-            FilterParser filterParser = new FilterParser(filter.getFilter());
             if (filterParser.isVacancyApplicable(vacancy.getCompany().getTitle() + " " + vacancy.getTitle())) {
                 result.add(vacancy);
             }
         }
 
         return result;
-    }
-
-    public List<Filter> getFilters(long chatId) {
-        return findByClientId(chatId);
     }
 
     @Transactional
