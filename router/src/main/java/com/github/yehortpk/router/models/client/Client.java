@@ -1,6 +1,6 @@
 package com.github.yehortpk.router.models.client;
 
-import com.github.yehortpk.router.models.company.Company;
+import com.github.yehortpk.router.models.filter.Filter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +19,6 @@ public class Client {
     @ToString.Include
     @Id
     private long chatId;
-    @ManyToMany(mappedBy = "subscribers")
-    private List<Company> subscriptions;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.REMOVE)
+    private List<Filter> filters;
 }

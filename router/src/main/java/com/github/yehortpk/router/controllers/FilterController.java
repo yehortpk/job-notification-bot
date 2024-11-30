@@ -3,6 +3,7 @@ package com.github.yehortpk.router.controllers;
 import com.github.yehortpk.router.models.filter.Filter;
 import com.github.yehortpk.router.models.filter.FilterDTO;
 import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
+import com.github.yehortpk.router.services.ClientService;
 import com.github.yehortpk.router.services.FilterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -22,12 +23,13 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class FilterController {
     private final ModelMapper modelMapper;
     private final FilterService filterService;
+    private final ClientService clientService;
 
     @GetMapping("/chat/{chat_id}")
     public List<FilterDTO> getFilters(
             @PathVariable("chat_id") int chatId
     ) {
-        return filterService.getFilters(chatId)
+        return clientService.findById(chatId).getFilters()
                 .stream().map((filter) -> modelMapper.map(filter, FilterDTO.class)).toList();
     }
 
