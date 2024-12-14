@@ -9,6 +9,7 @@ services:
       - notifier-local-network
     ports:
       - "5005:5005"
+      - "8082:8080"
     environment:
       KAFKA_PARSER_TOPIC: vacancies
     depends_on:

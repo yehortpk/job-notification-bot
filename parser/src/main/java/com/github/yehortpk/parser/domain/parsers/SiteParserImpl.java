@@ -45,15 +45,12 @@ public abstract class SiteParserImpl implements SiteParser {
     protected CompanyDTO company;
     @Autowired
     protected PageConnector defaultPageConnector;
-    @Autowired
-    private ProgressManagerService progressManagerService;
+    private ProgressManagerService progressManagerService = new ProgressManagerService();
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
         int pagesCount;
-        String[] filePackages = this.getClass().getName().split("\\.");
-        String classname = filePackages[filePackages.length - 1];
-        progressManagerService.addBar(classname, 1);
+        progressManagerService.addBar(company.getCompanyId(), 1);
 
         // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
         try {
@@ -61,9 +58,9 @@ public abstract class SiteParserImpl implements SiteParser {
             pagesCount = siteMetadata.getPagesCount();
             company.setData(createData(siteMetadata.getRequestData()));
             company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
-            progressManagerService.changeBarStepsCount(classname, pagesCount);
+            progressManagerService.changeBarStepsCount(company.getCompanyId(), pagesCount);
         } catch (Exception e) {
-            progressManagerService.markStepError(classname, 0);
+            progressManagerService.markStepError(company.getCompanyId(), 0);
             throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
                     .formatted(company.getTitle(), e.getMessage()));
         }
@@ -91,14 +88,14 @@ public abstract class SiteParserImpl implements SiteParser {
                             pagesCounter.get())
                     );
                 }
-                vacancies.addAll(vacanciesFromPage);
+                progressManagerService.markStepDone(company.getCompanyId(), pagesCounter.get());
                 log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
-                progressManagerService.markStepDone(classname, pagesCounter.get());
+                vacancies.addAll(vacanciesFromPage);
             } catch (InterruptedException| ExecutionException e) {
-                progressManagerService.markStepError(classname, pagesCounter.get());
+                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
                 log.error("company: {}, error: {} ", this.company.getTitle(), e.getCause().getMessage());
             } catch (NoVacanciesOnPageException e) {
-                progressManagerService.markStepError(classname, pagesCounter.get());
+                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
                 log.error("company: {}, error: {} ", this.company.getTitle(), e.getMessage());
             } finally {
                 pagesCounter.set(pagesCounter.get() + 1);

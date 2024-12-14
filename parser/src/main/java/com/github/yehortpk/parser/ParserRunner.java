@@ -6,9 +6,7 @@ import com.github.yehortpk.parser.services.NotifierService;
 import com.github.yehortpk.parser.services.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -24,14 +22,13 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ParserRunner implements ApplicationRunner {
+public class ParserRunner extends Thread{
     private final VacancyService vacancyService;
     private final CompanyService companyService;
     private final NotifierService notifierService;
-    private final ConfigurableApplicationContext context;
 
     @Override
-    public void run (ApplicationArguments args) {
+    public void run () {
         Set<VacancyDTO> parsedVacancies = vacancyService.parseAllVacancies();
         Set<VacancyDTO> newVacancies = new HashSet<>();
         Set<String> outdatedVacancies = new HashSet<>();
@@ -69,8 +66,6 @@ public class ParserRunner implements ApplicationRunner {
         if (!outdatedVacancies.isEmpty()) {
             notifierService.notifyOutdatedVacancies(outdatedVacancies);
         }
-
-        context.close();
     }
 }
 
