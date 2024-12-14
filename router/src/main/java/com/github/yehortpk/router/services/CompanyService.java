@@ -1,6 +1,5 @@
 package com.github.yehortpk.router.services;
 
-import com.github.yehortpk.router.models.client.Client;
 import com.github.yehortpk.router.models.company.Company;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.repositories.CompanyRepository;
@@ -27,16 +26,4 @@ public class CompanyService {
         return company.getVacancies();
     }
 
-    public Set<Client> getSubscribers(int companyId) {
-        Company company = companyRepository.findByCompanyId(companyId);
-        return company.getSubscribers();
-    }
-
-    public Company findCompanyById(long companyId) {
-        return companyRepository.findByCompanyId(companyId);
-    }
-
-    public void saveCompany(Company company) {
-        companyRepository.save(company);
-    }
 }
