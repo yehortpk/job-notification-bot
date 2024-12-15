@@ -34,7 +34,7 @@ public class ProgressManagerService {
             this.title = title;
             this.totalSteps = totalSteps;
             this.steps = new ProgressStepEnum[totalSteps];
-            Arrays.fill(steps, ProgressStepEnum.STEP_UNKNOWN);
+            Arrays.fill(steps, ProgressStepEnum.STEP_PENDING);
             this.currentPosition = 0;
         }
     }
@@ -98,7 +98,7 @@ public class ProgressManagerService {
                 stringProgressBarEntry.getKey(),
                 value.title,
                 Arrays.stream(value.steps).map(
-                        (ps) -> ps == null? ProgressStepEnum.STEP_UNKNOWN.getValue() : ps.getValue()
+                        (ps) -> ps == null? ProgressStepEnum.STEP_PENDING.getValue() : ps.getValue()
                 ).toList()
             ));
         }

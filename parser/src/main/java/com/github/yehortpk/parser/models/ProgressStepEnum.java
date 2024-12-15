@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ProgressStepEnum {
-    STEP_UNKNOWN(-1),
+    STEP_PENDING(-1),
     STEP_ERROR(0),
     STEP_DONE(1);
 
