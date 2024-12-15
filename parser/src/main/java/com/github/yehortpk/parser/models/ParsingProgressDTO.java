@@ -1,21 +1,21 @@
 package com.github.yehortpk.parser.models;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
-@Setter
+@AllArgsConstructor
+@Builder
 public class ParsingProgressDTO {
+    @Setter
     private List<ParserProgress> parsers = new ArrayList<>();
     private boolean finished = false;
-    public record ParserProgress(int parserID, List<Integer> steps) {}
+    private int parsedVacanciesCnt = 0;
+    private int newVacanciesCnt = 0;
+    private int outdatedVacanciesCnt = 0;
 
-    public void addParserProgress(int parserID, List<Integer> steps) {
-        parsers.add(new ParserProgress(parserID, steps));
-    }
+    public record ParserProgress(int parserID, String parserTitle, List<Integer> steps) {}
 }

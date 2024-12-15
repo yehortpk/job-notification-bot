@@ -45,12 +45,13 @@ public abstract class SiteParserImpl implements SiteParser {
     protected CompanyDTO company;
     @Autowired
     protected PageConnector defaultPageConnector;
+    @Autowired
     private ProgressManagerService progressManagerService = new ProgressManagerService();
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
         int pagesCount;
-        progressManagerService.addBar(company.getCompanyId(), 1);
+        progressManagerService.addBar(company.getCompanyId(), company.getTitle(), 1);
 
         // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
         try {

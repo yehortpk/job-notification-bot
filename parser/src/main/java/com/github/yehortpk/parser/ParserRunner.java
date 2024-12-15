@@ -3,6 +3,7 @@ package com.github.yehortpk.parser;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import com.github.yehortpk.parser.services.CompanyService;
 import com.github.yehortpk.parser.services.NotifierService;
+import com.github.yehortpk.parser.services.ProgressManagerService;
 import com.github.yehortpk.parser.services.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class ParserRunner extends Thread{
     private final VacancyService vacancyService;
     private final CompanyService companyService;
     private final NotifierService notifierService;
+    private final ProgressManagerService progressManagerService;
 
     @Override
     public void run () {
@@ -50,6 +52,10 @@ public class ParserRunner extends Thread{
                         vacancyService.calculateOutdatedVacanciesIds(parsedCompanyVacanciesSet, persistedCompanyVacancies));
             }
         });
+
+        progressManagerService.setParsedVacanciesCnt(parsedVacancies.size());
+        progressManagerService.setNewVacanciesCnt(newVacancies.size());
+        progressManagerService.setOutdatedVacanciesCnt(outdatedVacancies.size());
 
         String parsingResultOutput = String.format("""
                 Parsing completed.
