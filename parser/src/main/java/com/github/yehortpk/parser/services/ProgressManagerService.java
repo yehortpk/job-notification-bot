@@ -21,6 +21,8 @@ public class ProgressManagerService {
     private int newVacanciesCnt = 0;
     @Setter
     private int outdatedVacanciesCnt = 0;
+    @Setter
+    private boolean finished = false;
 
     public static class ProgressBar {
         int id;
@@ -55,13 +57,6 @@ public class ProgressManagerService {
         progressBar.totalSteps = totalSteps;
         progressBar.steps = new ProgressStepEnum[totalSteps];
         bars.replace(id, progressBar);
-    }
-
-    private boolean isParsingCompleted() {
-        if (bars.isEmpty()) {
-            return false;
-        }
-        return bars.values().stream().allMatch((pb)->pb.currentPosition == pb.totalSteps);
     }
 
     public void markStepDone(int id, int step) {
@@ -105,7 +100,7 @@ public class ProgressManagerService {
 
         return ParsingProgressDTO.builder()
                 .parsers(parsers)
-                .finished(isParsingCompleted())
+                .finished(finished)
                 .parsedVacanciesCnt(parsedVacanciesCnt)
                 .newVacanciesCnt(newVacanciesCnt)
                 .outdatedVacanciesCnt(outdatedVacanciesCnt)

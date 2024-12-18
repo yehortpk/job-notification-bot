@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 /**
  * This class provide methods for parsing and identifying outdated/new vacancies
@@ -79,18 +78,5 @@ public class VacancyService {
         result.removeIf(vacancyDTO -> persistedVacanciesUrls.contains(vacancyDTO.getLink()));
 
         return result;
-    }
-
-    /**
-     * Calculate difference between persistent and parsed vacancies
-     * @param parsedVacancies - total vacancies set
-     * @param persistedVacanciesUrls - persistent vacancies set
-     * @return set of outdated vacancies
-     */
-    public Set<String> calculateOutdatedVacanciesIds(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
-        Set<String> parsedVacanciesUrls = parsedVacancies.stream().map(VacancyDTO::getLink).collect(Collectors.toSet());
-
-        persistedVacanciesUrls.removeAll(parsedVacanciesUrls);
-        return persistedVacanciesUrls;
     }
 }
