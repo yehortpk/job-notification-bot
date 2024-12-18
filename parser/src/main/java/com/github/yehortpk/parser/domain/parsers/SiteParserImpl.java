@@ -84,10 +84,7 @@ public abstract class SiteParserImpl implements SiteParser {
                 PageDTO page = future.get();
                 Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
                 if (vacanciesFromPage.isEmpty()) {
-                    throw new NoVacanciesOnPageException(String.format(
-                            "There is no parsed vacancies on company:%s, page:%d", this.company.getTitle(),
-                            pagesCounter.get())
-                    );
+                    throw new NoVacanciesOnPageException(pagesCounter.get());
                 }
                 progressManagerService.markStepDone(company.getCompanyId(), pagesCounter.get());
                 log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
@@ -96,6 +93,9 @@ public abstract class SiteParserImpl implements SiteParser {
                 progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
                 log.error("company: {}, error: {} ", this.company.getTitle(), e.getCause().getMessage());
             } catch (NoVacanciesOnPageException e) {
+                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
+                log.error("company: {}, no vacancies on page: {} ", this.company.getTitle(), e.getPageId());
+            } catch (Exception e) {
                 progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
                 log.error("company: {}, error: {} ", this.company.getTitle(), e.getMessage());
             } finally {
