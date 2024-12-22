@@ -1,11 +1,7 @@
-package com.github.yehortpk.parser;
+package com.github.yehortpk.parser.services;
 
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
 import com.github.yehortpk.parser.models.VacancyDTO;
-import com.github.yehortpk.parser.services.CompanyService;
-import com.github.yehortpk.parser.services.NotifierService;
-import com.github.yehortpk.parser.services.ProgressManagerService;
-import com.github.yehortpk.parser.services.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -76,6 +72,7 @@ public class ParserRunnerService {
 
     public void runParsers() throws ParsingAlreadyStartedException {
         if (runnerThread == null || !runnerThread.isAlive()) {
+            progressManagerService.initialize();
             runnerThread = new Thread(run());
             runnerThread.start();
         } else {

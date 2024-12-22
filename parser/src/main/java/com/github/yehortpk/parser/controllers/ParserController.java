@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.controllers;
 
-import com.github.yehortpk.parser.ParserRunnerService;
+import com.github.yehortpk.parser.services.ParserRunnerService;
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

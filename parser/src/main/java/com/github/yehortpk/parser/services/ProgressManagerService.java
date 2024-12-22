@@ -4,25 +4,29 @@ import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import com.github.yehortpk.parser.models.ProgressStepEnum;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Service
+@Service("progressManagerService")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ProgressManagerService {
     @Getter
-    private final Map<Integer, ProgressBar> bars = new LinkedHashMap<>();
-    private final ReentrantLock barsLock = new ReentrantLock();
+    private Map<Integer, ProgressBar> bars;
+    private ReentrantLock barsLock;
+    private final ReentrantLock progressLock = new ReentrantLock();
 
     @Setter
-    private int parsedVacanciesCnt = 0;
+    private int parsedVacanciesCnt;
     @Setter
-    private int newVacanciesCnt = 0;
+    private int newVacanciesCnt;
     @Setter
-    private int outdatedVacanciesCnt = 0;
+    private int outdatedVacanciesCnt;
     @Setter
-    private boolean finished = false;
+    private boolean finished;
 
     public static class ProgressBar {
         int id;
@@ -39,6 +43,22 @@ public class ProgressManagerService {
             Arrays.fill(steps, ProgressStepEnum.STEP_PENDING);
             this.currentPosition = 0;
         }
+    }
+
+    public ProgressManagerService() {
+        initialize();
+    }
+
+    public void initialize() {
+        progressLock.lock();
+        this.parsedVacanciesCnt = 0;
+        this.newVacanciesCnt = 0;
+        this.outdatedVacanciesCnt = 0;
+        this.finished = false;
+
+        this.bars = new LinkedHashMap<>();
+        this.barsLock = new ReentrantLock();
+        progressLock.unlock();
     }
 
     public void addBar(int id, String title, int totalSteps) {

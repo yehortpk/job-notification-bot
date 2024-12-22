@@ -46,7 +46,7 @@ public abstract class SiteParserImpl implements SiteParser {
     @Autowired
     protected PageConnector defaultPageConnector;
     @Autowired
-    private ProgressManagerService progressManagerService = new ProgressManagerService();
+    private ProgressManagerService progressManagerService;
 
     @Override
     public Set<VacancyDTO> parseAllVacancies() {
