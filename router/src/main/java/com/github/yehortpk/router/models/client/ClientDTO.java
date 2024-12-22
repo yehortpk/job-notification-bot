@@ -1,11 +1,9 @@
 package com.github.yehortpk.router.models.client;
 
-import com.github.yehortpk.router.models.company.CompanyDTO;
+import com.github.yehortpk.router.models.filter.FilterDTO;
 import lombok.*;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -15,5 +13,5 @@ import java.util.stream.Collectors;
 @ToString
 public class ClientDTO {
     private long chatId;
-    private Set<CompanyDTO> subscriptions;
+    private Set<FilterDTO> filters;
 }

@@ -58,28 +58,28 @@ public class FilterParser {
         }
     }
 
-    public boolean isVacancyApplicable(String vacancyTitle) {
-        if(companyMatch != null && !vacancyTitle.startsWith(companyMatch)) {
+    public boolean isStringApplicable(String string) {
+        if(companyMatch != null && !string.startsWith(companyMatch)) {
             return false;
         }
 
-        vacancyTitle = vacancyTitle.toLowerCase();
+        string = string.toLowerCase();
 
         for (String negativeMatch : negativeMatches) {
-            if (vacancyTitle.contains(negativeMatch)) {
+            if (string.contains(negativeMatch)) {
                 return false;
             }
         }
 
         for (String defaultMatch : mandatoryMatches) {
-            if (!vacancyTitle.contains(defaultMatch)) {
+            if (!string.contains(defaultMatch)) {
                 return false;
             }
         }
 
         boolean result = true;
         for (String multiChoiceMatch : multiChoiceMatches) {
-            if (vacancyTitle.contains(multiChoiceMatch)) {
+            if (string.contains(multiChoiceMatch)) {
                 return true;
             }
             result = false;

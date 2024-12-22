@@ -46,6 +46,7 @@ public class VacancyController {
     }
 
     @GetMapping(params = "byCompany=true")
+    @CrossOrigin("http://127.0.0.1:4200")
     public Map<Long, Set<String>> getPersistedVacanciesIdsByCompanyId() {
         return vacancyService.getAllVacancies().stream().collect(Collectors.groupingBy(
                 (vacancy -> (long) vacancy.getCompany().getCompanyId()),

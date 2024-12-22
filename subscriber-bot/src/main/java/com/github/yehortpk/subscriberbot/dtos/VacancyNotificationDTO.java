@@ -9,6 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class VacancyNotificationDTO {
     private long chatId;
+    private long filterId;
+    private String filter;
     private String companyTitle;
     private String vacancyTitle;
     private int minSalary;

@@ -4,7 +4,6 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { ParsingService } from '../service/parsing.service';
 import { ParsingProgress } from './progress-bar.model';
-import { catchError, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-parser-progress',
@@ -43,7 +42,6 @@ export class ParserProgressComponent implements OnInit {
     this.progressInterval = setInterval(() => {
         this.parsingService.getProgress().subscribe(
         (pr) => {
-          console.log(pr);
           this.progress = pr;
           if (pr.finished) {
             clearInterval(this.progressInterval);

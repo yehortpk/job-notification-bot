@@ -29,6 +29,9 @@ public class NotifierService {
         String linkPart = String.format("<a href='%s'>%s</a>\n", vacancy.getLink(), vacancy.getLink());
         stringBuilder.append(linkPart);
 
+        String filterPart = String.format("Filter: <code>%s</code>\n", vacancy.getFilter());
+        stringBuilder.append(filterPart);
+
         return stringBuilder.toString();
     }
 }

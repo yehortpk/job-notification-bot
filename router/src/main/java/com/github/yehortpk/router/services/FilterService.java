@@ -22,10 +22,6 @@ public class FilterService {
     private final FilterRepository filterRepository;
     private final VacancyService vacancyService;
 
-    public List<Filter> findByClientId(long clientId) {
-        return filterRepository.findByClientId(clientId);
-    }
-
     public Optional<Filter> findById(long filterId) {
         return filterRepository.findById(filterId);
     }
@@ -55,7 +51,7 @@ public class FilterService {
 
         List<Vacancy> result = new ArrayList<>();
         for (Vacancy vacancy : allVacancies) {
-            if (filterParser.isVacancyApplicable(vacancy.getCompany().getTitle() + " " + vacancy.getTitle())) {
+            if (filterParser.isStringApplicable(vacancy.getCompany().getTitle() + " " + vacancy.getTitle())) {
                 result.add(vacancy);
             }
         }
@@ -66,5 +62,9 @@ public class FilterService {
     @Transactional
     public void addFilter(FilterDTO filter) {
         addRawFilter(filter.getClientId(), filter.getFilter());
+    }
+
+    public List<Filter> getAllFilters() {
+        return filterRepository.findAll();
     }
 }
