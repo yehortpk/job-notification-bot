@@ -1,0 +1,43 @@
+<div class="status-bar-container">
+  <div *ngIf="progress.parsers.length == 0" class="no-progress-message">
+    No parsing process started
+  </div>
+  <div *ngIf="progress.parsers.length > 0">
+    <div 
+      *ngFor="let bar of progress.parsers; let barIndex = index" 
+      class="status-bar"
+    >
+      <div class="status-bar-header">
+        <div *ngIf="bar.parserID" class="status-bar-title">
+          {{ bar.parserTitle }}
+        </div>
+        <div class="steps-wrapper">
+          <div class="steps">
+            <div 
+              *ngFor="let step of bar.steps; let stepIndex = index"
+              class="step"
+              [ngClass]="{
+                'step-pending': step === -1,
+                'step-done': step === 1,
+                'step-error': step === 0,
+                'last-step': stepIndex === bar.steps.length - 1
+              }"
+            >
+              <div class="step-indicator">
+                {{ stepIndex + 1 }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>Parsed vacancies: {{ progress.total }}</div>
+    <div>New vacancies: {{ progress.new }}</div>
+    <div>Outdated vacancies: {{ progress.outdated }}</div>
+  </div>
+  <button 
+    (click)="startParsing()"
+  >
+    Start parsing
+  </button>
+</div>
