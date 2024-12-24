@@ -46,14 +46,9 @@ public class FilterService {
         restTemplate.postForEntity(filterURL, new FilterDTO(0, chatId, filter), Void.class);
     }
 
-    public List<VacancyShortDTO> getVacanciesByFilter(int filterId) {
-        String finalURL =  filterURL + String.format("/%s/vacancies", filterId);
+    public VacanciesPageDTO getVacanciesByFilter(int filterId, int pageId) {
+        String finalURL =  filterURL + String.format("/%s/vacancies?page=%s", filterId, pageId);
 
-        ParameterizedTypeReference<List<VacancyShortDTO>> parameterizedTypeReference
-                = new ParameterizedTypeReference<>() {
-        };
-
-        return restTemplate.exchange(finalURL,
-                HttpMethod.GET, null, parameterizedTypeReference).getBody();
+        return restTemplate.getForEntity(finalURL, VacanciesPageDTO.class).getBody();
     }
 }

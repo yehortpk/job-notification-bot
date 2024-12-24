@@ -1,4 +1,4 @@
-package com.github.yehortpk.router.models.vacancy;
+package com.github.yehortpk.subscriberbot.dtos;
 
 import lombok.Builder;
 import lombok.Data;

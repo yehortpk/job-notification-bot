@@ -23,6 +23,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new VacancyToVacancyDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyShortDTOMapper());
         modelMapper.addMappings(new DataPageToVacanciesPageDTOMapper());
+        modelMapper.addMappings(new VacancyToVacancyCompanyDTOMapper());
 
         return modelMapper;
     }
