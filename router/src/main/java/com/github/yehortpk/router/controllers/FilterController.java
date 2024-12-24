@@ -2,7 +2,8 @@ package com.github.yehortpk.router.controllers;
 
 import com.github.yehortpk.router.models.filter.Filter;
 import com.github.yehortpk.router.models.filter.FilterDTO;
-import com.github.yehortpk.router.models.vacancy.VacancyShortDTO;
+import com.github.yehortpk.router.models.vacancy.VacanciesPageDTO;
+import com.github.yehortpk.router.models.vacancy.VacancyCompanyDTO;
 import com.github.yehortpk.router.services.ClientService;
 import com.github.yehortpk.router.services.FilterService;
 import lombok.RequiredArgsConstructor;
@@ -51,8 +52,32 @@ public class FilterController {
     }
 
     @GetMapping("/{filter_id}/vacancies")
-    public List<VacancyShortDTO> getVacanciesByFilter(@PathVariable("filter_id") long filterId) {
-        return filterService.getVacanciesByFilter(filterId).stream().map(vacancy ->
-                modelMapper.map(vacancy, VacancyShortDTO.class)).toList();
+    public VacanciesPageDTO getVacanciesByFilter(@PathVariable("filter_id") long filterId,
+                                                 @RequestParam(value = "page") int pageId,
+                                                 @RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize) {
+        if (pageId <= 0) {
+            throw new IllegalArgumentException("page parameter could not be less then 1");
+        }
+
+        List<VacancyCompanyDTO> filteredVacancies = filterService.getVacanciesByFilter(filterId).stream()
+                .map(vac -> modelMapper.map(vac, VacancyCompanyDTO.class)).toList();
+
+        int totalSize = filteredVacancies.size();
+        int totalPages = Math.max((int) Math.ceil((double)totalSize / pageSize), 1);
+
+        if (pageId > totalPages) {
+            throw new IllegalArgumentException("page parameter could not be greater then total pages count");
+        }
+
+        int start = Math.max(0, pageId - 1) * pageSize;
+        int end = start + Math.min(totalSize - start, pageSize);
+
+        return VacanciesPageDTO.builder()
+                .vacancies(filteredVacancies.subList(start, end))
+                .currentPage(pageId)
+                .totalVacancies(totalSize)
+                .pageSize(pageSize)
+                .totalPages(totalPages)
+                .build();
     }
 }
