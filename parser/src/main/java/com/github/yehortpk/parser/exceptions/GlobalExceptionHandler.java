@@ -32,9 +32,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new CustomErrorResponse(ex.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllExceptions(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
-
 }
