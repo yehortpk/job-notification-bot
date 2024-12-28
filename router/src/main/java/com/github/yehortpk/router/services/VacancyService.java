@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -59,8 +60,9 @@ public class VacancyService {
         vacancyRepository.deleteById(id);
     }
 
-    public Page<Vacancy> getVacanciesByPage(int pageId, int pageSize) {
-        return vacancyRepository.findAll(PageRequest.of(pageId, pageSize));
+    public Page<Vacancy> getVacanciesByPage(int pageId, int pageSize, String sortField, Sort.Direction direction) {
+        return vacancyRepository.findAll(PageRequest.of(pageId, pageSize,
+                Sort.by(direction, sortField)));
     }
 
     public void removeVacanciesByUrlsIn(List<String> urls) {

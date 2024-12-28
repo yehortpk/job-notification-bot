@@ -5,8 +5,10 @@ import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
 import com.github.yehortpk.router.services.VacancyService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,14 +41,28 @@ public class VacancyController {
     @GetMapping
     @CrossOrigin("http://localhost:4200")
     public VacanciesPageDTO getVacanciesByPage(@RequestParam(value = "page") int pageId,
-                                                @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
+                                               @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                               @RequestParam(value = "sortBy", defaultValue = "parsedAt") String sortBy,
+                                               @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir){
 
-        Page<Vacancy> vacanciesOnPage = vacancyService.getVacanciesByPage(pageId, pageSize);
+        // Check if field exists in Vacancy entity
+        if (!PropertyUtils.isReadable(new Vacancy(), sortBy)) {
+            throw new IllegalArgumentException(String.format("Property %s doesn't exist in the sorted entity", sortBy));
+        }
+
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.valueOf(sortDir);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Use only ASC/DESC for sortDir property");
+        }
+
+        Page<Vacancy> vacanciesOnPage = vacancyService.getVacanciesByPage(
+                pageId, pageSize, sortBy, direction);
         return modelMapper.getTypeMap(Page.class, VacanciesPageDTO.class).map(vacanciesOnPage);
     }
 
     @GetMapping(params = "byCompany=true")
-    @CrossOrigin("http://localhost:4200")
     public Map<Long, Set<String>> getPersistedVacanciesUrlsByCompanyId() {
         return vacancyService.getAllVacancies().stream().collect(Collectors.groupingBy(
                 (vacancy -> (long) vacancy.getCompany().getCompanyId()),

@@ -8,9 +8,12 @@ import com.github.yehortpk.router.models.vacancy.VacancyCompanyDTO;
 import com.github.yehortpk.router.services.ClientService;
 import com.github.yehortpk.router.services.FilterService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.apache.commons.beanutils.BeanComparator;
 
 import java.util.Comparator;
 import java.util.List;
@@ -58,13 +61,32 @@ public class FilterController {
     @GetMapping("/{filter_id}/vacancies")
     public VacanciesPageDTO getVacanciesByFilter(@PathVariable("filter_id") long filterId,
                                                  @RequestParam(value = "page") int pageId,
-                                                 @RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize) {
+                                                 @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                                 @RequestParam(value = "sortBy", defaultValue = "parsedAt") String sortBy,
+                                                 @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir) {
+        // Check if field exists in Vacancy entity
+        if (!PropertyUtils.isReadable(new Vacancy(), sortBy)) {
+            throw new IllegalArgumentException(String.format("Property %s doesn't exist in the sorted entity", sortBy));
+        }
+
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.valueOf(sortDir);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Use only ASC/DESC for sortDir property");
+        }
+
         if (pageId <= 0) {
             throw new IllegalArgumentException("page parameter could not be less then 1");
         }
 
+        Comparator<Vacancy> comparator = new BeanComparator<>(sortBy);
+        if (direction.isDescending()) {
+            comparator = comparator.reversed();
+        }
+
         List<VacancyCompanyDTO> filteredVacancies = filterService.getVacanciesByFilter(filterId).stream()
-                .sorted(Comparator.comparing(Vacancy::getParsedAt).reversed())
+                .sorted(comparator)
                 .map(vac -> modelMapper.map(vac, VacancyCompanyDTO.class)).toList();
 
         int totalSize = filteredVacancies.size();
