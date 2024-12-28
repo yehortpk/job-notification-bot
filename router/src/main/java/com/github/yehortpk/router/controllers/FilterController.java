@@ -3,6 +3,7 @@ package com.github.yehortpk.router.controllers;
 import com.github.yehortpk.router.models.filter.Filter;
 import com.github.yehortpk.router.models.filter.FilterDTO;
 import com.github.yehortpk.router.models.vacancy.VacanciesPageDTO;
+import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.models.vacancy.VacancyCompanyDTO;
 import com.github.yehortpk.router.services.ClientService;
 import com.github.yehortpk.router.services.FilterService;
@@ -11,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -20,6 +22,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
  */
 @RestController
 @RequestMapping("/filter")
+
+@CrossOrigin("http://localhost:4200")
 @RequiredArgsConstructor
 public class FilterController {
     private final ModelMapper modelMapper;
@@ -60,6 +64,7 @@ public class FilterController {
         }
 
         List<VacancyCompanyDTO> filteredVacancies = filterService.getVacanciesByFilter(filterId).stream()
+                .sorted(Comparator.comparing(Vacancy::getParsedAt).reversed())
                 .map(vac -> modelMapper.map(vac, VacancyCompanyDTO.class)).toList();
 
         int totalSize = filteredVacancies.size();

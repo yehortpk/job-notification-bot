@@ -37,16 +37,16 @@ public class VacancyController {
     }
 
     @GetMapping
-    @CrossOrigin("http://127.0.0.1:4200")
+    @CrossOrigin("http://localhost:4200")
     public VacanciesPageDTO getVacanciesByPage(@RequestParam(value = "page") int pageId,
-                                                @RequestParam(value = "pageSize", required = false, defaultValue = "10") int pageSize){
+                                                @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
 
         Page<Vacancy> vacanciesOnPage = vacancyService.getVacanciesByPage(pageId, pageSize);
         return modelMapper.getTypeMap(Page.class, VacanciesPageDTO.class).map(vacanciesOnPage);
     }
 
     @GetMapping(params = "byCompany=true")
-    @CrossOrigin("http://127.0.0.1:4200")
+    @CrossOrigin("http://localhost:4200")
     public Map<Long, Set<String>> getPersistedVacanciesUrlsByCompanyId() {
         return vacancyService.getAllVacancies().stream().collect(Collectors.groupingBy(
                 (vacancy -> (long) vacancy.getCompany().getCompanyId()),
