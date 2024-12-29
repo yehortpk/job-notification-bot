@@ -92,7 +92,7 @@ public class ProxyService {
 
     public synchronized void filterValidProxies() {
         if (!isValidated) {
-            log.info("Validate proxies... It may take 30 sec");
+            log.info("Validate proxies... This may take up to 30 sec");
 
             @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
             final int EXECUTOR_SERVICE_TIMEOUT = 30;

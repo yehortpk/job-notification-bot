@@ -8,13 +8,32 @@ import { CommonModule } from '@angular/common';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { TruncatePipe } from '../pipe/truncate.pipe';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { Filter } from '../type/filter.type';
+import { FilterService } from '../service/filter.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatSortModule, MatPaginatorModule]
+  imports: [
+    CommonModule, 
+    MatTableModule, 
+    MatSortModule, 
+    MatPaginatorModule, 
+    MatRadioModule,
+    FormsModule,
+    MatMenuModule,
+    MatButtonModule,
+    TruncatePipe,
+    MatSelectModule
+  ]
 })
 export class DashboardComponent implements OnInit {
   vacancies: Vacancy[] = []
@@ -22,6 +41,7 @@ export class DashboardComponent implements OnInit {
   pageSize!: number
   totalVacancies: number = 0
   totalPages: number = 0
+  filters: Filter[] = []
 
   displayedColumns: string[] = ['title', 'minSalary', 'maxSalary', 'company', 'parsedAt'];
   dataSource: MatTableDataSource<Vacancy> = new MatTableDataSource();
@@ -29,6 +49,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     
     private vacancyService: VacancyService,
+    private filterService: FilterService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -36,6 +57,20 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {
       this.requestVacancies(params);
+    });
+
+    this.requestFilters()
+  }
+
+  requestFilters() {
+    this.filterService.getAllFilters().subscribe({
+      next: (response) => {
+        response.unshift({filterId: null, filter: "Not selected"});
+        this.filters = response;
+      },
+      error: (error) => {
+        console.error('An error occurred:', error);
+      }
     });
   }
 
@@ -105,13 +140,15 @@ export class DashboardComponent implements OnInit {
 
     this.totalPages = response.totalPages;
     this.totalVacancies = response.totalVacancies;
-    this.pageSize = Math.round(this.totalVacancies/this.totalPages);
   }
 
   onPageChange(event: PageEvent) {
     this.router.navigate(["/dashboard"], {
       relativeTo: this.route,
-      queryParams: { page: event.pageIndex, pageSize: event.pageSize},
+      queryParams: { 
+        page: event.pageIndex, 
+        pageSize: event.pageSize
+      },
       queryParamsHandling: 'merge'
     });
   }
@@ -126,5 +163,16 @@ export class DashboardComponent implements OnInit {
       },
       queryParamsHandling: 'merge'
     });
-}
+  }
+
+  onFilterChange(event: MatSelectChange) {
+    this.router.navigate(["/dashboard"], {
+      relativeTo: this.route,
+      queryParams: { 
+        page: 0,
+        filter: event.value
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
 }

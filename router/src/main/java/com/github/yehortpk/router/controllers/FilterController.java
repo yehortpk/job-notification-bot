@@ -41,6 +41,12 @@ public class FilterController {
                 .stream().map((filter) -> modelMapper.map(filter, FilterDTO.class)).toList();
     }
 
+    @GetMapping
+    public List<FilterDTO> getAllFilters() {
+        return filterService.getAllFilters()
+                .stream().map((filter) -> modelMapper.map(filter, FilterDTO.class)).toList();
+    }
+
     @GetMapping("/{filter_id}")
     public FilterDTO getFilter(@PathVariable("filter_id") long filterId) {
         Filter filter = filterService.findById(filterId).orElseThrow(() ->
@@ -76,8 +82,8 @@ public class FilterController {
             throw new IllegalArgumentException("Use only ASC/DESC for sortDir property");
         }
 
-        if (pageId <= 0) {
-            throw new IllegalArgumentException("page parameter could not be less then 1");
+        if (pageId < 0) {
+            throw new IllegalArgumentException("page parameter could not be less then 0");
         }
 
         Comparator<Vacancy> comparator = new BeanComparator<>(sortBy);
@@ -96,7 +102,7 @@ public class FilterController {
             throw new IllegalArgumentException("page parameter could not be greater then total pages count");
         }
 
-        int start = Math.max(0, pageId - 1) * pageSize;
+        int start = pageId * pageSize;
         int end = start + Math.min(totalSize - start, pageSize);
 
         return VacanciesPageDTO.builder()
