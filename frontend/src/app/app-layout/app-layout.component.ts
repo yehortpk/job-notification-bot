@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './app-layout.component.html',
   styleUrls: ['./app-layout.component.css'],
   standalone: true,
-  imports: [RouterOutlet, CommonModule]
+  imports: [RouterOutlet, CommonModule, RouterModule]
 })
 export class AppLayoutComponent {
   dark: boolean = false;
