@@ -32,7 +32,7 @@ public abstract class StaticSiteParser extends SiteParserImpl {
                 .data(data)
                 .headers(company.getHeaders())
                 .pageUrl(pageUrl)
-                .delay(pageId * DELAY_SEC * 1000)
+                .delay(pageId * setSecIntervalBetweenPages() * 1000)
                 .build();
 
         Document doc = Jsoup.parse(defaultPageConnector.connectToPage(pageConnectionParams).getBody());

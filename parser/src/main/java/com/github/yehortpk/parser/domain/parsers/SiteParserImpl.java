@@ -84,7 +84,7 @@ public abstract class SiteParserImpl implements SiteParser {
                 PageDTO page = future.get();
                 Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
                 if (vacanciesFromPage.isEmpty()) {
-                    throw new NoVacanciesOnPageException(pagesCounter.get());
+                    throw new NoVacanciesOnPageException(pagesCounter.get() + 1);
                 }
                 progressManagerService.markStepDone(company.getCompanyId(), pagesCounter.get());
                 log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
@@ -208,6 +208,11 @@ public abstract class SiteParserImpl implements SiteParser {
     }
 
     protected int getPagesCount(Document doc) {
+        return 1;
+    }
+
+
+    protected int setSecIntervalBetweenPages() {
         return 1;
     }
 }
