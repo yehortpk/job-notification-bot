@@ -59,9 +59,11 @@ public abstract class SiteParserImpl implements SiteParser {
             pagesCount = siteMetadata.getPagesCount();
             company.setData(createData(siteMetadata.getRequestData()));
             company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
+            progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.DONE);
             progressManagerService.changeBarStepsCount(company.getCompanyId(), pagesCount);
         } catch (Exception e) {
             progressManagerService.markStepError(company.getCompanyId(), 0);
+            progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.ERROR);
             throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
                     .formatted(company.getTitle(), e.getMessage()));
         }

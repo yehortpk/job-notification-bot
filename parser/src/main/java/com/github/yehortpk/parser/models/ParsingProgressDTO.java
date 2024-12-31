@@ -11,9 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ParsingProgressDTO {
+    private boolean finished = false;
     @Setter
     private List<ParserProgress> parsers = new ArrayList<>();
-    private boolean finished = false;
+
     @JsonProperty("total")
     private int parsedVacanciesCnt = 0;
     @JsonProperty("new")
@@ -21,5 +22,5 @@ public class ParsingProgressDTO {
     @JsonProperty("outdated")
     private int outdatedVacanciesCnt = 0;
 
-    public record ParserProgress(int parserID, String parserTitle, List<Integer> steps) {}
+    public record ParserProgress(int parserID, MetadataStatusEnum metadataStatus, String parserTitle, ProgressStepEnum[] steps) {}
 }

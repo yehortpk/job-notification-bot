@@ -1,5 +1,6 @@
 package com.github.yehortpk.parser.services;
 
+import com.github.yehortpk.parser.models.MetadataStatusEnum;
 import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import com.github.yehortpk.parser.models.ProgressStepEnum;
 import lombok.Getter;
@@ -31,6 +32,7 @@ public class ProgressManagerService {
     public static class ProgressBar {
         int id;
         String title;
+        MetadataStatusEnum metadataStatus;
         ProgressStepEnum[] steps;
         int totalSteps;
         int currentPosition;
@@ -41,6 +43,7 @@ public class ProgressManagerService {
             this.totalSteps = totalSteps;
             this.steps = new ProgressStepEnum[totalSteps];
             Arrays.fill(steps, ProgressStepEnum.STEP_PENDING);
+            this.metadataStatus = MetadataStatusEnum.PENDING;
             this.currentPosition = 0;
         }
     }
@@ -76,6 +79,7 @@ public class ProgressManagerService {
         ProgressBar progressBar = bars.get(id);
         progressBar.totalSteps = totalSteps;
         progressBar.steps = new ProgressStepEnum[totalSteps];
+        Arrays.fill(progressBar.steps, ProgressStepEnum.STEP_PENDING);
         bars.replace(id, progressBar);
     }
 
@@ -111,10 +115,9 @@ public class ProgressManagerService {
             ProgressBar value = stringProgressBarEntry.getValue();
             parsers.add(new ParsingProgressDTO.ParserProgress(
                 stringProgressBarEntry.getKey(),
+                value.metadataStatus,
                 value.title,
-                Arrays.stream(value.steps).map(
-                        (ps) -> ps == null? ProgressStepEnum.STEP_PENDING.getValue() : ps.getValue()
-                ).toList()
+                value.steps
             ));
         }
 
@@ -125,5 +128,10 @@ public class ProgressManagerService {
                 .newVacanciesCnt(newVacanciesCnt)
                 .outdatedVacanciesCnt(outdatedVacanciesCnt)
                 .build();
+    }
+
+    public void setMetadataStatus(int parserId, MetadataStatusEnum metadataStatus) {
+        ProgressBar bar = bars.get(parserId);
+        bar.metadataStatus = metadataStatus;
     }
 }
