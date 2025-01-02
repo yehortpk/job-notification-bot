@@ -3,6 +3,8 @@ package com.github.yehortpk.router.repositories;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,4 +24,6 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
     @Transactional
     @Query("DELETE FROM Vacancy v WHERE v.link IN :links")
     void deleteByLinkIn(List<String> links);
+
+    Page<Vacancy> findByTitleContaining(String title, Pageable pageable);
 }

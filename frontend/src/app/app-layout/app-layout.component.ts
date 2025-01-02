@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterOutlet, Router, RouterModule } from '@angular/router';
+import { RouterOutlet, Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './app-layout.component.html',
   styleUrls: ['./app-layout.component.css'],
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterModule]
+  imports: [RouterOutlet, CommonModule, RouterModule, FormsModule]
 })
 export class AppLayoutComponent {
   dark: boolean = false;
@@ -18,7 +19,7 @@ export class AppLayoutComponent {
   isModalOpen: boolean = false;
   trapCleanup: (() => void) | null = null;
 
-  constructor(public router: Router) {
+  constructor(public router: Router, private route: ActivatedRoute) {
     this.dark = this.getThemeFromLocalStorage();
   }
 
@@ -114,6 +115,17 @@ export class AppLayoutComponent {
     return function cleanup() {
       element.removeEventListener('keydown', handleKeyDown)
     }
+  }
+
+  searchTerm: string = '';
+
+  onSubmit() {
+    this.router.navigate(["/dashboard"], {
+      relativeTo: this.route,
+      queryParams: { 
+        query: this.searchTerm
+      }
+    });
   }
   
 }

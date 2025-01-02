@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,7 +44,9 @@ public class VacancyController {
     public VacanciesPageDTO getVacanciesByPage(@RequestParam(value = "page") int pageId,
                                                @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                                @RequestParam(value = "sortBy", defaultValue = "parsedAt") String sortBy,
-                                               @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir){
+                                               @RequestParam(value = "sortDir", defaultValue = "DESC") String sortDir,
+                                               @RequestParam(value = "query", required = false) String query
+    ){
 
         // Check if field exists in Vacancy entity
         if (!PropertyUtils.isReadable(new Vacancy(), sortBy)) {
@@ -57,8 +60,16 @@ public class VacancyController {
             throw new IllegalArgumentException("Use only ASC/DESC for sortDir property");
         }
 
-        Page<Vacancy> vacanciesOnPage = vacancyService.getVacanciesByPage(
-                pageId, pageSize, sortBy, direction);
+        PageRequest pageable = PageRequest.of(pageId, pageSize,
+                Sort.by(direction, sortBy));
+
+        Page<Vacancy> vacanciesOnPage;
+        if (query == null) {
+            vacanciesOnPage = vacancyService.getVacancies(pageable);
+        } else {
+            vacanciesOnPage = vacancyService.getVacancies(query, pageable);
+        }
+
         return modelMapper.getTypeMap(Page.class, VacanciesPageDTO.class).map(vacanciesOnPage);
     }
 

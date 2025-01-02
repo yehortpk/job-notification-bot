@@ -79,12 +79,13 @@ export class DashboardComponent implements OnInit {
     this.pageSize = parseInt(params.get('pageSize') || '10');
     let sortBy = params.get('sortBy') || '';
     let sortDir = params.get('sortDir') || '';
-    let filterParam = params.get('filter')
+    let filterParam = params.get('filter');
+    let queryParam = params.get('query') || '';
 
     if (filterParam) {
       this.requestVacanciesByFilter(Number.parseInt(filterParam), this.currentPage, this.pageSize, sortBy, sortDir);
     } else {
-      this.requestVacanciesOnPage(this.currentPage, this.pageSize, sortBy, sortDir);
+      this.requestVacanciesOnPage(this.currentPage, this.pageSize, sortBy, sortDir, queryParam);
     }
   }
 
@@ -99,8 +100,8 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  requestVacanciesOnPage(pageId: number, pageSize: number, sortBy: string, sortDir: string) {
-    this.vacancyService.getVacancies(pageId, pageSize, sortBy, sortDir).subscribe({
+  requestVacanciesOnPage(pageId: number, pageSize: number, sortBy: string, sortDir: string, queryParam: string) {
+    this.vacancyService.getVacancies(pageId, pageSize, sortBy, sortDir, queryParam).subscribe({
       next: (response) => {
         this.updatePage(response)
       },
@@ -157,7 +158,7 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(["/dashboard"], {
       relativeTo: this.route,
       queryParams: { 
-        page: 0, 
+        page: 0,
         sortBy: event.active,
         sortDir: event.direction.toUpperCase()
       },
@@ -168,11 +169,9 @@ export class DashboardComponent implements OnInit {
   onFilterChange(event: MatSelectChange) {
     this.router.navigate(["/dashboard"], {
       relativeTo: this.route,
-      queryParams: { 
-        page: 0,
+      queryParams: {
         filter: event.value
-      },
-      queryParamsHandling: 'merge'
+      }
     });
   }
 }

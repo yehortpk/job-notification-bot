@@ -9,9 +9,9 @@ import { Observable } from 'rxjs';
 export class VacancyService {
   constructor(private http: HttpClient) { }
   
-  getVacancies(pageId: number, pageSize: number, sortBy: string, sortDir: string): Observable<VacanciesListDTO> {
+  getVacancies(pageId: number, pageSize: number, sortBy: string, sortDir: string, queryParam: string): Observable<VacanciesListDTO> {
     const ROUTER_URL = 'http://localhost:8081/vacancy';
-    return this.http.get<VacanciesListDTO>(ROUTER_URL, {params: {"page": pageId, "pageSize": pageSize, "sortBy": sortBy, "sortDir": sortDir}});
+    return this.http.get<VacanciesListDTO>(ROUTER_URL, {params: {"page": pageId, "pageSize": pageSize, "sortBy": sortBy, "sortDir": sortDir, "query": queryParam}});
   }
 
   getVacanciesByFilter(filterId: number, pageId: number, pageSize: number, sortBy: string, sortDir: string): Observable<VacanciesListDTO> {
