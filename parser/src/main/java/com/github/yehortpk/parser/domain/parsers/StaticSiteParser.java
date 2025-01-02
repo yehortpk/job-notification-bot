@@ -22,7 +22,7 @@ public abstract class StaticSiteParser extends SiteParserImpl {
 
     @Override
     public PageDTO parsePage(int pageId) throws IOException {
-        String pageUrl = company.getJobsTemplateLink().replace("{page}", String.valueOf(pageId));
+        String pageUrl = company.getVacanciesURL().replace("{page}", String.valueOf(pageId));
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
             data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);

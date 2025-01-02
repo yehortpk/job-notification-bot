@@ -37,7 +37,7 @@ public abstract class APISiteParser extends SiteParserImpl {
 
     @Override
     public PageDTO parsePage(int pageId) throws IOException {
-        String pageUrl = company.getSinglePageRequestLink();
+        String pageUrl = company.getApiVacanciesURL();
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
             data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);

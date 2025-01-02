@@ -181,7 +181,7 @@ public abstract class SiteParserImpl implements SiteParser {
     protected abstract PageDTO parsePage(int pageId) throws IOException;
 
     protected CompanySiteMetadata extractSiteMetadata() throws IOException {
-        String pageUrl = company.getJobsTemplateLink().replace("{page}","1");
+        String pageUrl = company.getVacanciesURL().replace("{page}","1");
         Map<String, String> siteData = company.getData().entrySet().stream()
                 .filter((entry) -> !isValueBinding(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

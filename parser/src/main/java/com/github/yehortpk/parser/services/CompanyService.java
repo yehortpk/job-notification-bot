@@ -36,7 +36,7 @@ public class CompanyService {
         if (companies == null) {
             return new ArrayList<>();
         }
-        return companies.stream().filter(CompanyDTO::isEnabled).toList();
+        return companies.stream().filter(CompanyDTO::isParsingEnabled).toList();
     }
 
     /**

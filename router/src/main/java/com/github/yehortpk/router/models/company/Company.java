@@ -17,14 +17,20 @@ import java.util.Set;
 public class Company {
     @Id
     private int companyId;
-    private String singlePageRequestLink;
-    private String jobsTemplateLink;
     private String beanClass;
     @ToString.Include
     private String title;
+
     @EqualsAndHashCode.Include
-    private String link;
-    private boolean isEnabled;
+    @Column(name = "main_page_url")
+    private String mainPageURL;
+    @Column(name = "vacancies_url")
+    private String vacanciesURL;
+    @Column(name = "api_vacancies_url")
+    private String apiVacanciesURL;
+
+    @Column(name = "parsing_enabled")
+    private boolean isParsingEnabled;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
     private Set<Vacancy> vacancies;

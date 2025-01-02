@@ -28,7 +28,7 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
 
     @Override
     public PageDTO parsePage(int pageId) throws IOException {
-        String pageUrl = company.getJobsTemplateLink();
+        String pageUrl = company.getVacanciesURL();
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
             data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);
