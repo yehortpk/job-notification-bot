@@ -5,7 +5,6 @@ import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
 import com.github.yehortpk.parser.services.ProgressManagerService;
 import lombok.Cleanup;
-import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
  * </ul>
  */
 @Component
-@Setter
 @ToString
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.NO)
 @Slf4j
@@ -49,7 +47,9 @@ public abstract class SiteParserImpl implements SiteParser {
     private ProgressManagerService progressManagerService;
 
     @Override
-    public Set<VacancyDTO> parseAllVacancies() {
+    public Set<VacancyDTO> parseVacancies(CompanyDTO company) {
+        this.company = company;
+
         int pagesCount;
         progressManagerService.addBar(company.getCompanyId(), company.getTitle(), 1);
 
@@ -57,8 +57,8 @@ public abstract class SiteParserImpl implements SiteParser {
         try {
             CompanySiteMetadata siteMetadata = extractSiteMetadata();
             pagesCount = siteMetadata.getPagesCount();
-            company.setData(createData(siteMetadata.getRequestData()));
-            company.setHeaders(createHeaders(siteMetadata.getRequestHeaders()));
+            company.setData(createData(siteMetadata.getRequestData(), company.getData()));
+            company.setHeaders(createHeaders(siteMetadata.getRequestHeaders(), company.getHeaders()));
             progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.DONE);
             progressManagerService.changeBarStepsCount(company.getCompanyId(), pagesCount);
         } catch (Exception e) {
@@ -85,6 +85,10 @@ public abstract class SiteParserImpl implements SiteParser {
             try {
                 PageDTO page = future.get();
                 Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
+                vacanciesFromPage.forEach(vacancy -> {
+                    vacancy.setCompanyID(company.getCompanyId());
+                    vacancy.setCompanyTitle(company.getTitle());
+                });
                 if (vacanciesFromPage.isEmpty()) {
                     throw new NoVacanciesOnPageException(pagesCounter.get() + 1);
                 }
@@ -93,13 +97,13 @@ public abstract class SiteParserImpl implements SiteParser {
                 vacancies.addAll(vacanciesFromPage);
             } catch (InterruptedException| ExecutionException e) {
                 progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, error: {} ", this.company.getTitle(), e.getCause().getMessage());
+                log.error("company: {}, error: {} ", company.getTitle(), e.getCause().getMessage());
             } catch (NoVacanciesOnPageException e) {
                 progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, no vacancies on page: {} ", this.company.getTitle(), e.getPageId());
+                log.error("company: {}, no vacancies on page: {} ", company.getTitle(), e.getPageId());
             } catch (Exception e) {
                 progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, error: {} ", this.company.getTitle(), e.getMessage());
+                log.error("company: {}, error: {} ", company.getTitle(), e.getMessage());
             } finally {
                 pagesCounter.set(pagesCounter.get() + 1);
             }
@@ -123,8 +127,6 @@ public abstract class SiteParserImpl implements SiteParser {
 
         for (Element vacancyBlock : vacancyBlocks) {
             VacancyDTO vacancy = generateVacancyObjectFromBlock(vacancyBlock);
-            vacancy.setCompanyID(company.getCompanyId());
-            vacancy.setCompanyTitle(company.getTitle());
             vacancies.add(vacancy);
         }
 
@@ -135,8 +137,8 @@ public abstract class SiteParserImpl implements SiteParser {
      * Creates query headers for the request
      * @return map of headers
      */
-    protected Map<String, String> createHeaders(Map<String, String> siteMetadata) {
-        HashMap<String, String> headers = new HashMap<>(company.getHeaders());
+    protected Map<String, String> createHeaders(Map<String, String> siteMetadata, Map<String, String> companyHeaders) {
+        HashMap<String, String> headers = new HashMap<>(companyHeaders);
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             String value = entry.getValue();
 
@@ -149,8 +151,8 @@ public abstract class SiteParserImpl implements SiteParser {
      * Creates query data for the request
      * @return map of data
      */
-    protected Map<String, String> createData(Map<String, String> siteMetadata) {
-        HashMap<String, String> data = new HashMap<>(company.getData());
+    protected Map<String, String> createData(Map<String, String> siteMetadata, Map<String, String> companyData) {
+        HashMap<String, String> data = new HashMap<>(companyData);
         for (Map.Entry<String, String> entry : data.entrySet()) {
             String value = entry.getValue();
 

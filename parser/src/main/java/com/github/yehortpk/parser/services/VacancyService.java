@@ -39,16 +39,15 @@ public class VacancyService {
         Set<VacancyDTO> result = new HashSet<>();
         Map<String, Future<Set<VacancyDTO>>> vacanciesByCompaniesFut = new HashMap<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
-        for (CompanyDTO companyDTO : companies) {
-            String beanClass = companyDTO.getBeanClass();
+        for (CompanyDTO company : companies) {
+            String beanClass = company.getBeanClass();
             try {
                 SiteParser siteParser = (SiteParser) applicationContext.getBean(beanClass);
-                siteParser.setCompany(companyDTO);
 
-                Future<Set<VacancyDTO>> future = executor.submit(siteParser::parseAllVacancies);
+                Future<Set<VacancyDTO>> future = executor.submit(() -> siteParser.parseVacancies(company));
                 vacanciesByCompaniesFut.put(beanClass, future);
             } catch (BeansException ignored) {
-                log.info("{} parser implementation doesn't exist", beanClass);
+                log.error("{} parser implementation doesn't exist", beanClass);
             }
         }
 

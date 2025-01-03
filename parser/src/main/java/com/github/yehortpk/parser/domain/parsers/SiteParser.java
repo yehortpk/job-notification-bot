@@ -19,10 +19,5 @@ public interface SiteParser {
      * Parse all vacancies for specific {@link CompanyDTO}
      * @return set of vacancies
      */
-    Set<VacancyDTO> parseAllVacancies();
-
-    /**
-     * Set company as a parameter for company data extraction
-     */
-    void setCompany(CompanyDTO company);
+    Set<VacancyDTO> parseVacancies(CompanyDTO company);
 }
