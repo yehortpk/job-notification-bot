@@ -22,25 +22,20 @@ import java.util.concurrent.*;
  * Every proxy thread have its own delay based on its sequence number (by default - 50ms). When the proxy is in the
  * delay it may be cancelled by another thread that complete the page scrapping.
  */
-@Setter
 @RequiredArgsConstructor
-@NoArgsConstructor(force = true)
 @Slf4j
 public class ProxyPageConnector implements PageConnector {
-    @NonNull private final PageScrapper pageScrapper;
-    @NonNull private final ProxyService proxyService;
+    private final PageScrapper pageScrapper;
+    private final ProxyService proxyService;
 
-    private final int INITIAL_POLL_TIMEOUT = 60;
     private final int INITIAL_DELAY_BETWEEN_THREADS = 50;
-    private final int POLL_TIMEOUT_LAMBDA = 10;
-    private final int DELAY_BETWEEN_THREADS_LAMBDA = 100;
-    private final int CONNECTION_MAX_ATTEMPTS = 3;
+    private final int TIMEOUT_SECONDS = 30;
 
 
     @Override
     public ScrapperResponseDTO connectToPage(PageConnectionParams pageConnectionParams) throws IOException {
 
-        ScrapperResponseDTO pageBody = loadPage(INITIAL_POLL_TIMEOUT, INITIAL_DELAY_BETWEEN_THREADS, pageConnectionParams);
+        ScrapperResponseDTO pageBody = loadPage(pageConnectionParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(),
@@ -54,19 +49,11 @@ public class ProxyPageConnector implements PageConnector {
      * delay between threads (DELAY_BETWEEN_THREADS_LAMBDA). When the number of attempts exceeds
      * CONNECTION_MAX_ATTEMPTS, {@link NullPointerException} will be thrown
      *
-     * @param pollTimeout timeout for every thread to poll the page.
-     * @param threadsDelay delay between threads connection attempts
      * @param pageConnectionParams connection parameters for the page
      * @return page HTML
      * @see PageConnectionParams
      */
-    private ScrapperResponseDTO loadPage(int pollTimeout, int threadsDelay,
-                                         PageConnectionParams pageConnectionParams) throws IOException {
-        if((pollTimeout - INITIAL_POLL_TIMEOUT) >= POLL_TIMEOUT_LAMBDA * CONNECTION_MAX_ATTEMPTS) {
-            throw new IOException(String.format("Can't load page %s, data: %s",
-                    pageConnectionParams.getPageUrl(),
-                    pageConnectionParams.getData()));
-        }
+    private ScrapperResponseDTO loadPage(PageConnectionParams pageConnectionParams) throws IOException {
 
         Map<Future<ScrapperResponseDTO>, Proxy> pageResponseWithProxiesFut = new HashMap<>();
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -77,7 +64,7 @@ public class ProxyPageConnector implements PageConnector {
         List<Proxy> proxies = proxyService.getProxies();
         for (int counter = 0; counter < proxies.size(); counter++) {
             Proxy proxy = proxies.get(counter);
-            int currentThreadsTimeout = threadsDelay * counter;
+            int currentThreadsTimeout = INITIAL_DELAY_BETWEEN_THREADS * counter;
             Callable<ScrapperResponseDTO> task = () -> {
                 Thread.sleep(currentThreadsTimeout);
                 return pageScrapper.scrapPage(pageConnectionParams);
@@ -100,7 +87,7 @@ public class ProxyPageConnector implements PageConnector {
                 throw new RuntimeException("Service was interrupted");
             }
             try {
-                ScrapperResponseDTO result = scrapperResponseFut.get();
+                ScrapperResponseDTO result = scrapperResponseFut.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 log.info("Connection to the page: {}, proxy: {}, data: {} was established",
                         pageConnectionParams.getPageUrl(),
                         pageResponseWithProxiesFut.get(scrapperResponseFut),
@@ -109,7 +96,7 @@ public class ProxyPageConnector implements PageConnector {
 
                 executor.close();
                 return result;
-            } catch (InterruptedException | ExecutionException ee) {
+            } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException ee) {
                 if (ee.getCause() instanceof ProxyPageConnectionException) {
                     log.error("Page: {}, proxy: {}, error: {}",
                             pageConnectionParams.getPageUrl(),
@@ -123,10 +110,6 @@ public class ProxyPageConnector implements PageConnector {
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.error("Could not connect to the page {} for specified timeout. Retry", pageConnectionParams.getPageUrl());
-        }
-        return loadPage(pollTimeout + POLL_TIMEOUT_LAMBDA,
-                threadsDelay + DELAY_BETWEEN_THREADS_LAMBDA, pageConnectionParams);
+        throw new IOException(String.format("Could not connect to the page %s for specified timeout", pageConnectionParams.getPageUrl()));
     }
 }
