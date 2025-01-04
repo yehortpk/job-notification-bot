@@ -1,5 +1,7 @@
 package com.github.yehortpk.parser.domain.scrappers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.ScrapperResponseDTO;
 import org.jsoup.Connection;
@@ -26,15 +28,22 @@ public class DefaultPageScrapper implements PageScrapper {
      */
     private Connection toConnection(PageConnectionParams pageConnectionParams) {
         Connection connection = Jsoup.connect(pageConnectionParams.getPageUrl())
-                .userAgent(pageConnectionParams.getUserAgent())
                 .proxy(pageConnectionParams.getProxy())
                 .headers(pageConnectionParams.getHeaders())
-                .data(pageConnectionParams.getData())
                 .ignoreContentType(true)
                 .method(pageConnectionParams.getConnectionMethod());
-        String requestBody = pageConnectionParams.getRequestBody();
-        if (requestBody != null) {
-            connection.requestBody(requestBody);
+
+        // Map data to json if content type is application/json
+        String contentTypeHeader = pageConnectionParams.getHeaders().get("Content-Type");
+        if(contentTypeHeader != null && contentTypeHeader.equals("application/json")) {
+            try {
+                String requestBody = new ObjectMapper().writeValueAsString(pageConnectionParams.getData());
+                connection = connection.requestBody(requestBody);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            connection = connection.data(pageConnectionParams.getData());
         }
         return connection;
     }
