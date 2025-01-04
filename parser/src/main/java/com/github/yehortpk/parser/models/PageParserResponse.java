@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class ScrapperResponseDTO {
+public class PageParserResponse {
     Map<String, String> headers;
     String body;
 }

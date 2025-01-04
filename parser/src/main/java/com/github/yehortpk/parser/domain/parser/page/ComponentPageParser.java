@@ -1,8 +1,9 @@
-package com.github.yehortpk.parser.domain.scrappers;
+package com.github.yehortpk.parser.domain.parser.page;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.models.ScrapperResponseDTO;
+import com.github.yehortpk.parser.models.PageParserResponse;
 import lombok.Cleanup;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,8 +14,6 @@ import org.openqa.selenium.remote.http.ConnectionFailedException;
 import org.openqa.selenium.safari.ConnectionClosedException;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import org.openqa.selenium.devtools.v114.network.Network;
 import org.openqa.selenium.devtools.v114.network.model.Headers;
@@ -34,18 +33,20 @@ import java.util.Optional;
  * Component-based site page scrapper. Uses dynamicElementQuerySelector from {@link PageConnectionParams}
  * to delay page scrapping until the element on the page is loaded. Works on Selenium
  */
-@Component
 @Slf4j
-public class ComponentPageScrapper implements PageScrapper {
+@RequiredArgsConstructor
+public class ComponentPageParser implements PageParser {
+    private final String dynamicElementQuerySelector;
+
     @Override
-    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
+    public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
         ChromeOptions chromeOptions = createChromeOptions(pageConnectionParams);
 
         @Cleanup ChromeDriver driver = createWebDriver(chromeOptions);
 
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
 
-        return scrapPage(finalPageUrl, driver, pageConnectionParams.getDynamicElementQuerySelector());
+        return parsePage(finalPageUrl, driver, dynamicElementQuerySelector);
     }
 
     /**
@@ -55,7 +56,7 @@ public class ComponentPageScrapper implements PageScrapper {
      * @param dynamicElementQuerySelector element query selector for component section loading delay
      * @return page HTML
      */
-    private ScrapperResponseDTO scrapPage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) throws IOException {
+    private PageParserResponse parsePage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) throws IOException {
         DevTools devTools = driver.getDevTools();
         devTools.createSession();
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
@@ -94,7 +95,7 @@ public class ComponentPageScrapper implements PageScrapper {
             ));
         }
 
-        return new ScrapperResponseDTO(headersMap, driver.getPageSource());
+        return new PageParserResponse(headersMap, driver.getPageSource());
     }
 
     /**
@@ -108,15 +109,13 @@ public class ComponentPageScrapper implements PageScrapper {
         return new String[]{address.getHostString(), String.valueOf(address.getPort())};
     }
 
-    @Value("${webdriver.chrome.driver}")
-    private String chromeDriverPath;
-
     /**
      * Create GoogleChrome web driver for Selenium with specific path in the system
      * @param chromeOptions web driver options
      * @return web driver
      */
     private ChromeDriver createWebDriver(ChromeOptions chromeOptions) {
+        final String chromeDriverPath = "/usr/local/bin/chromedriver";
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
         return new ChromeDriver(chromeOptions);
@@ -139,17 +138,18 @@ public class ComponentPageScrapper implements PageScrapper {
 
     }
 
-    @Value("${webdriver.chrome.path}")
-    private String chromeBinaryPath;
-
     /**
      * Creates Google Chrome web driver options without proxy
      * @return web driver options
      */
     private ChromeOptions createChromeOptions(PageConnectionParams pageConnectionParams) {
+        final String chromeBinaryPath = "/usr/bin/google-chrome";
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--headless", "--disable-dev-shm-usage", "--no-sandbox");
         chromeOptions.addArguments("window-size=1920,1080");
+        chromeOptions.addArguments("--enable-javascript");
+        chromeOptions.addArguments("--disable-gpu"); // Useful for headless mode
+        chromeOptions.addArguments("--allow-insecure-localhost");
         chromeOptions.setBinary(chromeBinaryPath);
 
         Map<String, Object> prefs = new HashMap<>();

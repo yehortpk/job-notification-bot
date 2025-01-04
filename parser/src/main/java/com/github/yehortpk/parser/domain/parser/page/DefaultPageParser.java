@@ -1,9 +1,9 @@
-package com.github.yehortpk.parser.domain.scrappers;
+package com.github.yehortpk.parser.domain.parser.page;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.models.ScrapperResponseDTO;
+import com.github.yehortpk.parser.models.PageParserResponse;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import java.io.IOException;
  * Default pages scrapper. Scrap page with Jsoup library
  */
 @Component
-public class DefaultPageScrapper implements PageScrapper {
+public class DefaultPageParser implements PageParser {
     @Override
-    public ScrapperResponseDTO scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
+    public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
         Connection.Response response = toConnection(pageConnectionParams).execute();
-        return new ScrapperResponseDTO(response.headers(), response.body());
+        return new PageParserResponse(response.headers(), response.body());
     }
 
     /**

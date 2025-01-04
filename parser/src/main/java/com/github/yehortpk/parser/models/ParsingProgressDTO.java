@@ -16,10 +16,13 @@ public class ParsingProgressDTO {
     private List<ParserProgress> parsers = new ArrayList<>();
 
     @JsonProperty("total")
+    @Builder.Default
     private int parsedVacanciesCnt = 0;
     @JsonProperty("new")
+    @Builder.Default
     private int newVacanciesCnt = 0;
     @JsonProperty("outdated")
+    @Builder.Default
     private int outdatedVacanciesCnt = 0;
 
     public record ParserProgress(int parserID, MetadataStatusEnum metadataStatus, String parserTitle, ProgressStepEnum[] steps) {}

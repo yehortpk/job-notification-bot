@@ -1,5 +1,6 @@
-package com.github.yehortpk.parser.domain.parsers;
+package com.github.yehortpk.parser.domain.parser.site;
 
+import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
 import com.google.gson.Gson;
@@ -26,7 +27,6 @@ import java.util.Map;
 @Getter
 public abstract class APISiteParser extends SiteParserImpl {
     private final int DELAY_SEC = 2;
-
     /**
      * Connection method for the page. GET by default
      * @return connection method
@@ -36,25 +36,33 @@ public abstract class APISiteParser extends SiteParserImpl {
     }
 
     @Override
-    public PageDTO parsePage(int pageId) throws IOException {
+    protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
+        String pageBody = defaultPageParser.parsePage(pageConnectionParams).getBody();
+
+        Document doc = parsePageBody(pageBody);
+        return new PageDTO(pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getData(), pageConnectionParams.getHeaders(), doc);
+    }
+
+    @Override
+    protected PageConnectionParams generatePageConnectionParams(int pageID, CompanyDTO company) {
         String pageUrl = company.getApiVacanciesURL();
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
-            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);
+            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageID) : value);
         }
 
-        PageConnectionParams pageConnectionParams = PageConnectionParams.builder()
+        return PageConnectionParams.builder()
                 .data(data)
                 .headers(company.getHeaders())
                 .connectionMethod(getConnectionMethod())
                 .pageUrl(pageUrl)
-                .delay(pageId * DELAY_SEC * 1000)
                 .build();
+    }
 
-        String pageBody = defaultPageConnector.connectToPage(pageConnectionParams).getBody();
-
-        Document doc = parsePageBody(pageBody);
-        return new PageDTO(pageUrl, pageId, data, doc);
+    @Override
+    protected int setIntervalBetweenPagesSec(){
+        return DELAY_SEC;
     }
 
     /**

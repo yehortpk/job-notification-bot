@@ -1,13 +1,12 @@
-package com.github.yehortpk.parser.domain.parsers;
+package com.github.yehortpk.parser.domain.parser.site;
 
-import com.github.yehortpk.parser.domain.connectors.PageConnector;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
 
 import java.util.Set;
 
 /**
- * Interface for all parsers. Uses {@link PageConnector} to acquire page connection. Require method parseAllVacancies
+ * Interface for all page parsers. Require method parseVacancies
  * for specific {@link CompanyDTO}
  * @see SiteParserImpl
  * @see APISiteParser

@@ -2,7 +2,7 @@ package com.github.yehortpk.parser.services;
 
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
-import com.github.yehortpk.parser.domain.parsers.SiteParser;
+import com.github.yehortpk.parser.domain.parser.site.SiteParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;

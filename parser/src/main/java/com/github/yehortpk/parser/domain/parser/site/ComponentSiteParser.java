@@ -1,12 +1,12 @@
-package com.github.yehortpk.parser.domain.parsers;
+package com.github.yehortpk.parser.domain.parser.site;
 
-import com.github.yehortpk.parser.domain.connectors.PageConnector;
+import com.github.yehortpk.parser.domain.parser.page.PageParser;
+import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
 import lombok.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,28 +22,34 @@ import java.util.Map;
 @ToString(callSuper = true)
 @Getter
 public abstract class ComponentSiteParser extends SiteParserImpl {
-    @Autowired
-    private PageConnector componentPageConnector;
-    private final int DELAY_SEC = 1;
+    private final int DELAY_SEC = 2;
 
     @Override
-    public PageDTO parsePage(int pageId) throws IOException {
+    protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
+        PageParser pageParser = pageParserFactory.createComponentPageParser(createDynamicElementQuerySelector());
+        Document page = Jsoup.parse(pageParser.parsePage(pageConnectionParams).getBody());
+        return new PageDTO(pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getData(), pageConnectionParams.getHeaders(), page);
+    }
+
+    @Override
+    protected PageConnectionParams generatePageConnectionParams(int pageID, CompanyDTO company) {
         String pageUrl = company.getVacanciesURL();
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
-            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageId) : value);
+            data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageID) : value);
         }
 
-        PageConnectionParams pageConnectionParams = PageConnectionParams.builder()
+        return PageConnectionParams.builder()
                 .data(data)
                 .headers(company.getHeaders())
                 .pageUrl(pageUrl)
-                .dynamicElementQuerySelector(createDynamicElementQuerySelector())
-                .delay(pageId * DELAY_SEC * 1000)
                 .build();
+    }
 
-        Document page = Jsoup.parse(componentPageConnector.connectToPage(pageConnectionParams).getBody());
-        return new PageDTO(pageUrl, pageId, page);
+    @Override
+    protected int setIntervalBetweenPagesSec(){
+        return DELAY_SEC;
     }
 
     /**

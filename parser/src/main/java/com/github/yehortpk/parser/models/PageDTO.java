@@ -18,13 +18,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class PageDTO {
     private String pageURL;
-    private int pageId;
     private Map<String, String> pageData = new HashMap<>();
+    private Map<String, String> pageHeaders = new HashMap<>();
     private Document doc;
-
-    public PageDTO(String pageURL, int pageId, Document doc) {
-        this.pageURL = pageURL;
-        this.pageId = pageId;
-        this.doc = doc;
-    }
 }
