@@ -145,14 +145,22 @@ public class ComponentPageParser implements PageParser {
     private ChromeOptions createChromeOptions(PageConnectionParams pageConnectionParams) {
         final String chromeBinaryPath = "/usr/bin/google-chrome";
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless", "--disable-dev-shm-usage", "--no-sandbox");
-        chromeOptions.addArguments("window-size=1920,1080");
-        chromeOptions.addArguments("--enable-javascript");
-        chromeOptions.addArguments("--disable-gpu"); // Useful for headless mode
-        chromeOptions.addArguments("--allow-insecure-localhost");
+        chromeOptions.addArguments(
+                "--headless",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-extensions",
+                "--no-sandbox",
+                "--disable-infobars",
+                "--disable-notifications",
+                "--blink-settings=imagesEnabled=false",
+                "--disk-cache-size=0"
+        );
         chromeOptions.setBinary(chromeBinaryPath);
 
         Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.default_content_setting_values.images", 2);
+        prefs.put("profile.managed_default_content_settings.images", 2);
         prefs.put("profile.managed_default_content_settings.javascript", 1);
 
         Map<String, String> headers = pageConnectionParams.getHeaders();
