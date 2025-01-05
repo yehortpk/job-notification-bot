@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.domain.parser.site;
 
-import com.github.yehortpk.parser.domain.parser.page.PageParserFactory;
+import com.github.yehortpk.parser.domain.parser.page.factory.PageParserFactory;
 import com.github.yehortpk.parser.domain.parser.page.PageParser;
 import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
