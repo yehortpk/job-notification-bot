@@ -111,15 +111,17 @@ public class ProgressManagerService {
 
     public ParsingProgressDTO getProgress() {
         List<ParsingProgressDTO.ParserProgress> parsers = new ArrayList<>();
-        for (Map.Entry<Integer, ProgressBar> stringProgressBarEntry : bars.entrySet()) {
-            ProgressBar value = stringProgressBarEntry.getValue();
+        for (Map.Entry<Integer, ProgressBar> pb : bars.entrySet()) {
+            ProgressBar value = pb.getValue();
             parsers.add(new ParsingProgressDTO.ParserProgress(
-                stringProgressBarEntry.getKey(),
+                pb.getKey(),
                 value.metadataStatus,
                 value.title,
                 value.steps
             ));
         }
+
+        parsers.sort(Comparator.comparingInt(ParsingProgressDTO.ParserProgress::parserID));
 
         return ParsingProgressDTO.builder()
                 .parsers(parsers)
