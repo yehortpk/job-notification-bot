@@ -2,14 +2,14 @@ package com.github.yehortpk.parser.models;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ProgressStepEnum {
+public enum PageProgressStatusEnum {
     STEP_PENDING(-1),
     STEP_ERROR(0),
     STEP_DONE(1);
 
     private final int value;
 
-    ProgressStepEnum(int value) {
+    PageProgressStatusEnum(int value) {
         this.value = value;
     }
 

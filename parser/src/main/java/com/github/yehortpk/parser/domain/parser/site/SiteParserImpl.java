@@ -56,9 +56,9 @@ public abstract class SiteParserImpl implements SiteParser {
         this.company = company;
 
         int pagesCount = 1;
-        progressManagerService.addBar(company.getCompanyId(), company.getTitle(), 1);
+        ParserProgress pProgress = progressManagerService.addParserProgress(company.getCompanyId(), company.getTitle());
         if (!isCompanyNeedMetadata(company)) {
-            progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.DONE);
+            pProgress.setMetadataStatus(MetadataStatusEnum.DONE);
         } else {
 
             // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
@@ -67,13 +67,16 @@ public abstract class SiteParserImpl implements SiteParser {
                 pagesCount = siteMetadata.getPagesCount();
                 company.setData(createData(siteMetadata.getRequestData(), company.getData()));
                 company.setHeaders(createHeaders(siteMetadata.getRequestHeaders(), company.getHeaders()));
-                progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.DONE);
-                progressManagerService.changeBarStepsCount(company.getCompanyId(), pagesCount);
+                pProgress.setMetadataStatus(MetadataStatusEnum.DONE);
+                pProgress.initPages(pagesCount);
             } catch (Exception e) {
-                progressManagerService.setMetadataStatus(company.getCompanyId(), MetadataStatusEnum.ERROR);
-                progressManagerService.markStepError(company.getCompanyId(), 0);
-                throw new RuntimeException("Can't extract site metadata, company: %s. Error: %s"
-                        .formatted(company.getTitle(), e.getMessage()));
+                pProgress.setMetadataStatus(MetadataStatusEnum.ERROR);
+                pProgress.markPageError(1);
+                String logMessage = "Can't extract site metadata, company: %s. Error: %s"
+                        .formatted(company.getTitle(), e.getMessage());
+
+                pProgress.addPageLog(1, ParserProgress.LogLevelEnum.ERROR, logMessage);
+                throw new RuntimeException(logMessage);
             }
         }
 
@@ -93,8 +96,9 @@ public abstract class SiteParserImpl implements SiteParser {
 
         Set<VacancyDTO> vacancies = new HashSet<>();
 
-        ThreadLocal<Integer> pagesCounter = ThreadLocal.withInitial(() -> 0);
+        ThreadLocal<Integer> pagesCounter = ThreadLocal.withInitial(() -> 1);
         for (Future<PageDTO> future : page_fut) {
+            Integer pageNum = pagesCounter.get();
             try {
                 PageDTO page = future.get();
                 Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
@@ -103,22 +107,40 @@ public abstract class SiteParserImpl implements SiteParser {
                     vacancy.setCompanyTitle(company.getTitle());
                 });
                 if (vacanciesFromPage.isEmpty()) {
-                    throw new NoVacanciesOnPageException(pagesCounter.get() + 1);
+                    throw new NoVacanciesOnPageException(pageNum);
                 }
-                progressManagerService.markStepDone(company.getCompanyId(), pagesCounter.get());
-                log.info("Page: {}, data: {} was parsed", page.getPageURL(), page.getPageData());
+                pProgress.markPageDone(pageNum);
+                String logMessage = String.format("Page: %s, data: %s was parsed", page.getPageURL(), page.getPageData());
+                log.info(logMessage);
+                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.INFO, logMessage);
                 vacancies.addAll(vacanciesFromPage);
+                pProgress.setPageParsedVacanciesCount(pageNum, vacanciesFromPage.size());
             } catch (InterruptedException| ExecutionException e) {
-                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, error: {} ", company.getTitle(), e.getCause().getMessage());
+                pProgress.markPageError(pageNum);
+
+                String logMessage = String.format("company: %s, error: %s", company.getTitle(), e.getCause().getMessage());
+                logMessage = e.getCause().getCause() != null?
+                        logMessage + String.format(" cause: %s" , e.getCause().getCause().getMessage()):
+                        logMessage;
+                log.error(logMessage);
+                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } catch (NoVacanciesOnPageException e) {
-                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, no vacancies on page: {} ", company.getTitle(), e.getPageId());
+                pProgress.markPageError(pageNum);
+
+                String logMessage = String.format("company: %s, no vacancies on page: %s ", company.getTitle(), e.getPageId());
+                log.error(logMessage);
+                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } catch (Exception e) {
-                progressManagerService.markStepError(company.getCompanyId(), pagesCounter.get());
-                log.error("company: {}, error: {} ", company.getTitle(), e.getMessage());
+                pProgress.markPageError(pageNum);
+
+                String logMessage = String.format("company: %s, error: %s ", company.getTitle(), e.getMessage());
+                logMessage = e.getCause().getCause() != null?
+                        logMessage + String.format(" cause: %s" , e.getCause().getCause().getMessage()):
+                        logMessage;
+                log.error(logMessage);
+                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } finally {
-                pagesCounter.set(pagesCounter.get() + 1);
+                pagesCounter.set(pageNum + 1);
             }
         }
 
@@ -190,7 +212,7 @@ public abstract class SiteParserImpl implements SiteParser {
         return data;
     }
 
-    protected CompanySiteMetadata extractSiteMetadata(CompanyDTO company) throws IOException {
+    protected CompanySiteMetadata extractSiteMetadata(CompanyDTO company) throws IOException, InterruptedException {
         String pageUrl = this.company.getVacanciesURL().replace("{page}","1");
         Map<String, String> siteData = this.company.getData().entrySet().stream()
                 .filter((entry) -> !isValueBinding(entry.getValue()))
@@ -206,6 +228,7 @@ public abstract class SiteParserImpl implements SiteParser {
                 .build();
 
         PageParserResponse pageResponse = defaultPageParser.parsePage(pageConnectionParams);
+        Thread.sleep(setIntervalBetweenPagesSec() * 1000L);
         return parseSiteMetadata(pageResponse.getHeaders(), Jsoup.parse(pageResponse.getBody()));
     }
 

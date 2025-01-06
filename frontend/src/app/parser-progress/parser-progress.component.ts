@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { ParsingService } from '../service/parsing.service';
-import { ParsingProgress } from './progress-bar.model';
+import { ParsingProgress } from '../type/progress-bar.type';
 
 @Component({
   selector: 'app-parser-progress',
@@ -21,7 +21,6 @@ export class ParserProgressComponent implements OnInit {
     parsers: [],
     finished: false,
     new: 0,
-    outdated: 0,
     total: 0
   };
   private progressInterval: any;

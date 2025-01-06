@@ -71,4 +71,8 @@
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+
+  .progress-res-block {
+    margin-top: 10px;
+  }
   

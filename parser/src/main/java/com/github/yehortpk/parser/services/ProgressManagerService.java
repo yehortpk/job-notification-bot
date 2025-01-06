@@ -1,8 +1,7 @@
 package com.github.yehortpk.parser.services;
 
-import com.github.yehortpk.parser.models.MetadataStatusEnum;
+import com.github.yehortpk.parser.models.ParserProgress;
 import com.github.yehortpk.parser.models.ParsingProgressDTO;
-import com.github.yehortpk.parser.models.ProgressStepEnum;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
@@ -15,9 +14,10 @@ import java.util.concurrent.locks.ReentrantLock;
 @Service("progressManagerService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ProgressManagerService {
+    private String parsingHash;
     @Getter
-    private Map<Integer, ProgressBar> bars;
-    private ReentrantLock barsLock;
+    private Map<Integer, ParserProgress> parsers;
+    private ReentrantLock parsersLock;
     private final ReentrantLock progressLock = new ReentrantLock();
 
     @Setter
@@ -25,115 +25,51 @@ public class ProgressManagerService {
     @Setter
     private int newVacanciesCnt;
     @Setter
-    private int outdatedVacanciesCnt;
-    @Setter
     private boolean finished;
-
-    public static class ProgressBar {
-        int id;
-        String title;
-        MetadataStatusEnum metadataStatus;
-        ProgressStepEnum[] steps;
-        int totalSteps;
-        int currentPosition;
-
-        public ProgressBar(int id, String title, int totalSteps) {
-            this.id = id;
-            this.title = title;
-            this.totalSteps = totalSteps;
-            this.steps = new ProgressStepEnum[totalSteps];
-            Arrays.fill(steps, ProgressStepEnum.STEP_PENDING);
-            this.metadataStatus = MetadataStatusEnum.PENDING;
-            this.currentPosition = 0;
-        }
-    }
 
     public ProgressManagerService() {
         initialize();
     }
 
+
+
     public void initialize() {
         progressLock.lock();
+        this.parsingHash = UUID.randomUUID().toString().substring(0, 10);
         this.parsedVacanciesCnt = 0;
         this.newVacanciesCnt = 0;
-        this.outdatedVacanciesCnt = 0;
         this.finished = false;
 
-        this.bars = new LinkedHashMap<>();
-        this.barsLock = new ReentrantLock();
+        this.parsers = new LinkedHashMap<>();
+        this.parsersLock = new ReentrantLock();
         progressLock.unlock();
     }
 
-    public void addBar(int id, String title, int totalSteps) {
-        barsLock.lock();
+    public ParserProgress addParserProgress(int id, String title) {
+        parsersLock.lock();
         try {
-            if (!bars.containsKey(id)) {
-                bars.put(id, new ProgressBar(id, title, totalSteps));// Add space for new bar
+            ParserProgress newPB = new ParserProgress(id, title);
+            if (!parsers.containsKey(id)) {
+                parsers.put(id, newPB);
+                return newPB;
+            } else {
+                throw new RuntimeException("Progress bar with this id is already exist");
             }
         } finally {
-            barsLock.unlock();
-        }
-    }
-
-    public void changeBarStepsCount(int id, int totalSteps) {
-        ProgressBar progressBar = bars.get(id);
-        progressBar.totalSteps = totalSteps;
-        progressBar.steps = new ProgressStepEnum[totalSteps];
-        Arrays.fill(progressBar.steps, ProgressStepEnum.STEP_PENDING);
-        bars.replace(id, progressBar);
-    }
-
-    public void markStepDone(int id, int step) {
-        barsLock.lock();
-        try {
-            ProgressBar bar = bars.get(id);
-            if (bar != null && step < bar.totalSteps) {
-                bar.steps[step] = ProgressStepEnum.STEP_DONE;
-                bar.currentPosition = Math.max(bar.currentPosition, step + 1);
-            }
-        } finally {
-            barsLock.unlock();
-        }
-    }
-
-    public void markStepError(int id, int step) {
-        barsLock.lock();
-        try {
-            ProgressBar bar = bars.get(id);
-            if (bar != null && step < bar.totalSteps) {
-                bar.steps[step] = ProgressStepEnum.STEP_ERROR;
-                bar.currentPosition = Math.max(bar.currentPosition, step + 1);
-            }
-        } finally {
-            barsLock.unlock();
+            parsersLock.unlock();
         }
     }
 
     public ParsingProgressDTO getProgress() {
-        List<ParsingProgressDTO.ParserProgress> parsers = new ArrayList<>();
-        for (Map.Entry<Integer, ProgressBar> pb : bars.entrySet()) {
-            ProgressBar value = pb.getValue();
-            parsers.add(new ParsingProgressDTO.ParserProgress(
-                pb.getKey(),
-                value.metadataStatus,
-                value.title,
-                value.steps
-            ));
-        }
-
-        parsers.sort(Comparator.comparingInt(ParsingProgressDTO.ParserProgress::parserID));
+        List<ParserProgress> parsers = new ArrayList<>(this.parsers.values());
+        parsers.sort(Comparator.comparingInt(ParserProgress::getId));
 
         return ParsingProgressDTO.builder()
+                .parsingHash(parsingHash)
                 .parsers(parsers)
                 .finished(finished)
-                .parsedVacanciesCnt(parsedVacanciesCnt)
-                .newVacanciesCnt(newVacanciesCnt)
-                .outdatedVacanciesCnt(outdatedVacanciesCnt)
+                .parsedVacanciesTotalCount(parsedVacanciesCnt)
+                .newVacanciesTotalCount(newVacanciesCnt)
                 .build();
-    }
-
-    public void setMetadataStatus(int parserId, MetadataStatusEnum metadataStatus) {
-        ProgressBar bar = bars.get(parserId);
-        bar.metadataStatus = metadataStatus;
     }
 }

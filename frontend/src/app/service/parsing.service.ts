@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { ParsingProgress } from '../parser-progress/progress-bar.model';
+import { ParsingProgress } from '../type/progress-bar.type';
 
 @Injectable({
     providedIn: 'root'

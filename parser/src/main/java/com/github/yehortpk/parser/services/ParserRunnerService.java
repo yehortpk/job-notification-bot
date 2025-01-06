@@ -1,6 +1,7 @@
 package com.github.yehortpk.parser.services;
 
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
+import com.github.yehortpk.parser.models.ParserProgress;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,6 @@ public class ParserRunnerService {
         return () -> {
             Set<VacancyDTO> parsedVacancies = vacancyService.parseAllVacancies();
             Set<VacancyDTO> newVacancies = new HashSet<>();
-            Set<String> outdatedVacancies = new HashSet<>();
 
             Map<Integer, List<VacancyDTO>> vacanciesByCompany = parsedVacancies.stream()
                     .collect(Collectors.groupingBy(VacancyDTO::getCompanyID));
@@ -44,28 +44,27 @@ public class ParserRunnerService {
                     persistedCompanyVacancies = new HashSet<>();
                 }
                 Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
-                newVacancies.addAll(vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacancies));
+                Set<VacancyDTO> companyNewVacancies = vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacancies);
+                ParserProgress parserProgress = progressManagerService.getParsers().get(companyId);
+                parserProgress.setParsedVacanciesCnt(vacancies.size());
+                parserProgress.setNewVacanciesCnt(companyNewVacancies.size());
+
+                newVacancies.addAll(companyNewVacancies);
             });
 
             progressManagerService.setFinished(true);
             progressManagerService.setParsedVacanciesCnt(parsedVacancies.size());
             progressManagerService.setNewVacanciesCnt(newVacancies.size());
-            progressManagerService.setOutdatedVacanciesCnt(outdatedVacancies.size());
 
             String parsingResultOutput = String.format("""
-                    Parsing completed.
-                    New vacancies count: %s
-                    outdated vacancies\
-                     count: %s""", newVacancies.size(), outdatedVacancies.size());
+                    Parsing completed.\s
+                    Total vacancies parsed: %s.\s
+                    New vacancies count: %s""", parsedVacancies.size(), newVacancies.size());
             System.out.println(parsingResultOutput);
             log.info(parsingResultOutput);
 
             if (!newVacancies.isEmpty()) {
                 notifierService.notifyNewVacancies(newVacancies);
-            }
-
-            if (!outdatedVacancies.isEmpty()) {
-                notifierService.notifyOutdatedVacancies(outdatedVacancies);
             }
         };
     }
