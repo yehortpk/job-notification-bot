@@ -24,6 +24,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new VacancyToVacancyShortDTOMapper());
         modelMapper.addMappings(new DataPageToVacanciesPageDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyCompanyDTOMapper());
+        modelMapper.addMappings(new ParsingProgressDTOToEntityMapper());
 
         return modelMapper;
     }

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +21,6 @@ public class ParserProgress {
     int parsedVacanciesCnt;
     int newVacanciesCnt;
 
-
     @Getter
     @AllArgsConstructor
     public static class PageProgress {
@@ -33,11 +32,7 @@ public class ParserProgress {
         private final List<PageLog> logs = new ArrayList<>();
 
 
-        public record PageLog(int pageID, LogLevelEnum level, ZonedDateTime dateTime, String message){}
+        public record PageLog(int pageID, LogLevelEnum level, LocalDateTime timestamp, String message){}
     }
 
-    public enum LogLevelEnum {
-        ERROR,
-        INFO
-    }
 }

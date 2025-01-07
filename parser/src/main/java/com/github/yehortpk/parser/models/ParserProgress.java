@@ -3,7 +3,7 @@ package com.github.yehortpk.parser.models;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class ParserProgress {
     }
 
     public void addPageLog(int page, LogLevelEnum level, String message) {
-        pages.get(page - 1).addLog(new PageProgress.PageLog(page, level, ZonedDateTime.now(), message));
+        pages.get(page - 1).addLog(new PageProgress.PageLog(page, level, LocalDateTime.now(), message));
     }
 
     public void setPageParsedVacanciesCount(int page, int count) {
@@ -68,7 +68,7 @@ public class ParserProgress {
             this.logs.add(log);
         }
 
-        public record PageLog(int pageID, LogLevelEnum level, ZonedDateTime dateTime, String message){}
+        public record PageLog(int pageID, LogLevelEnum level, LocalDateTime timestamp, String message){}
     }
 
     public enum LogLevelEnum {
