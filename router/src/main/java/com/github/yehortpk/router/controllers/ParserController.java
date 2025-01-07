@@ -1,36 +1,28 @@
 package com.github.yehortpk.router.controllers;
 
-import com.github.yehortpk.router.models.vacancy.VacancyDTO;
-import com.github.yehortpk.router.services.NotifierService;
-import com.github.yehortpk.router.services.VacancyService;
-import jakarta.transaction.Transactional;
+import com.github.yehortpk.router.models.parser.ParsingProgressDTO;
+import com.github.yehortpk.router.models.response.APIResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-
-/**
- * Controller that responsible for handling requests from KAFKA_PARSER_TOPIC from parser service
- */
-@Component
-@ConditionalOnProperty(name = "spring.kafka.bootstrap-servers")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/parser")
 public class ParserController {
-    private final VacancyService vacancyService;
-    private final NotifierService notifierService;
+    private final RestTemplate restTemplate;
 
-    @KafkaListener(topics = {"#{environment['KAFKA_PARSER_TOPIC']}"}, containerFactory = "parserContainerFactory")
-    @Transactional
-    public void listenParserTopic(List<ConsumerRecord<String, VacancyDTO>> vacanciesBatch) {
-        List<VacancyDTO> vacancies = vacanciesBatch.stream().map(ConsumerRecord::value).toList();
+    @Value("${parser-service-url}")
+    private String parserServiceURL;
 
-        vacancyService.addVacancies(vacancies);
+    @PostMapping("/start")
+    public APIResponse startParsing() {
+        return restTemplate.postForEntity(parserServiceURL + "/parser/start", null, APIResponse.class).getBody();
+    }
 
-        if (notifierService.isNotifierEnabled()) {
-            notifierService.notifyUsers(vacancies);
-        }
+    @GetMapping("/progress")
+    public ParsingProgressDTO getParsingProgress() {
+        return restTemplate.getForEntity(parserServiceURL + "/progress", ParsingProgressDTO.class).getBody();
     }
 }

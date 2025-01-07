@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { ParsingService } from '../service/parsing.service';
-import { ParsingProgress } from '../type/progress-bar.type';
+import { ParsingProgress } from '../type/parsing-progress.type';
 
 @Component({
   selector: 'app-parser-progress',

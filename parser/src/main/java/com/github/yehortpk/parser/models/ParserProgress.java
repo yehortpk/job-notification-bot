@@ -48,7 +48,7 @@ public class ParserProgress {
     }
 
     public void setPageParsedVacanciesCount(int page, int count) {
-        pages.get(page-1).setParsedVacanciesCnt(count);
+        pages.get(page - 1).setParsedVacanciesCnt(count);
     }
 
     @Getter

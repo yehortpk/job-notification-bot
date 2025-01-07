@@ -1,8 +1,11 @@
 package com.github.yehortpk.parser.controllers;
 
+import com.github.yehortpk.parser.models.APIResponse;
+import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import com.github.yehortpk.parser.services.ParserRunnerService;
+import com.github.yehortpk.parser.services.ProgressManagerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,11 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/parser")
 public class ParserController {
     private final ParserRunnerService parserRunnerService;
+    private final ProgressManagerService progressManagerService;
 
-    @CrossOrigin("http://localhost:4200")
     @PostMapping("/start")
-    public String startParsing() {
+    public APIResponse startParsing() {
         parserRunnerService.runParsers();
-        return "Parsing has been started";
+        return new APIResponse(200, "Parsing has been started");
+    }
+
+    @GetMapping("/progress")
+    public ParsingProgressDTO getProgress() {
+        return progressManagerService.getProgress();
     }
 }
