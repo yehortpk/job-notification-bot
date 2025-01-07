@@ -34,6 +34,9 @@ services:
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_ROOT_PASS: ${MONGO_ROOT_PASS}
+      MONGO_PROGRESS_DB: ${MONGO_PROGRESS_DB}
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
@@ -70,6 +73,21 @@ services:
         condition: service_healthy
     profiles:
       - bot
+      - app
+
+  frontend:
+    container_name: notifier-frontend-local
+    build:
+      dockerfile: ./frontend/Dockerfile
+    networks:
+      - notifier-local-network
+    ports:
+      - "4200:4200"
+    depends_on:
+      router:
+        condition: service_healthy
+    profiles:
+      - frontend
       - app
 
   redis:
@@ -150,7 +168,7 @@ services:
     container_name: notifier-mysql-local
     volumes:
       - notifier-mysql-local-data:/var/lib/mysql
-      - ./notifier.sql:/docker-entrypoint-initdb.d/notifier.sql
+      - ./notifier-init.sql:/docker-entrypoint-initdb.d/notifier-init.sql
     ports:
       - "3306:3306"
     networks:
@@ -173,12 +191,16 @@ services:
     image: mongo:6.0
     container_name: notifier-mongo-local
     ports:
-      - "27017:27017"
+      - "27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+      MONGO_INITDB_DATABASE: ${MONGO_PROGRESS_DB}
+    networks:
+      - notifier-local-network
     volumes:
       - mongo-data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
 
 networks:
   notifier-local-network:
