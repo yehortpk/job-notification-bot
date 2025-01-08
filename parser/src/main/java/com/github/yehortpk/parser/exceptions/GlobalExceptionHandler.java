@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.exceptions;
 
-import org.springframework.http.HttpStatus;
+import com.github.yehortpk.parser.models.APIResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ParsingAlreadyStartedException.class)
     public ResponseEntity<Object> handleParsingAlreadyStarterException(Exception ex) {
-        return ResponseEntity.badRequest().body(new CustomErrorResponse(ex.getMessage()));
+        return ResponseEntity.badRequest().body(new APIResponse(400, ex.getMessage()));
     }
 
 }

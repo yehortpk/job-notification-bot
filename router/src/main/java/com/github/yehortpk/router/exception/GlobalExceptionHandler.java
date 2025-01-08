@@ -26,4 +26,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(new APIResponse(400, ex.getMessage()));
     }
+
+    @ExceptionHandler({ProgressNotFoundException.class, ParserProgressNotFoundException.class, ParserPageProgressNotFoundException.class})
+    public ResponseEntity<Object> handleProgressNotFoundException(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(new APIResponse(404, ex.getMessage()));
+    }
 }

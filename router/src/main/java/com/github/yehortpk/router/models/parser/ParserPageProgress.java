@@ -5,21 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParserProgress {
-    int id;
-    String title;
-    int totalPages;
-    List<ParserPageProgress> pages;
-
-    MetadataStatusEnum metadataStatus;
-
-    int parsedVacanciesCnt;
-    int newVacanciesCnt;
-
+public class ParserPageProgress {
+    private int id;
+    private PageProgressStatusEnum status;
+    private int parsedVacanciesCnt;
+    private List<ParserPageLog> logs = new ArrayList<>();
 }
