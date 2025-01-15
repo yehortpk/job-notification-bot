@@ -38,7 +38,7 @@ public class VacancyService {
 
         Set<VacancyDTO> result = new HashSet<>();
         Map<String, Future<Set<VacancyDTO>>> vacanciesByCompaniesFut = new HashMap<>();
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(companies.size());
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
         for (CompanyDTO company : companies) {
             String beanClass = company.getBeanClass();
             try {
