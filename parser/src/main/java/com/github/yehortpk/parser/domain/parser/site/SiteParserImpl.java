@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.domain.parser.site;
 
-import com.github.yehortpk.parser.domain.parser.page.factory.PageParserFactory;
+import com.github.yehortpk.parser.domain.parser.page.DefaultPageParser;
 import com.github.yehortpk.parser.domain.parser.page.PageParser;
 import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
@@ -45,14 +45,11 @@ public abstract class SiteParserImpl implements SiteParser {
     protected PageParser defaultPageParser;
 
     @Autowired
-    protected PageParserFactory pageParserFactory;
-
-    @Autowired
     private ProgressManagerService progressManagerService;
 
     @Override
     public Set<VacancyDTO> parseVacancies(CompanyDTO company) {
-        this.defaultPageParser = pageParserFactory.createDefaultPageParser();
+        this.defaultPageParser = createDefaultPageParser();
         this.company = company;
 
         int pagesCount = 1;
@@ -88,7 +85,7 @@ public abstract class SiteParserImpl implements SiteParser {
             PageConnectionParams pageConnectionParams = generatePageConnectionParams(pageId, company);
             int finalPageId = pageId;
             Future<PageDTO> future = executor.submit(() -> {
-                Thread.sleep((finalPageId - 1) * setIntervalBetweenPagesSec() * 1000L);
+                Thread.sleep((finalPageId) * setIntervalBetweenPagesSec() * 1000L);
                 return parsePage(pageConnectionParams);
             });
             page_fut.add(future);
@@ -134,8 +131,8 @@ public abstract class SiteParserImpl implements SiteParser {
                 pProgress.markPageError(pageNum);
 
                 String logMessage = String.format("company: %s, error: %s ", company.getTitle(), e.getMessage());
-                logMessage = e.getCause().getCause() != null?
-                        logMessage + String.format(" cause: %s" , e.getCause().getCause().getMessage()):
+                logMessage = e.getCause() != null?
+                        logMessage + String.format(" cause: %s" , e.getCause().getMessage()):
                         logMessage;
                 log.error(logMessage);
                 pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
@@ -195,6 +192,11 @@ public abstract class SiteParserImpl implements SiteParser {
 
             headers.put(entry.getKey(), siteMetadata.getOrDefault(value, value));
         }
+
+        String cookies = siteMetadata.get("Cookie");
+        if (cookies != null) {
+            headers.put("Cookie", cookies);
+        }
         return headers;
     }
 
@@ -228,18 +230,27 @@ public abstract class SiteParserImpl implements SiteParser {
                 .build();
 
         PageParserResponse pageResponse = defaultPageParser.parsePage(pageConnectionParams);
-        Thread.sleep(setIntervalBetweenPagesSec() * 1000L);
-        return parseSiteMetadata(pageResponse.getHeaders(), Jsoup.parse(pageResponse.getBody()));
+        return parseSiteMetadata(pageResponse);
     }
 
     // Override in implementations to add metadata to requests
-    protected CompanySiteMetadata parseSiteMetadata(Map<String, String> headers, Document doc) {
+    protected CompanySiteMetadata parseSiteMetadata(PageParserResponse pageResponse) {
         CompanySiteMetadata defaultMetadata = new CompanySiteMetadata();
-        defaultMetadata.setPagesCount(getPagesCount(doc));
-        defaultMetadata.setRequestData(new HashMap<>());
-        defaultMetadata.setRequestHeaders(new HashMap<>());
+        defaultMetadata.setPagesCount(getPagesCount(Jsoup.parse(pageResponse.getBody())));
+        HashMap<String, String> metadataHeaders = new HashMap<>();
+        if (!pageResponse.getCookies().isEmpty()) {
+            metadataHeaders.put("Cookie", flatCookies(pageResponse.getCookies()));
+        }
+        defaultMetadata.setRequestHeaders(metadataHeaders);
 
         return defaultMetadata;
+    }
+
+    private String flatCookies(Map<String, String> cookies) {
+        return cookies.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(";"));
     }
 
     protected int getPagesCount(Document doc) {
@@ -247,6 +258,10 @@ public abstract class SiteParserImpl implements SiteParser {
     }
     protected int setIntervalBetweenPagesSec() {
         return 1;
+    }
+
+    protected PageParser createDefaultPageParser() {
+        return new DefaultPageParser();
     }
 
     /**
