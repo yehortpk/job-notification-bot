@@ -1,7 +1,7 @@
 db = db.getSiblingDB(process.env.MONGO_INITDB_DATABASE);
 
 // Create the collection
-db.createCollection('parsing_sessions', {
+db.createCollection('parsing-history', {
   validator: {
     $jsonSchema: {
       bsonType: 'object',

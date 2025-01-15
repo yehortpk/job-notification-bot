@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "progress")
+@Document(collection = "parsing-history")
 public class ParsingProgress {
     @Id
     private String id;

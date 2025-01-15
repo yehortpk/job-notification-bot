@@ -5,6 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface ParsingProgressRepository extends MongoRepository<ParsingProgress, String> {
+public interface ParsingHistoryRepository extends MongoRepository<ParsingProgress, String> {
     Optional<ParsingProgress> findByParsingHash(String parsingHash);
 }
