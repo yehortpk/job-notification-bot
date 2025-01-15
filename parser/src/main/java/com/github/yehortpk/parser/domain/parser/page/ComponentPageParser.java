@@ -2,9 +2,11 @@ package com.github.yehortpk.parser.domain.parser.page;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageParserResponse;
+import com.github.yehortpk.parser.services.RequestProxyService;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.lightbody.bmp.client.ClientUtil;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -37,6 +39,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ComponentPageParser implements PageParser {
     private final String dynamicElementQuerySelector;
+    private final RequestProxyService requestProxyService;
 
     @Override
     public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
@@ -45,33 +48,45 @@ public class ComponentPageParser implements PageParser {
         @Cleanup ChromeDriver driver = createWebDriver(chromeOptions);
 
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
+        pageConnectionParams.setPageUrl(finalPageUrl);
 
-        return parsePage(finalPageUrl, driver, dynamicElementQuerySelector);
+        return parsePage(driver, pageConnectionParams);
     }
 
     /**
      * Scraps page with specific url and specific {@link WebDriver}
-     * @param pageUrl URL to the page
      * @param driver GoogleChrome web driver for Selenium parser
-     * @param dynamicElementQuerySelector element query selector for component section loading delay
+     * @param pageConnectionParams element query selector for component section loading delay
      * @return page HTML
      */
-    private PageParserResponse parsePage(String pageUrl, ChromeDriver driver, String dynamicElementQuerySelector) throws IOException {
+    private PageParserResponse parsePage(ChromeDriver driver, PageConnectionParams pageConnectionParams) throws IOException {
         DevTools devTools = driver.getDevTools();
         devTools.createSession();
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
 
         AtomicReference<Headers> headers = new AtomicReference<>();
+        String pageUrl = pageConnectionParams.getPageUrl();
         devTools.addListener(Network.responseReceived(), responseReceived -> {
             String requestUrl = responseReceived.getResponse().getUrl();
-
             if (requestUrl.equals(pageUrl)) {
                 headers.set(responseReceived.getResponse().getHeaders());
             }
         });
 
-
+        log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",
+                pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getProxy(),
+                pageConnectionParams.getData(),
+                pageConnectionParams.getHeaders()
+        );
         driver.get(pageUrl);
+
+        log.info("Connection to the page {}, proxy: {},  data: {}, headers: {} was established",
+                pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getProxy(),
+                pageConnectionParams.getData(),
+                pageConnectionParams.getHeaders()
+        );
 
         Wait<ChromeDriver> wait = new FluentWait<>(driver)
                 .withTimeout(Duration.of(30, ChronoUnit.SECONDS))
@@ -94,8 +109,9 @@ public class ComponentPageParser implements PageParser {
                     entry -> entry.getValue().toString()
             ));
         }
+        Map<String, String> cookies = driver.manage().getCookies().stream().collect(Collectors.toMap(Cookie::getName, Cookie::getValue));
 
-        return new PageParserResponse(headersMap, driver.getPageSource());
+        return new PageParserResponse(headersMap, cookies, driver.getPageSource());
     }
 
     /**
@@ -154,7 +170,9 @@ public class ComponentPageParser implements PageParser {
                 "--disable-infobars",
                 "--disable-notifications",
                 "--blink-settings=imagesEnabled=false",
-                "--disk-cache-size=0"
+                "--disk-cache-size=0",
+                "--enable-cookies",
+                "--ignore-certificate-errors"
         );
         chromeOptions.setBinary(chromeBinaryPath);
 
@@ -163,16 +181,15 @@ public class ComponentPageParser implements PageParser {
         prefs.put("profile.managed_default_content_settings.images", 2);
         prefs.put("profile.managed_default_content_settings.javascript", 1);
 
-        Map<String, String> headers = pageConnectionParams.getHeaders();
-        if (!headers.isEmpty()) {
-            prefs.put("custom_headers", headers);
-        }
         chromeOptions.setExperimentalOption("prefs", prefs);
+
 
         Proxy proxy = pageConnectionParams.getProxy();
         if (proxy != null) {
             String[] proxyData = retrieveDataFromProxy(proxy);
-            chromeOptions.addArguments(String.format("--proxy-server=%s:%s", proxyData[0], proxyData[1]));
+            chromeOptions.setProxy(ClientUtil.createSeleniumProxy(requestProxyService.createSeleniumProxy(pageConnectionParams.getHeaders(), proxyData)));
+        } else {
+            chromeOptions.setProxy(ClientUtil.createSeleniumProxy(requestProxyService.createSeleniumProxy(pageConnectionParams.getHeaders())));
         }
 
         return chromeOptions;

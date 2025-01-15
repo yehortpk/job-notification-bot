@@ -9,5 +9,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class PageParserResponse {
     Map<String, String> headers;
+    Map<String, String> cookies;
     String body;
 }

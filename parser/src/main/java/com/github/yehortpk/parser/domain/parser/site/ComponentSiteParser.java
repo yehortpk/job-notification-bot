@@ -1,12 +1,15 @@
 package com.github.yehortpk.parser.domain.parser.site;
 
+import com.github.yehortpk.parser.domain.parser.page.ComponentPageParser;
 import com.github.yehortpk.parser.domain.parser.page.PageParser;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
+import com.github.yehortpk.parser.services.RequestProxyService;
 import lombok.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -23,10 +26,12 @@ import java.util.Map;
 @Getter
 public abstract class ComponentSiteParser extends SiteParserImpl {
     private final int DELAY_SEC = 2;
+    @Autowired
+    private RequestProxyService requestProxyService;
 
     @Override
     protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-        PageParser pageParser = pageParserFactory.createComponentPageParser(createDynamicElementQuerySelector());
+        PageParser pageParser = createComponentPageParser();
         Document page = Jsoup.parse(pageParser.parsePage(pageConnectionParams).getBody());
         return new PageDTO(pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(), pageConnectionParams.getHeaders(), page);
@@ -34,7 +39,7 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
 
     @Override
     protected PageConnectionParams generatePageConnectionParams(int pageID, CompanyDTO company) {
-        String pageUrl = company.getVacanciesURL();
+        String pageUrl = company.getVacanciesURL().replace("{page}", String.valueOf(pageID));
         Map<String, String> data = new HashMap<>(company.getData());
         if (data.containsValue("{page}")) {
             data.replaceAll((key, value) -> value.equals("{page}") ? String.valueOf(pageID) : value);
@@ -50,6 +55,10 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
     @Override
     protected int setIntervalBetweenPagesSec(){
         return DELAY_SEC;
+    }
+
+    protected PageParser createComponentPageParser() {
+        return new ComponentPageParser(createDynamicElementQuerySelector(), requestProxyService);
     }
 
     /**
