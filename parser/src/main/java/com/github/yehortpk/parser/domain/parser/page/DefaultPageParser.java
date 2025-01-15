@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageParserResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
@@ -14,11 +15,24 @@ import java.io.IOException;
  * Default pages scrapper. Scrap page with Jsoup library
  */
 @Component
+@Slf4j
 public class DefaultPageParser implements PageParser {
     @Override
     public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
+        log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",
+                pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getProxy(),
+                pageConnectionParams.getData(),
+                pageConnectionParams.getHeaders()
+        );
         Connection.Response response = toConnection(pageConnectionParams).execute();
-        return new PageParserResponse(response.headers(), response.body());
+        log.info("Connection to the page {}, proxy: {},  data: {}, headers: {} was established",
+                pageConnectionParams.getPageUrl(),
+                pageConnectionParams.getProxy(),
+                pageConnectionParams.getData(),
+                pageConnectionParams.getHeaders()
+        );
+        return new PageParserResponse(response.headers(), response.cookies(), response.body());
     }
 
     /**
