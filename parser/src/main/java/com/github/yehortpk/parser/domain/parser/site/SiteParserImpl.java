@@ -60,6 +60,7 @@ public abstract class SiteParserImpl implements SiteParser {
 
             // Parsing first page to retrieve all metadata (total pages count, csrf, required cookies, etc.)
             try {
+                log.info("Extracting site metadata for company {}", company.getTitle());
                 CompanySiteMetadata siteMetadata = extractSiteMetadata(company);
                 pagesCount = siteMetadata.getPagesCount();
                 company.setData(createData(siteMetadata.getRequestData(), company.getData()));
@@ -72,8 +73,9 @@ public abstract class SiteParserImpl implements SiteParser {
                 String logMessage = "Can't extract site metadata, company: %s. Error: %s"
                         .formatted(company.getTitle(), e.getMessage());
 
+                log.error(logMessage);
                 pProgress.addPageLog(1, ParserProgress.LogLevelEnum.ERROR, logMessage);
-                throw new RuntimeException(logMessage);
+                return new HashSet<>();
             }
         }
 
