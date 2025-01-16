@@ -1,18 +1,20 @@
 package com.github.yehortpk.parser.services;
 
+import com.github.yehortpk.parser.domain.parser.site.SiteParser;
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
+import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.ParserProgress;
 import com.github.yehortpk.parser.models.VacancyDTO;
+import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * This class implements the {@link ApplicationRunner} interface and is responsible for parsing vacancies,
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ParserRunnerService {
-    private final VacancyService vacancyService;
+    private final ApplicationContext applicationContext;
     private final CompanyService companyService;
     private final NotifierService notifierService;
     private final ProgressManagerService progressManagerService;
@@ -30,53 +32,92 @@ public class ParserRunnerService {
 
     private Runnable run () {
         return () -> {
-            Set<VacancyDTO> parsedVacancies = vacancyService.parseAllVacancies();
-            Set<VacancyDTO> newVacancies = new HashSet<>();
+            List<CompanyDTO> companies = companyService.getCompaniesList();
 
-            Map<Integer, List<VacancyDTO>> vacanciesByCompany = parsedVacancies.stream()
-                    .collect(Collectors.groupingBy(VacancyDTO::getCompanyID));
+            if (companies.isEmpty()) {
+                return ;
+            }
+
+            Map<CompanyDTO, CompletableFuture<Set<VacancyDTO>>> vacanciesByCompaniesFutures = new HashMap<>();
+            @Cleanup ExecutorService executor = Executors.newCachedThreadPool();
+
+            for (CompanyDTO company : companies) {
+                String beanClass = company.getBeanClass();
+                try {
+                    SiteParser siteParser = (SiteParser) applicationContext.getBean(beanClass);
+
+                    CompletableFuture<Set<VacancyDTO>> vacanciesByCompany =
+                            CompletableFuture.supplyAsync(() -> siteParser.parseVacancies(company), executor);
+                    vacanciesByCompaniesFutures.put(company, vacanciesByCompany);
+                } catch (BeansException ignored) {
+                    log.error("{} parser implementation doesn't exist", beanClass);
+                }
+            }
 
             Map<Long, Set<String>> persistedVacanciesByCompanyId = companyService.getPersistedVacanciesUrlsByCompanyId();
 
-            vacanciesByCompany.forEach((companyId, vacancies) -> {
-                Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.get((long) companyId);
-                if (persistedCompanyVacancies == null) {
-                    persistedCompanyVacancies = new HashSet<>();
+            for (Map.Entry<CompanyDTO, CompletableFuture<Set<VacancyDTO>>> vacanciesByCompanyEntry : vacanciesByCompaniesFutures.entrySet()) {
+                CompanyDTO company = vacanciesByCompanyEntry.getKey();
+                CompletableFuture<Set<VacancyDTO>> vacanciesFut = vacanciesByCompanyEntry.getValue();
+
+                vacanciesFut.whenComplete((parsedVacancies, error) -> {
+                    if (error != null) {
+                        throw new RuntimeException(error);
+                    }
+
+                    Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.get((long) company.getCompanyId());
+                    Set<VacancyDTO> companyNewVacancies = calculateNewVacancies(parsedVacancies, persistedCompanyVacancies);
+                    ParserProgress parserProgress = progressManagerService.getParsers().get(company.getCompanyId());
+                    parserProgress.setParsedVacanciesCnt(parsedVacancies.size());
+                    parserProgress.setNewVacanciesCnt(companyNewVacancies.size());
+
+                    progressManagerService.setParsedVacanciesCnt(progressManagerService.getParsedVacanciesCnt() + parsedVacancies.size());
+                    progressManagerService.setNewVacanciesCnt(progressManagerService.getNewVacanciesCnt() + companyNewVacancies.size());
+                    if (!companyNewVacancies.isEmpty()) {
+                        notifierService.notifyNewVacancies(companyNewVacancies);
+                    }
+                });
+            }
+
+            for (CompletableFuture<Set<VacancyDTO>> fut : vacanciesByCompaniesFutures.values()) {
+                try {
+                    fut.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
                 }
-                Set<VacancyDTO> parsedCompanyVacanciesSet = new HashSet<>(vacancies);
-                Set<VacancyDTO> companyNewVacancies = vacancyService.calculateNewVacancies(parsedCompanyVacanciesSet, persistedCompanyVacancies);
-                ParserProgress parserProgress = progressManagerService.getParsers().get(companyId);
-                parserProgress.setParsedVacanciesCnt(vacancies.size());
-                parserProgress.setNewVacanciesCnt(companyNewVacancies.size());
-
-                newVacancies.addAll(companyNewVacancies);
-            });
-
+            }
             progressManagerService.setFinished(true);
-            progressManagerService.setParsedVacanciesCnt(parsedVacancies.size());
-            progressManagerService.setNewVacanciesCnt(newVacancies.size());
 
             String parsingResultOutput = String.format("""
                     Parsing completed.\s
                     Total vacancies parsed: %s.\s
-                    New vacancies count: %s""", parsedVacancies.size(), newVacancies.size());
+                    New vacancies count: %s""", progressManagerService.getParsedVacanciesCnt(), progressManagerService.getNewVacanciesCnt());
             System.out.println(parsingResultOutput);
             log.info(parsingResultOutput);
-
-            if (!newVacancies.isEmpty()) {
-                notifierService.notifyNewVacancies(newVacancies);
-            }
         };
     }
 
     public void runParsers() throws ParsingAlreadyStartedException {
         if (runnerThread == null || !runnerThread.isAlive()) {
-            progressManagerService.initialize();
+            progressManagerService.init();
             runnerThread = new Thread(run());
             runnerThread.start();
         } else {
             throw new ParsingAlreadyStartedException("Parsing process has already started");
         }
+    }
+
+    /**
+     * Calculate difference between parsed and persistent vacancies
+     * @param parsedVacancies - total vacancies set
+     * @param persistedVacanciesUrls - persistent vacancies set
+     * @return set of new vacancies
+     */
+    public Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
+        Set<VacancyDTO> result = new HashSet<>(parsedVacancies);
+        result.removeIf(vacancyDTO -> persistedVacanciesUrls.contains(vacancyDTO.getLink()));
+
+        return result;
     }
 }
 

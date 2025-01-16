@@ -21,19 +21,22 @@ public class ProgressManagerService {
     private final ReentrantLock progressLock = new ReentrantLock();
 
     @Setter
+    @Getter
     private int parsedVacanciesCnt;
     @Setter
+    @Getter
     private int newVacanciesCnt;
     @Setter
+    @Getter
     private boolean finished;
 
     public ProgressManagerService() {
-        initialize();
+        init();
     }
 
 
 
-    public void initialize() {
+    public void init() {
         progressLock.lock();
         this.parsingHash = UUID.randomUUID().toString().substring(0, 10);
         this.parsedVacanciesCnt = 0;
