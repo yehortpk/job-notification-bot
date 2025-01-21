@@ -16,11 +16,11 @@ import java.util.*;
 public class CompanyService {
     private final RestTemplate restTemplate;
 
-    @Value("${company-service-url}")
-    private String companyServiceURL;
+    @Value("${router-companies-url}")
+    private String routerCompaniesURL;
 
     @Value("${router-vacancies-url}")
-    private String vacancyServiceURL;
+    private String routerVacanciesURL;
 
     /**
      * Returns all companies list from router company service
@@ -31,7 +31,7 @@ public class CompanyService {
                 = new ParameterizedTypeReference<>() {
         };
 
-        List<CompanyDTO> companies = restTemplate.exchange(companyServiceURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
+        List<CompanyDTO> companies = restTemplate.exchange(routerCompaniesURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
 
         if (companies == null) {
             return new ArrayList<>();
@@ -49,7 +49,7 @@ public class CompanyService {
                 = new ParameterizedTypeReference<>() {
         };
 
-        String finalURL = companyServiceURL + "/%s/vacancies".formatted(companyId);
+        String finalURL = routerCompaniesURL + "/%s/vacancies".formatted(companyId);
 
         return restTemplate.exchange(finalURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
     }
@@ -59,7 +59,7 @@ public class CompanyService {
                 = new ParameterizedTypeReference<>() {
         };
 
-        String finalURL = vacancyServiceURL + "?byCompany=true";
+        String finalURL = routerVacanciesURL + "?byCompany=true";
 
         Map<Long, Set<String>> body = restTemplate.exchange(finalURL, HttpMethod.GET, null, parameterizedTypeReference).getBody();
         if (body == null) {

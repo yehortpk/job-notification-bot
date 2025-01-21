@@ -31,13 +31,7 @@ public class ParserController {
 
     @GetMapping("/progress")
     public ParsingProgressDTO getParsingProgress() {
-        ParsingProgressDTO progress = restTemplate.getForEntity(parserServiceURL + "/parser/progress", ParsingProgressDTO.class).getBody();
-        if (progress != null && progress.isFinished()) {
-            if (parsingHistoryService.findByParsingHash(progress.getParsingHash()).isEmpty()) {
-                parsingHistoryService.saveParsingProgress(progress);
-            }
-        }
-        return progress;
+        return restTemplate.getForEntity(parserServiceURL + "/parser/progress", ParsingProgressDTO.class).getBody();
     }
 
     @GetMapping("/progress/{parsing_hash}")

@@ -92,8 +92,9 @@ public class ParserRunnerService {
                     Parsing completed.\s
                     Total vacancies parsed: %s.\s
                     New vacancies count: %s""", progressManagerService.getParsedVacanciesCnt(), progressManagerService.getNewVacanciesCnt());
-            System.out.println(parsingResultOutput);
             log.info(parsingResultOutput);
+
+            notifierService.notifyFinishedProgress(progressManagerService.getProgress());
         };
     }
 

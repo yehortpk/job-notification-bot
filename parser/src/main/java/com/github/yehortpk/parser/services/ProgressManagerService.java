@@ -4,15 +4,12 @@ import com.github.yehortpk.parser.models.ParserProgress;
 import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Service("progressManagerService")
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Service
 public class ProgressManagerService {
     private String parsingHash;
     @Getter

@@ -1,5 +1,6 @@
 package com.github.yehortpk.parser.services;
 
+import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,5 +39,14 @@ public class NotifierService {
         HttpEntity<Set<String>> request =
                 new HttpEntity<>(outdatedVacanciesIds);
         restTemplate.exchange(routerVacanciesURL, HttpMethod.DELETE, request, Void.class);
+    }
+
+    @Value("${router-parser-url}")
+    private String routerParserURL;
+
+    public void notifyFinishedProgress(ParsingProgressDTO parsingProgress) {
+        HttpEntity<ParsingProgressDTO> request =
+                new HttpEntity<>(parsingProgress);
+        restTemplate.exchange(routerParserURL + "/progress", HttpMethod.POST, request, Void.class);
     }
 }
