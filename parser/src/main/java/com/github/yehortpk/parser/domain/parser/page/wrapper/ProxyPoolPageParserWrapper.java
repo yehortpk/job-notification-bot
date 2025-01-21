@@ -59,15 +59,17 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
         CompletionService<PageParserResponse> completionService = new ExecutorCompletionService<>(executor);
 
+        List<Proxy> proxies = proxyService.getProxyPool();
+        MAX_PARALLEL_INSTANCES_COUNT = Math.min(MAX_PARALLEL_INSTANCES_COUNT, proxies.size());
+        for (int counter = 0; counter < MAX_PARALLEL_INSTANCES_COUNT; counter++) {
+            Proxy proxy = proxyService.getRandomProxy();
+            PageConnectionParams pageConnectionParamsClone = SerializationUtils.clone(pageConnectionParams);
+            pageConnectionParamsClone.setProxy(proxy);
 
-        proxyService.filterValidProxies();
-        List<Proxy> proxies = proxyService.getProxies();
-        for (int counter = 0; counter < proxies.size(); counter++) {
-            Proxy proxy = proxies.get(counter);
             int currentThreadsTimeout = INITIAL_DELAY_BETWEEN_THREADS_MS * counter;
             Callable<PageParserResponse> task = () -> {
                 Thread.sleep(currentThreadsTimeout);
-                return pageParser.parsePage(pageConnectionParams);
+                return pageParser.parsePage(pageConnectionParamsClone);
             };
             Future<PageParserResponse> pageResponseWithProxy = completionService.submit(task);
             log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jsoup.Connection;
 
+import java.io.Serializable;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
 @Getter
 @Setter
 @Builder
-public class PageConnectionParams {
+public class PageConnectionParams implements Serializable {
     private String pageUrl;
     @Builder.Default
     private Map<String, String> data = new HashMap<>();
