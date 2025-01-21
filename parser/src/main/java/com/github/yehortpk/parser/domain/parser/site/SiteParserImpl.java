@@ -101,13 +101,14 @@ public abstract class SiteParserImpl implements SiteParser {
             try {
                 PageDTO page = future.get();
                 Set<VacancyDTO> vacanciesFromPage = extractVacanciesFromPage(page);
+                if (vacanciesFromPage.isEmpty()) {
+                    throw new NoVacanciesOnPageException(pageNum);
+                }
+
                 vacanciesFromPage.forEach(vacancy -> {
                     vacancy.setCompanyID(company.getCompanyId());
                     vacancy.setCompanyTitle(company.getTitle());
                 });
-                if (vacanciesFromPage.isEmpty()) {
-                    throw new NoVacanciesOnPageException(pageNum);
-                }
                 pProgress.markPageDone(pageNum);
                 String logMessage = String.format("Page: %s, data: %s was parsed", page.getPageURL(), page.getPageData());
                 log.info(logMessage);
@@ -118,7 +119,7 @@ public abstract class SiteParserImpl implements SiteParser {
                 pProgress.markPageError(pageNum);
 
                 String logMessage = String.format("company: %s, error: %s", company.getTitle(), e.getCause().getMessage());
-                logMessage = e.getCause().getCause() != null?
+                logMessage = e.getCause() != null && e.getCause().getCause() != null?
                         logMessage + String.format(" cause: %s" , e.getCause().getCause().getMessage()):
                         logMessage;
                 log.error(logMessage);

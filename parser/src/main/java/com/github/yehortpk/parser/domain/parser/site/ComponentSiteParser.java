@@ -5,11 +5,9 @@ import com.github.yehortpk.parser.domain.parser.page.PageParser;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
-import com.github.yehortpk.parser.services.RequestProxyService;
 import lombok.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,8 +24,6 @@ import java.util.Map;
 @Getter
 public abstract class ComponentSiteParser extends SiteParserImpl {
     private final int DELAY_SEC = 2;
-    @Autowired
-    private RequestProxyService requestProxyService;
 
     @Override
     protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
@@ -58,7 +54,7 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
     }
 
     protected PageParser createComponentPageParser() {
-        return new ComponentPageParser(createDynamicElementQuerySelector(), requestProxyService);
+        return new ComponentPageParser(createDynamicElementQuerySelector());
     }
 
     /**

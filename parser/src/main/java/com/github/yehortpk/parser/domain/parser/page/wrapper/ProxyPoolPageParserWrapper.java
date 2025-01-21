@@ -1,12 +1,12 @@
 package com.github.yehortpk.parser.domain.parser.page.wrapper;
 
-import com.github.yehortpk.parser.exceptions.ProxyPageConnectionException;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.domain.parser.page.PageParser;
 import com.github.yehortpk.parser.models.PageParserResponse;
-import com.github.yehortpk.parser.services.ProxyService;
+import com.github.yehortpk.parser.services.proxy.ProxyService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SerializationUtils;
 import org.openqa.selenium.TimeoutException;
 
 import java.io.IOException;
@@ -22,19 +22,19 @@ import java.util.concurrent.*;
  * Every proxy thread have its own delay based on its sequence number (by default - 50ms). When the proxy is in the
  * delay it may be cancelled by another thread that complete the page scrapping.
  */
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class ProxyPoolPageParserWrapper implements PageParserWrapper {
     private final PageParser pageParser;
-    private final ProxyService proxyService;
+    private final ProxyService proxyService = ProxyService.getInstance();
 
-    private final int INITIAL_DELAY_BETWEEN_THREADS_MS = 50;
+    private int MAX_PARALLEL_INSTANCES_COUNT = 10;
+    private final int INITIAL_DELAY_BETWEEN_THREADS_MS = 500;
     private final int POLL_TIMEOUT_SEC = 30;
 
 
     @Override
     public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-
         PageParserResponse pageBody = loadPage(pageConnectionParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
                 pageConnectionParams.getPageUrl(),
@@ -72,46 +72,38 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
                 return pageParser.parsePage(pageConnectionParamsClone);
             };
             Future<PageParserResponse> pageResponseWithProxy = completionService.submit(task);
-            log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",
-                    pageConnectionParams.getPageUrl(),
-                    proxy,
-                    pageConnectionParams.getData(),
-                    pageConnectionParams.getHeaders()
-            );
             pageResponseWithProxiesFut.put(pageResponseWithProxy, proxy);
         }
 
-        for (int i = 0; i < proxies.size(); i++) {
-            Future<PageParserResponse> scrapperResponseFut;
-            try {
-                scrapperResponseFut = completionService.take();
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Service was interrupted");
-            }
-            try {
-                PageParserResponse result = scrapperResponseFut.get(POLL_TIMEOUT_SEC, TimeUnit.SECONDS);
-                log.info("Connection to the page: {}, proxy: {}, data: {} was established",
-                        pageConnectionParams.getPageUrl(),
-                        pageResponseWithProxiesFut.get(scrapperResponseFut),
-                        pageConnectionParams.getData());
-                pageResponseWithProxiesFut.forEach((res, proxy) -> res.cancel(true));
 
-                executor.close();
-                return result;
-            } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException ee) {
-                if (ee.getCause() instanceof ProxyPageConnectionException) {
+        try {
+            Future<PageParserResponse> completedFuture = completionService.poll(POLL_TIMEOUT_SEC * 1000 +
+                    (long) pageResponseWithProxiesFut.size() * INITIAL_DELAY_BETWEEN_THREADS_MS, TimeUnit.MILLISECONDS);
+
+            if (completedFuture != null) {
+                try {
+                    PageParserResponse response = completedFuture.get();
+
+                    // Cancel all other threads
+                    for (Future<PageParserResponse> future : pageResponseWithProxiesFut.keySet()) {
+                        if (!future.isDone() && !future.isCancelled()) {
+                            future.cancel(true);
+                        }
+                    }
+
+                    return response;
+                } catch (ExecutionException e) {
                     log.error("Page: {}, proxy: {}, error: {}",
                             pageConnectionParams.getPageUrl(),
-                            pageResponseWithProxiesFut.get(scrapperResponseFut),
-                            ee.getCause().getMessage());
-                } else {
-                    log.error("Page: {}, error: {}",
-                            pageConnectionParams.getPageUrl(),
-                            ee.getCause().getMessage());
+                            pageResponseWithProxiesFut.get(completedFuture),
+                            e.getCause().getMessage());
                 }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Thread was interrupted while waiting for page parsing", e);
         }
 
-        throw new IOException(String.format("Could not connect to the page %s for specified timeout", pageConnectionParams.getPageUrl()));
-    }
+        throw new IOException(String.format("Could not connect to the page %s within %d seconds",
+                pageConnectionParams.getPageUrl(), POLL_TIMEOUT_SEC));}
 }

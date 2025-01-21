@@ -21,7 +21,6 @@ import org.openqa.selenium.devtools.v114.network.Network;
 import org.openqa.selenium.devtools.v114.network.model.Headers;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -39,18 +38,31 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ComponentPageParser implements PageParser {
     private final String dynamicElementQuerySelector;
-    private final RequestProxyService requestProxyService;
+    private RequestProxyService requestProxyService;
 
     @Override
     public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-        ChromeOptions chromeOptions = createChromeOptions(pageConnectionParams);
+        Proxy proxy = pageConnectionParams.getProxy();
+        if (proxy != null) {
+            requestProxyService = new RequestProxyService(proxy);
+        } else {
+            requestProxyService = new RequestProxyService();
+        }
+
+        requestProxyService.addHeaders(pageConnectionParams.getHeaders());
+        requestProxyService.startService();
+
+        ChromeOptions chromeOptions = createChromeOptions();
 
         @Cleanup ChromeDriver driver = createWebDriver(chromeOptions);
 
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
         pageConnectionParams.setPageUrl(finalPageUrl);
 
-        return parsePage(driver, pageConnectionParams);
+        PageParserResponse pageParserResponse = parsePage(driver, pageConnectionParams);
+
+        requestProxyService.stopService();
+        return pageParserResponse;
     }
 
     /**
@@ -115,17 +127,6 @@ public class ComponentPageParser implements PageParser {
     }
 
     /**
-     * Retrieves data (host, port) from {@link Proxy} object
-     * @param proxy proxy object
-     * @return proxy data array with size of 2 (host and port)
-     */
-    private String[] retrieveDataFromProxy(Proxy proxy) {
-        InetSocketAddress address = (InetSocketAddress) proxy.address();
-
-        return new String[]{address.getHostString(), String.valueOf(address.getPort())};
-    }
-
-    /**
      * Create GoogleChrome web driver for Selenium with specific path in the system
      * @param chromeOptions web driver options
      * @return web driver
@@ -167,7 +168,7 @@ public class ComponentPageParser implements PageParser {
      * Creates Google Chrome web driver options without proxy
      * @return web driver options
      */
-    private ChromeOptions createChromeOptions(PageConnectionParams pageConnectionParams) {
+    private ChromeOptions createChromeOptions() {
         final String chromeBinaryPath = "/usr/bin/google-chrome";
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(
@@ -191,15 +192,7 @@ public class ComponentPageParser implements PageParser {
         prefs.put("profile.managed_default_content_settings.javascript", 1);
 
         chromeOptions.setExperimentalOption("prefs", prefs);
-
-
-        Proxy proxy = pageConnectionParams.getProxy();
-        if (proxy != null) {
-            String[] proxyData = retrieveDataFromProxy(proxy);
-            chromeOptions.setProxy(ClientUtil.createSeleniumProxy(requestProxyService.createSeleniumProxy(pageConnectionParams.getHeaders(), proxyData)));
-        } else {
-            chromeOptions.setProxy(ClientUtil.createSeleniumProxy(requestProxyService.createSeleniumProxy(pageConnectionParams.getHeaders())));
-        }
+        chromeOptions.setProxy(ClientUtil.createSeleniumProxy(requestProxyService.getProxy()));
 
         return chromeOptions;
     }
