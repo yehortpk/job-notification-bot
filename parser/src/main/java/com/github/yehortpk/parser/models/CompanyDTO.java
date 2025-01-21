@@ -14,6 +14,7 @@ import java.util.Map;
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CompanyDTO {
+    @EqualsAndHashCode.Include
     @JsonProperty("company_id")
     private int companyId;
     /**
@@ -28,7 +29,6 @@ public class CompanyDTO {
     /**
      * Main URL to the company domain
      */
-    @EqualsAndHashCode.Include
     @JsonProperty("main_page_url")
     private String mainPageURL;
     /**

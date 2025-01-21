@@ -16,12 +16,12 @@ import java.util.Set;
 @AllArgsConstructor
 public class Company {
     @Id
+    @EqualsAndHashCode.Include
     private int companyId;
     private String beanClass;
     @ToString.Include
     private String title;
 
-    @EqualsAndHashCode.Include
     @Column(name = "main_page_url")
     private String mainPageURL;
     @Column(name = "vacancies_url")
