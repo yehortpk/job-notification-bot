@@ -1,6 +1,5 @@
 package com.github.yehortpk.parser.services.proxy;
 
-import com.github.yehortpk.parser.models.ProxyDTO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
