@@ -10,15 +10,16 @@ import java.util.List;
 @Getter
 @Setter
 public class ParserProgress {
-    int id;
-    String title;
-    int totalPages;
-    List<PageProgress> pages = new ArrayList<>();
+    private int id;
+    private String title;
+    private int totalPages;
+    private List<PageProgress> pages = new ArrayList<>();
 
-    MetadataStatusEnum metadataStatus = MetadataStatusEnum.PENDING;
+    private MetadataStatusEnum metadataStatus = MetadataStatusEnum.PENDING;
 
-    int parsedVacanciesCnt = 0;
-    int newVacanciesCnt = 0;
+    private int parsedVacanciesCnt = 0;
+    private int newVacanciesCnt = 0;
+    private int outdatedVacanciesCnt = 0;
 
     public ParserProgress(int id, String title) {
         this.id = id;

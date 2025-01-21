@@ -12,14 +12,15 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ParserProgress {
-    int id;
-    String title;
-    int totalPages;
-    List<ParserPageProgress> pages;
+    private int id;
+    private String title;
+    private int totalPages;
+    private List<ParserPageProgress> pages;
 
-    MetadataStatusEnum metadataStatus;
+    private MetadataStatusEnum metadataStatus;
 
-    int parsedVacanciesCnt;
-    int newVacanciesCnt;
+    private int parsedVacanciesCnt;
+    private int newVacanciesCnt;
+    private int outdatedVacanciesCnt;
 
 }

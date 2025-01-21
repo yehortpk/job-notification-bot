@@ -3,6 +3,7 @@ package com.github.yehortpk.parser.services;
 import com.github.yehortpk.parser.domain.parser.site.SiteParser;
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
 import com.github.yehortpk.parser.models.CompanyDTO;
+import com.github.yehortpk.parser.models.PageProgressStatusEnum;
 import com.github.yehortpk.parser.models.ParserProgress;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import lombok.Cleanup;
@@ -60,23 +61,44 @@ public class ParserRunnerService {
                 CompanyDTO company = vacanciesByCompanyEntry.getKey();
                 CompletableFuture<Set<VacancyDTO>> vacanciesFut = vacanciesByCompanyEntry.getValue();
 
-                vacanciesFut.whenComplete((parsedVacancies, error) -> {
-                    if (error != null) {
-                        throw new RuntimeException(error);
-                    }
+                synchronized (this) {
+                    vacanciesFut.whenComplete((parsedVacancies, error) -> {
+                        if (error != null) {
+                            throw new RuntimeException(error);
+                        }
 
-                    Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.get((long) company.getCompanyId());
-                    Set<VacancyDTO> companyNewVacancies = calculateNewVacancies(parsedVacancies, persistedCompanyVacancies);
-                    ParserProgress parserProgress = progressManagerService.getParsers().get(company.getCompanyId());
-                    parserProgress.setParsedVacanciesCnt(parsedVacancies.size());
-                    parserProgress.setNewVacanciesCnt(companyNewVacancies.size());
+                        ParserProgress parserProgress = progressManagerService.getParsers().get(company.getCompanyId());
+                        parserProgress.setParsedVacanciesCnt(parsedVacancies.size());
 
-                    progressManagerService.setParsedVacanciesCnt(progressManagerService.getParsedVacanciesCnt() + parsedVacancies.size());
-                    progressManagerService.setNewVacanciesCnt(progressManagerService.getNewVacanciesCnt() + companyNewVacancies.size());
-                    if (!companyNewVacancies.isEmpty()) {
-                        notifierService.notifyNewVacancies(companyNewVacancies);
-                    }
-                });
+                        Set<String> persistedCompanyVacancies = persistedVacanciesByCompanyId.getOrDefault((long) company.getCompanyId(), new HashSet<>());
+                        Set<VacancyDTO> companyNewVacancies = calculateNewVacancies(parsedVacancies, persistedCompanyVacancies);
+
+
+                        parserProgress.setNewVacanciesCnt(companyNewVacancies.size());
+
+                        progressManagerService.setParsedVacanciesCnt(progressManagerService.getParsedVacanciesCnt() + parsedVacancies.size());
+                        progressManagerService.setNewVacanciesCnt(progressManagerService.getNewVacanciesCnt() + companyNewVacancies.size());
+                        if (!companyNewVacancies.isEmpty()) {
+                            notifierService.notifyNewVacancies(companyNewVacancies);
+                        }
+
+                        for (ParserProgress.PageProgress pPage : progressManagerService.getParsers().get(company.getCompanyId()).getPages()) {
+                            if (pPage.getStatus().equals(PageProgressStatusEnum.STEP_ERROR)) {
+                                return;
+                            }
+                        }
+
+                        if (!parsedVacancies.isEmpty()) {
+                            Set<String> companyOutdatedVacanciesIdentifiers = calculateOutdatedVacanciesIdentifiers(parsedVacancies, persistedCompanyVacancies);
+
+                            if (!companyOutdatedVacanciesIdentifiers.isEmpty()) {
+                                parserProgress.setOutdatedVacanciesCnt(companyOutdatedVacanciesIdentifiers.size());
+                                log.info("Remove outdated vacancies from company {}, count: {}", company.getTitle(), companyOutdatedVacanciesIdentifiers.size());
+                                notifierService.notifyOutdatedVacancies(companyOutdatedVacanciesIdentifiers);
+                            }
+                        }
+                    });
+                }
             }
 
             for (CompletableFuture<Set<VacancyDTO>> fut : vacanciesByCompaniesFutures.values()) {
@@ -114,11 +136,18 @@ public class ParserRunnerService {
      * @param persistedVacanciesUrls - persistent vacancies set
      * @return set of new vacancies
      */
-    public Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
+    public synchronized Set<VacancyDTO> calculateNewVacancies(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
         Set<VacancyDTO> result = new HashSet<>(parsedVacancies);
         result.removeIf(vacancyDTO -> persistedVacanciesUrls.contains(vacancyDTO.getLink()));
-
         return result;
+    }
+
+    public synchronized Set<String> calculateOutdatedVacanciesIdentifiers(Set<VacancyDTO> parsedVacancies, Set<String> persistedVacanciesUrls) {
+        for (VacancyDTO parsedVacancy : parsedVacancies) {
+            persistedVacanciesUrls.remove(parsedVacancy.getLink());
+        }
+
+        return persistedVacanciesUrls;
     }
 }
 
