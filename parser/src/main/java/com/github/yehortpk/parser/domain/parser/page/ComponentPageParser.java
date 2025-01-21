@@ -145,9 +145,18 @@ public class ComponentPageParser implements PageParser {
      */
     private String constructURLWithData(String pageUrl, Map<String, String> data) {
         if (!data.isEmpty()) {
-            return pageUrl + "?" + data.entrySet().stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .collect(Collectors.joining("&"));
+            StringBuilder pageUrlBuilder = new StringBuilder(pageUrl + "?");
+            for (Map.Entry<String, String> dataES : data.entrySet()) {
+                if (dataES.getKey().endsWith("[]")) {
+                    for (String valuePart : dataES.getValue().split(",")) {
+                        pageUrlBuilder.append(dataES.getKey()).append("=").append(valuePart).append("&");
+                    }
+                } else {
+                    pageUrlBuilder.append(dataES.getKey()).append("=").append(dataES.getValue()).append("&");
+                }
+
+            }
+            pageUrl = pageUrlBuilder.toString();
         }
 
         return pageUrl;

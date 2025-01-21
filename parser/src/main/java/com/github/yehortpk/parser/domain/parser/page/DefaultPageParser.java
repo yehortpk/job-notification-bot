@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Default pages scrapper. Scrap page with Jsoup library
@@ -57,7 +58,15 @@ public class DefaultPageParser implements PageParser {
                 throw new RuntimeException(e);
             }
         } else {
-            connection = connection.data(pageConnectionParams.getData());
+            for (Map.Entry<String, String> dataES : pageConnectionParams.getData().entrySet()) {
+                if (dataES.getKey().endsWith("[]")) {
+                    for (String keyArrayPart : dataES.getValue().split(",")) {
+                        connection.data(dataES.getKey(), keyArrayPart);
+                    }
+                } else {
+                    connection.data(dataES.getKey(), dataES.getValue());
+                }
+            }
         }
         return connection;
     }
