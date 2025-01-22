@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.domain.parser.site;
+package com.github.yehortpk.parser.parser;
 
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
@@ -24,7 +24,7 @@ public abstract class StaticSiteParser extends SiteParserImpl {
     @Override
     protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
 
-        Document doc = Jsoup.parse(defaultPageParser.parsePage(pageConnectionParams).getBody());
+        Document doc = Jsoup.parse(defaultPageScrapper.scrapPage(pageConnectionParams).getBody());
         return new PageDTO(pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(), pageConnectionParams.getHeaders(), doc);
     }

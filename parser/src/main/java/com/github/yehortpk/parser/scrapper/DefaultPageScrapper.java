@@ -1,9 +1,8 @@
-package com.github.yehortpk.parser.domain.parser.page;
+package com.github.yehortpk.parser.scrapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.models.PageParserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -17,9 +16,9 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class DefaultPageParser implements PageParser {
+public class DefaultPageScrapper implements PageScrapper {
     @Override
-    public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
+    public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
         log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getProxy(),
@@ -33,7 +32,7 @@ public class DefaultPageParser implements PageParser {
                 pageConnectionParams.getData(),
                 pageConnectionParams.getHeaders()
         );
-        return new PageParserResponse(response.headers(), response.cookies(), response.body());
+        return new PageScrapperResponse(response.headers(), response.cookies(), response.body());
     }
 
     /**

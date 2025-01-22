@@ -1,9 +1,9 @@
-package com.github.yehortpk.parser.domain.parser.page.wrapper;
+package com.github.yehortpk.parser.scrapper.decorator;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.domain.parser.page.PageParser;
-import com.github.yehortpk.parser.models.PageParserResponse;
-import com.github.yehortpk.parser.services.proxy.ProxyService;
+import com.github.yehortpk.parser.scrapper.PageScrapper;
+import com.github.yehortpk.parser.scrapper.PageScrapperResponse;
+import com.github.yehortpk.parser.proxy.ProxyService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
@@ -24,8 +24,8 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ProxyPoolPageParserWrapper implements PageParserWrapper {
-    private final PageParser pageParser;
+public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
+    private final PageScrapper pageScrapper;
     private final ProxyService proxyService = ProxyService.getInstance();
 
     private int MAX_PARALLEL_INSTANCES_COUNT = 10;
@@ -34,8 +34,8 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
 
 
     @Override
-    public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-        PageParserResponse pageBody = loadPage(pageConnectionParams);
+    public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
+        PageScrapperResponse pageBody = loadPage(pageConnectionParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
                 pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(),
@@ -44,7 +44,7 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
     }
 
     /**
-     * Recursive method that responsible for scrap the page with {@link PageParser}. If all the threads fail page
+     * Recursive method that responsible for scrap the page with {@link PageScrapper}. If all the threads fail page
      * connection, method call itself recursively with increased pollTimeout (POLL_TIMEOUT_LAMBDA) and increased
      * delay between threads (DELAY_BETWEEN_THREADS_LAMBDA). When the number of attempts exceeds
      * CONNECTION_MAX_ATTEMPTS, {@link NullPointerException} will be thrown
@@ -53,11 +53,11 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
      * @return page HTML
      * @see PageConnectionParams
      */
-    private PageParserResponse loadPage(PageConnectionParams pageConnectionParams) throws IOException {
+    private PageScrapperResponse loadPage(PageConnectionParams pageConnectionParams) throws IOException {
 
-        Map<Future<PageParserResponse>, Proxy> pageResponseWithProxiesFut = new HashMap<>();
+        Map<Future<PageScrapperResponse>, Proxy> pageResponseWithProxiesFut = new HashMap<>();
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-        CompletionService<PageParserResponse> completionService = new ExecutorCompletionService<>(executor);
+        CompletionService<PageScrapperResponse> completionService = new ExecutorCompletionService<>(executor);
 
         List<Proxy> proxies = proxyService.getProxyPool();
         MAX_PARALLEL_INSTANCES_COUNT = Math.min(MAX_PARALLEL_INSTANCES_COUNT, proxies.size());
@@ -67,25 +67,25 @@ public class ProxyPoolPageParserWrapper implements PageParserWrapper {
             pageConnectionParamsClone.setProxy(proxy);
 
             int currentThreadsTimeout = INITIAL_DELAY_BETWEEN_THREADS_MS * counter;
-            Callable<PageParserResponse> task = () -> {
+            Callable<PageScrapperResponse> task = () -> {
                 Thread.sleep(currentThreadsTimeout);
-                return pageParser.parsePage(pageConnectionParamsClone);
+                return pageScrapper.scrapPage(pageConnectionParamsClone);
             };
-            Future<PageParserResponse> pageResponseWithProxy = completionService.submit(task);
+            Future<PageScrapperResponse> pageResponseWithProxy = completionService.submit(task);
             pageResponseWithProxiesFut.put(pageResponseWithProxy, proxy);
         }
 
 
         try {
-            Future<PageParserResponse> completedFuture = completionService.poll(POLL_TIMEOUT_SEC * 1000 +
+            Future<PageScrapperResponse> completedFuture = completionService.poll(POLL_TIMEOUT_SEC * 1000 +
                     (long) pageResponseWithProxiesFut.size() * INITIAL_DELAY_BETWEEN_THREADS_MS, TimeUnit.MILLISECONDS);
 
             if (completedFuture != null) {
                 try {
-                    PageParserResponse response = completedFuture.get();
+                    PageScrapperResponse response = completedFuture.get();
 
                     // Cancel all other threads
-                    for (Future<PageParserResponse> future : pageResponseWithProxiesFut.keySet()) {
+                    for (Future<PageScrapperResponse> future : pageResponseWithProxiesFut.keySet()) {
                         if (!future.isDone() && !future.isCancelled()) {
                             future.cancel(true);
                         }

@@ -1,15 +1,15 @@
-package com.github.yehortpk.parser.models;
+package com.github.yehortpk.parser.progress;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum MetadataStatusEnum {
-    PENDING(-1),
-    ERROR(0),
-    DONE(1);
+public enum PageProgressStatusEnum {
+    STEP_PENDING(-1),
+    STEP_ERROR(0),
+    STEP_DONE(1);
 
     private final int value;
 
-    MetadataStatusEnum(int value) {
+    PageProgressStatusEnum(int value) {
         this.value = value;
     }
 

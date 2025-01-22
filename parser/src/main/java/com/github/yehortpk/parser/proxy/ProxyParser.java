@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.services.proxy;
+package com.github.yehortpk.parser.proxy;
 
 import java.net.Proxy;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.models;
+package com.github.yehortpk.parser.progress;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

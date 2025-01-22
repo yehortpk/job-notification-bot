@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.exceptions;
 
-import com.github.yehortpk.parser.models.APIResponse;
+import com.github.yehortpk.parser.controllers.APIResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

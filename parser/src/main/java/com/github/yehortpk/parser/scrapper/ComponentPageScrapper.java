@@ -1,7 +1,6 @@
-package com.github.yehortpk.parser.domain.parser.page;
+package com.github.yehortpk.parser.scrapper;
 
 import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.models.PageParserResponse;
 import com.github.yehortpk.parser.services.RequestProxyService;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +35,12 @@ import java.util.Optional;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ComponentPageParser implements PageParser {
+public class ComponentPageScrapper implements PageScrapper {
     private final String dynamicElementQuerySelector;
     private RequestProxyService requestProxyService;
 
     @Override
-    public PageParserResponse parsePage(PageConnectionParams pageConnectionParams) throws IOException {
+    public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
         Proxy proxy = pageConnectionParams.getProxy();
         if (proxy != null) {
             requestProxyService = new RequestProxyService(proxy);
@@ -59,10 +58,10 @@ public class ComponentPageParser implements PageParser {
         String finalPageUrl = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
         pageConnectionParams.setPageUrl(finalPageUrl);
 
-        PageParserResponse pageParserResponse = parsePage(driver, pageConnectionParams);
+        PageScrapperResponse pageScrapperResponse = parsePage(driver, pageConnectionParams);
 
         requestProxyService.stopService();
-        return pageParserResponse;
+        return pageScrapperResponse;
     }
 
     /**
@@ -71,7 +70,7 @@ public class ComponentPageParser implements PageParser {
      * @param pageConnectionParams element query selector for component section loading delay
      * @return page HTML
      */
-    private PageParserResponse parsePage(ChromeDriver driver, PageConnectionParams pageConnectionParams) throws IOException {
+    private PageScrapperResponse parsePage(ChromeDriver driver, PageConnectionParams pageConnectionParams) throws IOException {
         DevTools devTools = driver.getDevTools();
         devTools.createSession();
         devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
@@ -123,7 +122,7 @@ public class ComponentPageParser implements PageParser {
         }
         Map<String, String> cookies = driver.manage().getCookies().stream().collect(Collectors.toMap(Cookie::getName, Cookie::getValue));
 
-        return new PageParserResponse(headersMap, cookies, driver.getPageSource());
+        return new PageScrapperResponse(headersMap, cookies, driver.getPageSource());
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.models;
+package com.github.yehortpk.parser.controllers;
 
 public record APIResponse(int code, String message) {
 }

@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.services;
 
-import com.github.yehortpk.parser.models.ParsingProgressDTO;
+import com.github.yehortpk.parser.progress.ParsingProgressDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.domain.parser.site;
+package com.github.yehortpk.parser.parser;
 
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
@@ -37,7 +37,7 @@ public abstract class APISiteParser extends SiteParserImpl {
 
     @Override
     protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-        String pageBody = defaultPageParser.parsePage(pageConnectionParams).getBody();
+        String pageBody = defaultPageScrapper.scrapPage(pageConnectionParams).getBody();
 
         Document doc = parsePageBody(pageBody);
         return new PageDTO(pageConnectionParams.getPageUrl(),

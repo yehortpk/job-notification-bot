@@ -1,7 +1,7 @@
-package com.github.yehortpk.parser.domain.parser.site;
+package com.github.yehortpk.parser.parser;
 
-import com.github.yehortpk.parser.domain.parser.page.ComponentPageParser;
-import com.github.yehortpk.parser.domain.parser.page.PageParser;
+import com.github.yehortpk.parser.scrapper.ComponentPageScrapper;
+import com.github.yehortpk.parser.scrapper.PageScrapper;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
 import com.github.yehortpk.parser.models.PageDTO;
@@ -27,8 +27,8 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
 
     @Override
     protected PageDTO parsePage(PageConnectionParams pageConnectionParams) throws IOException {
-        PageParser pageParser = createComponentPageParser();
-        Document page = Jsoup.parse(pageParser.parsePage(pageConnectionParams).getBody());
+        PageScrapper pageScrapper = createComponentPageParser();
+        Document page = Jsoup.parse(pageScrapper.scrapPage(pageConnectionParams).getBody());
         return new PageDTO(pageConnectionParams.getPageUrl(),
                 pageConnectionParams.getData(), pageConnectionParams.getHeaders(), page);
     }
@@ -53,8 +53,8 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
         return DELAY_SEC;
     }
 
-    protected PageParser createComponentPageParser() {
-        return new ComponentPageParser(createDynamicElementQuerySelector());
+    protected PageScrapper createComponentPageParser() {
+        return new ComponentPageScrapper(createDynamicElementQuerySelector());
     }
 
     /**

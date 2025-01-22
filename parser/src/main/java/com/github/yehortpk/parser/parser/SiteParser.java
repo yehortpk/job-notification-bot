@@ -1,4 +1,4 @@
-package com.github.yehortpk.parser.domain.parser.site;
+package com.github.yehortpk.parser.parser;
 
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;

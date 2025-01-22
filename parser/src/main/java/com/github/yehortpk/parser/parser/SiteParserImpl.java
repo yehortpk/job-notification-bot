@@ -1,10 +1,13 @@
-package com.github.yehortpk.parser.domain.parser.site;
+package com.github.yehortpk.parser.parser;
 
-import com.github.yehortpk.parser.domain.parser.page.DefaultPageParser;
-import com.github.yehortpk.parser.domain.parser.page.PageParser;
+import com.github.yehortpk.parser.progress.MetadataStatusEnum;
+import com.github.yehortpk.parser.progress.ParserProgress;
+import com.github.yehortpk.parser.scrapper.DefaultPageScrapper;
+import com.github.yehortpk.parser.scrapper.PageScrapper;
 import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
-import com.github.yehortpk.parser.services.ProgressManagerService;
+import com.github.yehortpk.parser.progress.ProgressManagerService;
+import com.github.yehortpk.parser.scrapper.PageScrapperResponse;
 import lombok.Cleanup;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +45,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class SiteParserImpl implements SiteParser {
     protected CompanyDTO company;
-    protected PageParser defaultPageParser;
+    protected PageScrapper defaultPageScrapper;
 
     @Autowired
     private ProgressManagerService progressManagerService;
 
     @Override
     public Set<VacancyDTO> parseVacancies(CompanyDTO company) {
-        this.defaultPageParser = createDefaultPageParser();
+        this.defaultPageScrapper = createDefaultPageParser();
         this.company = company;
 
         int pagesCount = 1;
@@ -232,12 +235,12 @@ public abstract class SiteParserImpl implements SiteParser {
                 .data(siteData)
                 .build();
 
-        PageParserResponse pageResponse = defaultPageParser.parsePage(pageConnectionParams);
+        PageScrapperResponse pageResponse = defaultPageScrapper.scrapPage(pageConnectionParams);
         return parseSiteMetadata(pageResponse);
     }
 
     // Override in implementations to add metadata to requests
-    protected CompanySiteMetadata parseSiteMetadata(PageParserResponse pageResponse) {
+    protected CompanySiteMetadata parseSiteMetadata(PageScrapperResponse pageResponse) {
         CompanySiteMetadata defaultMetadata = new CompanySiteMetadata();
         defaultMetadata.setPagesCount(getPagesCount(Jsoup.parse(pageResponse.getBody())));
         HashMap<String, String> metadataHeaders = new HashMap<>();
@@ -263,8 +266,8 @@ public abstract class SiteParserImpl implements SiteParser {
         return 1;
     }
 
-    protected PageParser createDefaultPageParser() {
-        return new DefaultPageParser();
+    protected PageScrapper createDefaultPageParser() {
+        return new DefaultPageScrapper();
     }
 
     /**

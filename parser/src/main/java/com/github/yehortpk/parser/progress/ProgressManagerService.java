@@ -1,7 +1,5 @@
-package com.github.yehortpk.parser.services;
+package com.github.yehortpk.parser.progress;
 
-import com.github.yehortpk.parser.models.ParserProgress;
-import com.github.yehortpk.parser.models.ParsingProgressDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;

@@ -1,11 +1,12 @@
 package com.github.yehortpk.parser.services;
 
-import com.github.yehortpk.parser.domain.parser.site.SiteParser;
+import com.github.yehortpk.parser.parser.SiteParser;
 import com.github.yehortpk.parser.exceptions.ParsingAlreadyStartedException;
 import com.github.yehortpk.parser.models.CompanyDTO;
-import com.github.yehortpk.parser.models.PageProgressStatusEnum;
-import com.github.yehortpk.parser.models.ParserProgress;
+import com.github.yehortpk.parser.progress.PageProgressStatusEnum;
+import com.github.yehortpk.parser.progress.ParserProgress;
 import com.github.yehortpk.parser.models.VacancyDTO;
+import com.github.yehortpk.parser.progress.ProgressManagerService;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
