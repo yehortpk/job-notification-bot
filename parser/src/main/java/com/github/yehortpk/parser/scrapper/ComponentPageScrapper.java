@@ -100,7 +100,7 @@ public class ComponentPageScrapper implements PageScrapper {
         );
 
         Wait<ChromeDriver> wait = new FluentWait<>(driver)
-                .withTimeout(Duration.of(30, ChronoUnit.SECONDS))
+                .withTimeout(Duration.of(pageConnectionParams.getTimeoutSec(), ChronoUnit.SECONDS))
                 .pollingEvery(Duration.of(5, ChronoUnit.SECONDS))
                 .ignoring(NoSuchElementException.class)
                 .ignoring(ConnectionClosedException.class)

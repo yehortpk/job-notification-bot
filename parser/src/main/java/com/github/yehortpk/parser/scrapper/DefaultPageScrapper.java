@@ -45,7 +45,8 @@ public class DefaultPageScrapper implements PageScrapper {
                 .proxy(pageConnectionParams.getProxy())
                 .headers(pageConnectionParams.getHeaders())
                 .ignoreContentType(true)
-                .method(pageConnectionParams.getConnectionMethod());
+                .method(pageConnectionParams.getConnectionMethod())
+                .timeout(pageConnectionParams.getTimeoutSec() * 1000);
 
         // Map data to json if content type is application/json
         String contentTypeHeader = pageConnectionParams.getHeaders().get("Content-Type");

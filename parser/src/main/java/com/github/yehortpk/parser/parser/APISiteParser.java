@@ -57,6 +57,7 @@ public abstract class APISiteParser extends SiteParserImpl {
                 .headers(company.getHeaders())
                 .connectionMethod(getConnectionMethod())
                 .pageUrl(pageUrl)
+                .timeoutSec(setPagePullTimeoutSec())
                 .build();
     }
 
