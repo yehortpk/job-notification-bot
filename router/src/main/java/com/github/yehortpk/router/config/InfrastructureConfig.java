@@ -15,13 +15,21 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 @ConditionalOnProperty(name = "spring.kafka.bootstrap-servers")
-public class KafkaConfig {
+public class InfrastructureConfig {
+    // Rest config
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    // Kafka config
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
@@ -55,6 +63,7 @@ public class KafkaConfig {
 
         props.put(ConsumerConfig.GROUP_ID_CONFIG, parserTopicConsumerGroupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS, "vacancy:com.github.yehortpk.router.models.vacancy.VacancyDTO");
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
@@ -88,6 +97,7 @@ public class KafkaConfig {
     public KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate() {
         KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate = new KafkaTemplate<>(producerFactory());
         kafkaTemplate.setDefaultTopic(kafkaBotNotifierTopic);
+        kafkaTemplate.setTransactionIdPrefix("tx-");
         return kafkaTemplate;
     }
 

@@ -1,19 +1,12 @@
 package com.github.yehortpk.router.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class ApplicationConfig implements WebMvcConfigurer {
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
+public class SecurityConfig implements WebMvcConfigurer {
     @Value("${frontend-service-url}")
     private String frontendServiceURL;
 

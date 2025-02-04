@@ -53,6 +53,7 @@ public class InfrastructureConfig {
     @Bean
     public KafkaTemplate<String, VacancyDTO> kafkaTemplate() {
         KafkaTemplate<String, VacancyDTO> kafkaTemplate = new KafkaTemplate<>(producerFactory());
+        kafkaTemplate.setTransactionIdPrefix("tx-");
         kafkaTemplate.setDefaultTopic(parserTopic);
         return kafkaTemplate;
     }
