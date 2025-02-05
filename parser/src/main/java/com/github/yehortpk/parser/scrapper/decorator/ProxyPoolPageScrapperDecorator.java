@@ -7,7 +7,6 @@ import com.github.yehortpk.parser.proxy.ProxyService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
-import org.openqa.selenium.TimeoutException;
 
 import java.io.IOException;
 import java.net.Proxy;
