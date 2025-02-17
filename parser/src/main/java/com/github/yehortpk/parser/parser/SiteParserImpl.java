@@ -265,7 +265,6 @@ public abstract class SiteParserImpl implements SiteParser {
     protected int setIntervalBetweenPagesSec() {
         return 1;
     }
-    protected int setPagePullTimeoutSec() {return 30;}
 
     protected PageScrapper createDefaultPageParser() {
         return new DefaultPageScrapper();

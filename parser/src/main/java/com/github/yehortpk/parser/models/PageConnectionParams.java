@@ -26,5 +26,5 @@ public class PageConnectionParams implements Serializable {
     private Connection.Method connectionMethod = Connection.Method.GET;
     private Proxy proxy;
     @Builder.Default
-    private int timeoutSec = 30;
+    private int timeoutSec = 60;
 }

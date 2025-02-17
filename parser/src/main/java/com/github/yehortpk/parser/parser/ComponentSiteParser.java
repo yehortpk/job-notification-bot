@@ -45,7 +45,6 @@ public abstract class ComponentSiteParser extends SiteParserImpl {
                 .data(data)
                 .headers(company.getHeaders())
                 .pageUrl(pageUrl)
-                .timeoutSec(setPagePullTimeoutSec())
                 .build();
     }
 
