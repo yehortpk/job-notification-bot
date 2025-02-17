@@ -73,7 +73,6 @@ public class InfrastructureConfig {
         ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(parserConsumerFactory());
-        factory.setBatchListener(true);
         return factory;
     }
 

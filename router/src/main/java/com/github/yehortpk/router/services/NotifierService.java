@@ -26,7 +26,7 @@ public class NotifierService {
     @Value("${notifier.enabled}")
     private boolean notifierEnabled;
 
-    public void notifyUsers(List<VacancyDTO> vacancies) {
+    public void notifyUsers(VacancyDTO vacancy) {
         List<FilterDTO> filters = filterService.getAllFilters().stream()
                 .map(filter -> modelMapper.map(filter, FilterDTO.class))
                 .toList();
@@ -36,23 +36,21 @@ public class NotifierService {
 
         filters.forEach(filter -> {
             FilterParser filterParser = new FilterParser(filter.getFilter());
-            vacancies.forEach(vacancyDTO -> {
-                if (filterParser.isStringApplicable(vacancyDTO.getTitle()) && !notifiedVacancies.contains(vacancyDTO)) {
-                    VacancyNotificationDTO vacancy = VacancyNotificationDTO.builder()
-                            .vacancyTitle(vacancyDTO.getTitle())
-                            .filter(filter.getFilter())
-                            .filterId(filter.getFilterId())
-                            .minSalary(vacancyDTO.getMinSalary())
-                            .maxSalary(vacancyDTO.getMaxSalary())
-                            .companyTitle(vacancyDTO.getCompanyTitle())
-                            .chatId(filter.getClientId())
-                            .link(vacancyDTO.getLink())
-                            .build();
+            if (!notifiedVacancies.contains(vacancy) && filterParser.isStringApplicable(vacancy.getTitle())) {
+                VacancyNotificationDTO vacancyNotification = VacancyNotificationDTO.builder()
+                        .vacancyTitle(vacancy.getTitle())
+                        .filter(filter.getFilter())
+                        .filterId(filter.getFilterId())
+                        .minSalary(vacancy.getMinSalary())
+                        .maxSalary(vacancy.getMaxSalary())
+                        .companyTitle(vacancy.getCompanyTitle())
+                        .chatId(filter.getClientId())
+                        .link(vacancy.getLink())
+                        .build();
 
-                    notifyUser(vacancy);
-                    notifiedVacancies.add(vacancyDTO);
-                }
-            });
+                notifyUser(vacancyNotification);
+                notifiedVacancies.add(vacancy);
+            }
         });
     }
 

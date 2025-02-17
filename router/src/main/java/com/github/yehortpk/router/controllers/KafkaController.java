@@ -24,13 +24,11 @@ public class KafkaController {
 
     @KafkaListener(topics = {"#{environment['KAFKA_PARSER_TOPIC']}"}, containerFactory = "parserContainerFactory")
     @Transactional
-    public void listenParserTopic(List<ConsumerRecord<String, VacancyDTO>> vacanciesBatch) {
-        List<VacancyDTO> vacancies = vacanciesBatch.stream().map(ConsumerRecord::value).toList();
-
-        vacancyService.addVacancies(vacancies);
+    public void listenParserTopic(VacancyDTO vacancy) {
+        vacancyService.addVacancy(vacancy);
 
         if (notifierService.isNotifierEnabled()) {
-            notifierService.notifyUsers(vacancies);
+            notifierService.notifyUsers(vacancy);
         }
     }
 

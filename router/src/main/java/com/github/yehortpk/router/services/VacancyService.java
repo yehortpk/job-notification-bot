@@ -52,6 +52,20 @@ public class VacancyService {
         vacancyRepository.saveAll(newVacancies);
     }
 
+    public void addVacancy(VacancyDTO vacancy) {
+        Company vacancyCompany = companyRepository.getReferenceById((long) vacancy.getCompanyID());
+        Vacancy newVacancy = Vacancy.builder()
+                .company(vacancyCompany)
+                .title(vacancy.getTitle())
+                .minSalary(vacancy.getMinSalary())
+                .maxSalary(vacancy.getMaxSalary())
+                .link(vacancy.getLink())
+                .parsedAt(vacancy.getParsedAt())
+                .build();
+
+        vacancyRepository.save(newVacancy);
+    }
+
     public List<Vacancy> getAllVacancies() {
         return vacancyRepository.findAll();
     }
