@@ -180,7 +180,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
-      MONGO_INITDB_DATABASE: ${MONGO_PROGRESS_DB}
+      MONGO_INITDB_DATABASE: parser-progress
     networks:
       - notifier-local-network
     volumes:
