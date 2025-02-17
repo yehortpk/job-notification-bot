@@ -1,3 +1,10 @@
+FROM node:23 as playwright
+WORKDIR /usr/app
+
+RUN mkdir -p /ms-playwright
+RUN npm install playwright@1.49.0
+RUN PLAYWRIGHT_BROWSERS_PATH=/ms-playwright npx playwright install
+
 FROM maven:3.9.6-eclipse-temurin-21-alpine as builder
 
 WORKDIR /opt/app
@@ -8,15 +15,8 @@ COPY parser/src /opt/app/parser/src
 COPY router/pom.xml /opt/app/router/pom.xml
 COPY subscriber-bot/pom.xml /opt/app/subscriber-bot/pom.xml
 
-RUN apk add nodejs npm
-
 RUN --mount=type=cache,target=/root/.m2 mvn clean install -pl parser -DskipTests
-RUN npm install playwright@1.49.0
 
-RUN \
-if [ ! -f /ms-playwright ];  then \
-    npx playwright install \
-fi
 
 FROM eclipse-temurin:21.0.2_13-jre as runner
 
@@ -79,7 +79,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 ENV PLAYWRIGHT_SKIP_BROWSER_GC=1
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
-COPY --from=builder /root/.cache/ms-playwright /ms-playwright
+COPY --from=playwright /ms-playwright /ms-playwright
 COPY --from=builder /opt/app/parser/target/parser-0.0.1-SNAPSHOT.jar .
 
 CMD ["java", "-jar", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "/app/parser-0.0.1-SNAPSHOT.jar"]
