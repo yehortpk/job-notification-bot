@@ -11,7 +11,7 @@ import java.util.Set;
  * @see SiteParserImpl
  * @see APISiteParser
  * @see StaticSiteParser
- * @see ComponentSiteParser
+ * @see DynamicSiteParser
  */
 public interface SiteParser {
     /**

@@ -52,7 +52,7 @@ public abstract class SiteParserImpl implements SiteParser {
 
     @Override
     public Set<VacancyDTO> parseVacancies(CompanyDTO company) {
-        this.defaultPageScrapper = createDefaultPageParser();
+        this.defaultPageScrapper = createDefaultPageScrapper();
         this.company = company;
 
         int pagesCount = 1;
@@ -86,6 +86,7 @@ public abstract class SiteParserImpl implements SiteParser {
         @Cleanup ThreadPoolExecutor executor =
                 (ThreadPoolExecutor) Executors.newFixedThreadPool(pagesCount);
 
+        // Parse all pages in parallel with specific interval
         for (int pageId = 1; pageId <= pagesCount; pageId++) {
             PageConnectionParams pageConnectionParams = generatePageConnectionParams(pageId, company);
             int finalPageId = pageId;
@@ -112,35 +113,37 @@ public abstract class SiteParserImpl implements SiteParser {
                     vacancy.setCompanyID(company.getCompanyId());
                     vacancy.setCompanyTitle(company.getTitle());
                 });
-                pProgress.markPageDone(pageNum);
                 String logMessage = String.format("Page: %s, data: %s was parsed", page.getPageURL(), page.getPageData());
                 log.info(logMessage);
-                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.INFO, logMessage);
-                vacancies.addAll(vacanciesFromPage);
-                pProgress.setPageParsedVacanciesCount(pageNum, vacanciesFromPage.size());
-            } catch (InterruptedException| ExecutionException e) {
-                pProgress.markPageError(pageNum);
 
+                pProgress.markPageDone(pageNum);
+                pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.INFO, logMessage);
+                pProgress.setPageParsedVacanciesCount(pageNum, vacanciesFromPage.size());
+
+                vacancies.addAll(vacanciesFromPage);
+            } catch (InterruptedException| ExecutionException e) {
                 String logMessage = String.format("company: %s, error: %s", company.getTitle(), e.getCause().getMessage());
                 logMessage = e.getCause() != null && e.getCause().getCause() != null?
                         logMessage + String.format(" cause: %s" , e.getCause().getCause().getMessage()):
                         logMessage;
                 log.error(logMessage);
+
+                pProgress.markPageError(pageNum);
                 pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } catch (NoVacanciesOnPageException e) {
-                pProgress.markPageError(pageNum);
-
                 String logMessage = String.format("company: %s, no vacancies on page: %s ", company.getTitle(), e.getPageId());
                 log.error(logMessage);
+
+                pProgress.markPageError(pageNum);
                 pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } catch (Exception e) {
-                pProgress.markPageError(pageNum);
-
                 String logMessage = String.format("company: %s, error: %s ", company.getTitle(), e.getMessage());
                 logMessage = e.getCause() != null?
                         logMessage + String.format(" cause: %s" , e.getCause().getMessage()):
                         logMessage;
                 log.error(logMessage);
+
+                pProgress.markPageError(pageNum);
                 pProgress.addPageLog(pageNum, ParserProgress.LogLevelEnum.ERROR, logMessage);
             } finally {
                 pagesCounter.set(pageNum + 1);
@@ -266,7 +269,7 @@ public abstract class SiteParserImpl implements SiteParser {
         return 1;
     }
 
-    protected PageScrapper createDefaultPageParser() {
+    protected PageScrapper createDefaultPageScrapper() {
         return new DefaultPageScrapper();
     }
 

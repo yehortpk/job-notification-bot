@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 @ToString(callSuper = true)
 @Getter
-public abstract class ComponentSiteParser extends SiteParserImpl {
+public abstract class DynamicSiteParser extends SiteParserImpl {
     private final int DELAY_SEC = 2;
 
     @Override
