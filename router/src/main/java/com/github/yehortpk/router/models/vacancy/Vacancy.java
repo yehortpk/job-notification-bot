@@ -19,9 +19,10 @@ public class Vacancy {
     @JoinColumn(name = "company_id")
     private Company company;
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int vacancyId;
     @EqualsAndHashCode.Include
+    @Column(unique = true, nullable = false)
     private String link;
     @ToString.Include
     private String title;
