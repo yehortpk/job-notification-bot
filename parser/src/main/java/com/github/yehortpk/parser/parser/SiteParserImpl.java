@@ -2,7 +2,7 @@ package com.github.yehortpk.parser.parser;
 
 import com.github.yehortpk.parser.progress.MetadataStatusEnum;
 import com.github.yehortpk.parser.progress.ParserProgress;
-import com.github.yehortpk.parser.scrapper.DefaultPageScrapper;
+import com.github.yehortpk.parser.scrapper.StaticPageScrapper;
 import com.github.yehortpk.parser.scrapper.PageScrapper;
 import com.github.yehortpk.parser.exceptions.NoVacanciesOnPageException;
 import com.github.yehortpk.parser.models.*;
@@ -270,7 +270,7 @@ public abstract class SiteParserImpl implements SiteParser {
     }
 
     protected PageScrapper createDefaultPageScrapper() {
-        return new DefaultPageScrapper();
+        return new StaticPageScrapper();
     }
 
     /**

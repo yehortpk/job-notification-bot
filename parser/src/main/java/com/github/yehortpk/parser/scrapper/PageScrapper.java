@@ -7,8 +7,8 @@ import java.io.IOException;
 /**
  * Interface for all page parsers.
  * scrap page HTML.
- * @see DefaultPageScrapper
- * @see ComponentPageScrapper
+ * @see StaticPageScrapper
+ * @see DynamicPageScrapper
  */
 public interface PageScrapper {
     /**

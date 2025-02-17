@@ -16,7 +16,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class DefaultPageScrapper implements PageScrapper {
+public class StaticPageScrapper implements PageScrapper {
     @Override
     public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
         log.info("Connect to the page {}, proxy: {},  data: {}, headers: {}",

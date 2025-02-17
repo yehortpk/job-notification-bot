@@ -16,7 +16,7 @@ import java.util.Map;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ComponentPageScrapper implements PageScrapper {
+public class DynamicPageScrapper implements PageScrapper {
     private final String dynamicElementQuerySelector;
     private final PlaywrightService playwrightService = new PlaywrightService();
 

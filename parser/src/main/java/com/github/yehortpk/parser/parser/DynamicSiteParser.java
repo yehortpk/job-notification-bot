@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.parser;
 
-import com.github.yehortpk.parser.scrapper.ComponentPageScrapper;
+import com.github.yehortpk.parser.scrapper.DynamicPageScrapper;
 import com.github.yehortpk.parser.scrapper.PageScrapper;
 import com.github.yehortpk.parser.models.CompanyDTO;
 import com.github.yehortpk.parser.models.PageConnectionParams;
@@ -54,7 +54,7 @@ public abstract class DynamicSiteParser extends SiteParserImpl {
     }
 
     protected PageScrapper createComponentPageParser() {
-        return new ComponentPageScrapper(createDynamicElementQuerySelector());
+        return new DynamicPageScrapper(createDynamicElementQuerySelector());
     }
 
     /**
