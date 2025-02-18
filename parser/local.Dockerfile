@@ -79,6 +79,8 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 ENV PLAYWRIGHT_SKIP_BROWSER_GC=1
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
+ENV SPRING_PROFILES_ACTIVE=local
+
 COPY --from=playwright /ms-playwright /ms-playwright
 COPY --from=builder /opt/app/parser/target/parser-0.0.1-SNAPSHOT.jar .
 

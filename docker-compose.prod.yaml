@@ -1,7 +1,8 @@
 services:
   parser-prod:
     container_name: notifier-parser-prod
-    image: yehortpk/job-notification-bot-notifier:latest
+    build:
+      dockerfile: ./parser/prod.Dockerfile
     networks:
       - notifier-prod-network
     environment:
@@ -15,17 +16,21 @@ services:
 
   router-prod:
     container_name: notifier-router-prod
-    image: yehortpk/job-notification-bot-router:latest
+    build:
+      dockerfile: ./router/prod.Dockerfile
     networks:
       - notifier-prod-network
-    ports:
-      - "8080"
     environment:
       KAFKA_PARSER_TOPIC: vacancies
       KAFKA_SUBSCRIBE_TOPIC: subscriptions
       KAFKA_BOT_NOTIFIER_TOPIC: bot-notifier
       MYSQL_USERNAME: ${MYSQL_USERNAME}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_ROOT_PASS: ${MONGO_ROOT_PASS}
+      MONGO_PROGRESS_DB: ${MONGO_PROGRESS_DB}
+    ports:
+      - "8081:8080"
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
@@ -44,7 +49,8 @@ services:
 
   bot-prod:
     container_name: notifier-bot-prod
-    image: yehortpk/job-notification-bot-subscriber-bot:latest
+    build:
+      dockerfile: ./subscriber-bot/prod.Dockerfile
     networks:
       - notifier-prod-network
     environment:
@@ -61,13 +67,27 @@ services:
       - bot
       - app
 
+  frontend-prod:
+    container_name: notifier-frontend-prod
+    build:
+      dockerfile: ./frontend/Dockerfile
+    networks:
+      - notifier-prod-network
+    ports:
+      - "4200:4200"
+    depends_on:
+      router-prod:
+        condition: service_healthy
+    profiles:
+      - frontend
+      - app
+
+
   redis-prod:
     image: redis:7.2.4
     container_name: notifier-redis-prod
     volumes:
-      -  notifier-redis-prod-data:/data
-    ports:
-      - "6379"
+      - notifier-redis-prod-data:/data
     networks:
       - notifier-prod-network
     healthcheck:
@@ -78,15 +98,13 @@ services:
     profiles:
       - bot
       - app
-  
+
   zookeeper-prod:
     image: confluentinc/cp-zookeeper:7.6.0
     container_name: notifier-zookeeper-prod
     volumes:
       - notifier-zookeeper-prod-data:/var/lib/zookeeper/data
       - notifier-zookeeper-prod-log:/var/lib/zookeeper/log
-    ports:
-      - "2181"
     networks:
       - notifier-prod-network
     environment:
@@ -106,9 +124,6 @@ services:
   kafka-prod:
     image: confluentinc/cp-kafka:7.6.0
     container_name: notifier-kafka-prod
-    ports:
-      - "29092"
-      - "9092"
     networks:
       - notifier-prod-network
     volumes:
@@ -133,14 +148,15 @@ services:
       - router
       - bot
       - app
-  
+
   mysql-prod:
     image: mysql:8.3.0
     container_name: notifier-mysql-prod
     volumes:
-      -  notifier-mysql-prod-data:/var/lib/mysql
+      - notifier-mysql-prod-data:/var/lib/mysql
+      - ./notifier-dump.sql:/docker-entrypoint-initdb.d/notifier-dump.sql
     ports:
-      - "3306"
+      - "3306:3306"
     networks:
       - notifier-prod-network
     environment:
@@ -157,6 +173,21 @@ services:
       - bot
       - app
 
+  mongo-prod:
+    image: mongo:6.0
+    container_name: notifier-mongo-prod
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS}
+      MONGO_INITDB_DATABASE: parser-progress
+    networks:
+      - notifier-prod-network
+    volumes:
+      - notifier-mongo-prod-data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
 networks:
   notifier-prod-network:
     driver: bridge
@@ -167,3 +198,4 @@ volumes:
   notifier-redis-prod-data:
   notifier-zookeeper-prod-data:
   notifier-zookeeper-prod-log:
+  notifier-mongo-prod-data:

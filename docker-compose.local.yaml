@@ -1,5 +1,5 @@
 services:
-  parser:
+  parser-local:
     container_name: notifier-parser-local
     build:
       dockerfile: ./parser/local.Dockerfile
@@ -13,13 +13,13 @@ services:
     environment:
       KAFKA_PARSER_TOPIC: vacancies
     depends_on:
-      router:
+      router-local:
         condition: service_healthy
     profiles:
       - parser
       - app
 
-  router:
+  router-local:
     container_name: notifier-router-local
     build:
       dockerfile: ./router/local.Dockerfile
@@ -43,9 +43,9 @@ services:
       timeout: 5s
       retries: 3
     depends_on:
-      kafka:
+      kafka-local:
         condition: service_healthy
-      mysql:
+      mysql-local:
         condition: service_healthy
     profiles:
       - router
@@ -53,7 +53,7 @@ services:
       - bot
       - app
 
-  bot:
+  bot-local:
     container_name: notifier-bot-local
     build:
       dockerfile: ./subscriber-bot/local.Dockerfile
@@ -67,15 +67,15 @@ services:
       TG_BOT_API_KEY: ${TG_BOT_API_KEY}
       TG_BOT_USERNAME: ${TG_BOT_USERNAME}
     depends_on:
-      router:
+      router-local:
         condition: service_healthy
-      redis:
+      redis-local:
         condition: service_healthy
     profiles:
       - bot
       - app
 
-  redis:
+  redis-local:
     image: redis:7.2.4
     container_name: notifier-redis-local
     volumes:
@@ -93,7 +93,7 @@ services:
       - bot
       - app
 
-  zookeeper:
+  zookeeper-local:
     image: confluentinc/cp-zookeeper:7.6.0
     container_name: notifier-zookeeper-local
     volumes:
@@ -117,7 +117,7 @@ services:
       - bot
       - app
 
-  kafka:
+  kafka-local:
     image: confluentinc/cp-kafka:7.6.0
     container_name: notifier-kafka-local
     ports:
@@ -129,13 +129,13 @@ services:
       - notifier-kafka-local-data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-local:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://notifier-kafka-local:9092,PLAINTEXT_HOST://localhost:29092
     depends_on:
-      zookeeper:
+      zookeeper-local:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
@@ -148,12 +148,12 @@ services:
       - bot
       - app
 
-  mysql:
+  mysql-local:
     image: mysql:8.3.0
     container_name: notifier-mysql-local
     volumes:
       - notifier-mysql-local-data:/var/lib/mysql
-      - ./notifier-init.sql:/docker-entrypoint-initdb.d/notifier-init.sql
+      - ./notifier-dump.sql:/docker-entrypoint-initdb.d/notifier-dump.sql
     ports:
       - "3306:3306"
     networks:
@@ -172,7 +172,7 @@ services:
       - bot
       - app
 
-  mongo:
+  mongo-local:
     image: mongo:6.0
     container_name: notifier-mongo-local
     ports:
@@ -184,7 +184,7 @@ services:
     networks:
       - notifier-local-network
     volumes:
-      - mongo-data:/data/db
+      - notifier-mongo-local-data:/data/db
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
 
 networks:
@@ -197,4 +197,4 @@ volumes:
   notifier-redis-local-data:
   notifier-zookeeper-local-data:
   notifier-zookeeper-local-log:
-  mongo-data:
+  notifier-mongo-local-data:
