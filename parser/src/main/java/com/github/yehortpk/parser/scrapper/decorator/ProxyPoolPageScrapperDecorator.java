@@ -13,6 +13,7 @@ import java.net.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -27,9 +28,8 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
     private final PageScrapper pageScrapper;
     private final ProxyService proxyService = ProxyService.getInstance();
 
-    private int MAX_PARALLEL_INSTANCES_COUNT = 10;
+    private int MAX_PARALLEL_INSTANCES_COUNT = 5;
     private final int INITIAL_DELAY_BETWEEN_THREADS_MS = 500;
-    private final int POLL_TIMEOUT_SEC = 30;
 
 
     @Override
@@ -76,33 +76,57 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
 
 
         try {
-            Future<PageScrapperResponse> completedFuture = completionService.poll(POLL_TIMEOUT_SEC * 1000 +
-                    (long) pageResponseWithProxiesFut.size() * INITIAL_DELAY_BETWEEN_THREADS_MS, TimeUnit.MILLISECONDS);
+            int remainingFutures = pageResponseWithProxiesFut.size();
+            long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pageConnectionParams.getTimeoutSec())
+                    + (long) INITIAL_DELAY_BETWEEN_THREADS_MS * remainingFutures;
 
-            if (completedFuture != null) {
+            while (remainingFutures > 0) {
+                long timeoutLeft = deadline - System.currentTimeMillis();
+                if (timeoutLeft <= 0) {
+                    break;
+                }
+
+                Future<PageScrapperResponse> completedFuture =
+                        completionService.poll(timeoutLeft, TimeUnit.MILLISECONDS);
+
+                if (completedFuture == null) {
+                    break;
+                }
+
+                remainingFutures--;
+
                 try {
                     PageScrapperResponse response = completedFuture.get();
 
-                    // Cancel all other threads
-                    for (Future<PageScrapperResponse> future : pageResponseWithProxiesFut.keySet()) {
-                        if (!future.isDone() && !future.isCancelled()) {
-                            future.cancel(true);
-                        }
-                    }
-
+                    cancelRemainingFutures(pageResponseWithProxiesFut.keySet());
                     return response;
-                } catch (ExecutionException e) {
+
+                } catch (InterruptedException | ExecutionException e) {
                     log.error("Page: {}, proxy: {}, error: {}",
                             pageConnectionParams.getPageUrl(),
                             pageResponseWithProxiesFut.get(completedFuture),
                             e.getCause().getMessage());
                 }
             }
+
+            // Clean up if we exit the loop without finding a successful response
+            cancelRemainingFutures(pageResponseWithProxiesFut.keySet());
+
+            throw new IOException(String.format("Could not connect to the page %s within %d seconds",
+                    pageConnectionParams.getPageUrl(), pageConnectionParams.getTimeoutSec()));
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            cancelRemainingFutures(pageResponseWithProxiesFut.keySet());
             throw new IOException("Thread was interrupted while waiting for page parsing", e);
         }
+    }
 
-        throw new IOException(String.format("Could not connect to the page %s within %d seconds",
-                pageConnectionParams.getPageUrl(), POLL_TIMEOUT_SEC));}
+    private void cancelRemainingFutures(Set<Future<PageScrapperResponse>> futures) {
+        for (Future<PageScrapperResponse> future : futures) {
+            if (!future.isDone() && !future.isCancelled()) {
+                future.cancel(true);
+            }
+        }
+    }
 }
