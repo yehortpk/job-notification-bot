@@ -4,9 +4,8 @@ import lombok.Getter;
 import lombok.experimental.StandardException;
 
 @Getter
-@StandardException
-public class NoVacanciesOnPageException extends Exception {
-    private int pageId;
+public class NoVacanciesOnPageException extends RuntimeException {
+    private final int pageId;
 
     public NoVacanciesOnPageException(int pageId) {
         super(String.format("No vacancies on page %s", pageId));
