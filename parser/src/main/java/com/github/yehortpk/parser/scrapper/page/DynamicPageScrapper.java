@@ -1,6 +1,6 @@
-package com.github.yehortpk.parser.scrapper;
+package com.github.yehortpk.parser.scrapper.page;
 
-import com.github.yehortpk.parser.models.PageConnectionParams;
+import com.github.yehortpk.parser.models.PageRequestParams;
 import com.github.yehortpk.parser.services.PlaywrightService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import java.net.Proxy;
 import java.util.Map;
 
 /**
- * Component-based site page scrapper. Uses dynamicElementQuerySelector from {@link PageConnectionParams}
+ * Component-based site page scrapper. Uses dynamicElementQuerySelector from {@link PageRequestParams}
  * to delay page scrapping until the element on the page is loaded. Works on Selenium
  */
 @Slf4j
@@ -21,12 +21,12 @@ public class DynamicPageScrapper implements PageScrapper {
     private final PlaywrightService playwrightService = new PlaywrightService();
 
     @Override
-    public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
-        Map<String, String> headers = pageConnectionParams.getHeaders();
-        String proxy = pageConnectionParams.getProxy() == null? null: convertProxyToString(pageConnectionParams.getProxy());
-        String pageURL = constructURLWithData(pageConnectionParams.getPageUrl(), pageConnectionParams.getData());
+    public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
+        Map<String, String> headers = pageRequestParams.getHeaders();
+        String proxy = pageRequestParams.getProxy() == null? null: convertProxyToString(pageRequestParams.getProxy());
+        String pageURL = constructURLWithData(pageRequestParams.getPageURL(), pageRequestParams.getData());
 
-        return playwrightService.scrapPage(pageURL, dynamicElementQuerySelector, pageConnectionParams.getTimeoutSec(), headers, proxy);
+        return playwrightService.scrapPage(pageURL, dynamicElementQuerySelector, pageRequestParams.getTimeoutSec(), headers, proxy);
     }
 
     /**

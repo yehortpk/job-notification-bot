@@ -1,6 +1,6 @@
-package com.github.yehortpk.parser.scrapper.decorator;
+package com.github.yehortpk.parser.scrapper.page.decorator;
 
-import com.github.yehortpk.parser.scrapper.PageScrapper;
+import com.github.yehortpk.parser.scrapper.page.PageScrapper;
 
 /**
  * Interface for all page parser decorators. These wrappers will enhance default

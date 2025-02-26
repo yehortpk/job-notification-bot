@@ -1,6 +1,6 @@
 package com.github.yehortpk.parser.services;
 
-import com.github.yehortpk.parser.scrapper.PageScrapperResponse;
+import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.WaitForSelectorState;

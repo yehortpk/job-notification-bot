@@ -1,8 +1,8 @@
-package com.github.yehortpk.parser.scrapper.decorator;
+package com.github.yehortpk.parser.scrapper.page.decorator;
 
-import com.github.yehortpk.parser.models.PageConnectionParams;
-import com.github.yehortpk.parser.scrapper.PageScrapper;
-import com.github.yehortpk.parser.scrapper.PageScrapperResponse;
+import com.github.yehortpk.parser.models.PageRequestParams;
+import com.github.yehortpk.parser.scrapper.page.PageScrapper;
+import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
 import com.github.yehortpk.parser.proxy.ProxyService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +33,12 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
 
 
     @Override
-    public PageScrapperResponse scrapPage(PageConnectionParams pageConnectionParams) throws IOException {
-        PageScrapperResponse pageBody = loadPage(pageConnectionParams);
+    public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
+        PageScrapperResponse pageBody = loadPage(pageRequestParams);
         log.info("Connection to the page: {}, data: {}, proxy: {} was established",
-                pageConnectionParams.getPageUrl(),
-                pageConnectionParams.getData(),
-                pageConnectionParams.getProxy());
+                pageRequestParams.getPageURL(),
+                pageRequestParams.getData(),
+                pageRequestParams.getProxy());
         return pageBody;
     }
 
@@ -48,11 +48,11 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
      * delay between threads (DELAY_BETWEEN_THREADS_LAMBDA). When the number of attempts exceeds
      * CONNECTION_MAX_ATTEMPTS, {@link NullPointerException} will be thrown
      *
-     * @param pageConnectionParams connection parameters for the page
+     * @param pageRequestParams connection parameters for the page
      * @return page HTML
-     * @see PageConnectionParams
+     * @see PageRequestParams
      */
-    private PageScrapperResponse loadPage(PageConnectionParams pageConnectionParams) throws IOException {
+    private PageScrapperResponse loadPage(PageRequestParams pageRequestParams) throws IOException {
 
         Map<Future<PageScrapperResponse>, Proxy> pageResponseWithProxiesFut = new HashMap<>();
         @Cleanup ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -62,13 +62,13 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
         MAX_PARALLEL_INSTANCES_COUNT = Math.min(MAX_PARALLEL_INSTANCES_COUNT, proxies.size());
         for (int counter = 0; counter < MAX_PARALLEL_INSTANCES_COUNT; counter++) {
             Proxy proxy = proxyService.getRandomProxy();
-            PageConnectionParams pageConnectionParamsClone = SerializationUtils.clone(pageConnectionParams);
-            pageConnectionParamsClone.setProxy(proxy);
+            PageRequestParams pageRequestParamsClone = SerializationUtils.clone(pageRequestParams);
+            pageRequestParamsClone.setProxy(proxy);
 
             int currentThreadsTimeout = INITIAL_DELAY_BETWEEN_THREADS_MS * counter;
             Callable<PageScrapperResponse> task = () -> {
                 Thread.sleep(currentThreadsTimeout);
-                return pageScrapper.scrapPage(pageConnectionParamsClone);
+                return pageScrapper.scrapPage(pageRequestParamsClone);
             };
             Future<PageScrapperResponse> pageResponseWithProxy = completionService.submit(task);
             pageResponseWithProxiesFut.put(pageResponseWithProxy, proxy);
@@ -77,7 +77,7 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
 
         try {
             int remainingFutures = pageResponseWithProxiesFut.size();
-            long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pageConnectionParams.getTimeoutSec())
+            long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(pageRequestParams.getTimeoutSec())
                     + (long) INITIAL_DELAY_BETWEEN_THREADS_MS * remainingFutures;
 
             while (remainingFutures > 0) {
@@ -103,7 +103,7 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
 
                 } catch (InterruptedException | ExecutionException e) {
                     log.error("Page: {}, proxy: {}, error: {}",
-                            pageConnectionParams.getPageUrl(),
+                            pageRequestParams.getPageURL(),
                             pageResponseWithProxiesFut.get(completedFuture),
                             e.getCause().getMessage());
                 }
@@ -113,7 +113,7 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
             cancelRemainingFutures(pageResponseWithProxiesFut.keySet());
 
             throw new IOException(String.format("Could not connect to the page %s within %d seconds",
-                    pageConnectionParams.getPageUrl(), pageConnectionParams.getTimeoutSec()));
+                    pageRequestParams.getPageURL(), pageRequestParams.getTimeoutSec()));
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
