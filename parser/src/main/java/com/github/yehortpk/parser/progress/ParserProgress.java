@@ -15,8 +15,6 @@ public class ParserProgress {
     private int totalPages;
     private List<PageProgress> pages = new ArrayList<>();
 
-    private MetadataStatusEnum metadataStatus = MetadataStatusEnum.PENDING;
-
     private int parsedVacanciesCnt = 0;
     private int newVacanciesCnt = 0;
     private int outdatedVacanciesCnt = 0;
