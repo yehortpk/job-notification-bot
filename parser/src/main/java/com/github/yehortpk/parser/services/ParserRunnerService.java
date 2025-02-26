@@ -119,9 +119,26 @@ public class ParserRunnerService {
 
             notifierService.notifyFinishedProgress(progressManagerService.getProgress());
         };
+    private void handleCompanyScrapperException(Throwable ex, CompanyDTO company) {
+        ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
+        String errorLog = String.format("Company: %s, error: %s",
+                company.getTitle(), createErrorMessage((Exception) ex));
+
+        log.error(errorLog);
+        parserProgress.markPageError(1);
+        parserProgress.addPageLog(1, ParserProgress.LogLevelEnum.ERROR, errorLog);
     }
 
     public void runParsers() throws ParsingAlreadyStartedException {
+    private void handlePageScrapperException(Throwable ex, CompanyDTO company, int pageID) {
+        ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
+        String errorLog = String.format("Company: %s, pageID:%s, error: %s",
+                company.getTitle(), pageID, createErrorMessage((Exception) ex));
+        log.error(errorLog);
+        parserProgress.markPageError(pageID);
+        parserProgress.addPageLog(pageID, ParserProgress.LogLevelEnum.ERROR, errorLog);
+    }
+
     private void handlePageParserException(Throwable ex, CompanyDTO company, int pageID) {
         ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
         String errorLog = String.format("Company: %s, page: %s error: %s",
@@ -181,6 +198,8 @@ public class ParserRunnerService {
 
         notifierService.notifyNewVacancies(newVacancies);
     }
+
+    public void runParsing() throws ParsingAlreadyStartedException {
         if (runnerThread == null || !runnerThread.isAlive()) {
             progressManagerService.init();
             runnerThread = new Thread(run());
