@@ -44,5 +44,5 @@ out/
 *.zip
 *.tar.gz
 *.rar
-/src/main/java/com/github/yehortpk/parser/parser/companies/
+/src/main/java/com/github/yehortpk/parser/crawler/companies/
 /src/main/resources/*.log

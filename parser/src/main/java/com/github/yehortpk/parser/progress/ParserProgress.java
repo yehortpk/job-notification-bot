@@ -48,8 +48,12 @@ public class ParserProgress {
         pages.get(page - 1).addLog(new PageProgress.PageLog(page, level, LocalDateTime.now(), message));
     }
 
-    public void setPageParsedVacanciesCount(int page, int count) {
-        pages.get(page - 1).setParsedVacanciesCnt(count);
+    public void addParsedVacancies(int parsedVacancies) {
+        parsedVacanciesCnt += parsedVacancies;
+    }
+
+    public void addNewVacancies(int newVacancies) {
+        newVacanciesCnt += newVacancies;
     }
 
     @Getter
@@ -59,6 +63,8 @@ public class ParserProgress {
         private PageProgressStatusEnum status = PageProgressStatusEnum.STEP_PENDING;
         @Setter
         private int parsedVacanciesCnt = 0;
+        @Setter
+        private int newVacanciesCnt = 0;
         private final List<PageLog> logs = new ArrayList<>();
 
         public PageProgress(int id) {

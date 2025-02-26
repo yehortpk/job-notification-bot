@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
-public class ProgressManagerService {
+public class ParsingProgressService {
     private String parsingHash;
     @Getter
     private Map<Integer, ParserProgress> parsers;
@@ -25,11 +25,9 @@ public class ProgressManagerService {
     @Getter
     private boolean finished;
 
-    public ProgressManagerService() {
+    public ParsingProgressService() {
         init();
     }
-
-
 
     public void init() {
         progressLock.lock();
@@ -56,6 +54,14 @@ public class ProgressManagerService {
         } finally {
             parsersLock.unlock();
         }
+    }
+
+    public void addParsedVacancies(int parsedVacancies) {
+        parsedVacanciesCnt += parsedVacancies;
+    }
+
+    public void addNewVacancies(int newVacancies) {
+        newVacanciesCnt += newVacancies;
     }
 
     public ParsingProgressDTO getProgress() {
