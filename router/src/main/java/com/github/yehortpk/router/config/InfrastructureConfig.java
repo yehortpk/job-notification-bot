@@ -63,7 +63,6 @@ public class InfrastructureConfig {
 
         props.put(ConsumerConfig.GROUP_ID_CONFIG, parserTopicConsumerGroupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS, "vacancy:com.github.yehortpk.router.models.vacancy.VacancyDTO");
-        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
@@ -96,7 +95,6 @@ public class InfrastructureConfig {
     public KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate() {
         KafkaTemplate<String, VacancyNotificationDTO> kafkaTemplate = new KafkaTemplate<>(producerFactory());
         kafkaTemplate.setDefaultTopic(kafkaBotNotifierTopic);
-        kafkaTemplate.setTransactionIdPrefix("tx-");
         return kafkaTemplate;
     }
 

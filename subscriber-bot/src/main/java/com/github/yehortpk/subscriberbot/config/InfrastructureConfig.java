@@ -50,7 +50,6 @@ public class InfrastructureConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "2000");
-        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
 
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
