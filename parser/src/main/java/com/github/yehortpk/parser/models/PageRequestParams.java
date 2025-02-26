@@ -16,12 +16,14 @@ import java.util.Map;
 @Getter
 @Setter
 @Builder
-public class PageConnectionParams implements Serializable {
-    private String pageUrl;
+public class PageRequestParams implements Serializable {
+    private String pageURL;
     @Builder.Default
     private Map<String, String> data = new HashMap<>();
     @Builder.Default
     private Map<String, String> headers = new HashMap<>();
+    @Builder.Default
+    private Map<String, String> cookies = new HashMap<>();
     @Builder.Default
     private Connection.Method connectionMethod = Connection.Method.GET;
     private Proxy proxy;
