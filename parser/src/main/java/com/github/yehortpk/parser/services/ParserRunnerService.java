@@ -122,6 +122,65 @@ public class ParserRunnerService {
     }
 
     public void runParsers() throws ParsingAlreadyStartedException {
+    private void handlePageParserException(Throwable ex, CompanyDTO company, int pageID) {
+        ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
+        String errorLog = String.format("Company: %s, page: %s error: %s",
+                company.getTitle(), pageID, createErrorMessage((Exception) ex));
+        log.error(errorLog);
+        parserProgress.markPageError(pageID);
+        parserProgress.addPageLog(pageID, ParserProgress.LogLevelEnum.ERROR, errorLog);
+    }
+
+    private void parsePageVacancies(PageDTO page, CompanyDTO company) {
+        SiteParser siteParser = (SiteParser) applicationContext.getBean(company.getBeanClass());
+        ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
+
+        int pageID = page.getPageID();
+
+        Set<VacancyDTO> parsedVacancies;
+        try {
+            parsedVacancies = siteParser.parseVacancies(page);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (parsedVacancies.isEmpty()) {
+            throw new NoVacanciesOnPageException(page.getPageID());
+        }
+
+        parsedVacancies.forEach(vacancy -> {
+            vacancy.setCompanyID(company.getCompanyId());
+            vacancy.setCompanyTitle(company.getTitle());
+        });
+
+        Set<String> persistedCompanyVacancies =
+                persistedVacanciesByCompanyId.getOrDefault((long) company.getCompanyId(), new HashSet<>());
+
+        ParserProgress.PageProgress pageProgress = parserProgress.getPages().get(pageID - 1);
+
+        Set<VacancyDTO> newVacancies = calculateNewVacancies(parsedVacancies, persistedCompanyVacancies);
+
+        int parsedVacanciesCnt = parsedVacancies.size();
+        int newVacanciesCnt = newVacancies.size();
+
+        parserProgress.markPageDone(pageID);
+
+        String successLog = String.format("Company: %s, page: %s was parsed, parsed vacancies count = %s, new vacancies count = %s",
+                company.getTitle(), pageID, parsedVacanciesCnt, newVacanciesCnt);
+        log.info(successLog);
+        parserProgress.addPageLog(pageID, ParserProgress.LogLevelEnum.INFO, successLog);
+
+        pageProgress.setParsedVacanciesCnt(parsedVacanciesCnt);
+        pageProgress.setNewVacanciesCnt(newVacanciesCnt);
+
+        parserProgress.addParsedVacancies(parsedVacanciesCnt);
+        parserProgress.addNewVacancies(newVacanciesCnt);
+
+        parsingProgressService.addParsedVacancies(parsedVacanciesCnt);
+        parsingProgressService.addNewVacancies(newVacanciesCnt);
+
+        notifierService.notifyNewVacancies(newVacancies);
+    }
         if (runnerThread == null || !runnerThread.isAlive()) {
             progressManagerService.init();
             runnerThread = new Thread(run());
