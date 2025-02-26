@@ -18,7 +18,7 @@ public class ParserController {
 
     @PostMapping("/start")
     public APIResponse startParsing() {
-        parserRunnerService.runParsers();
+        parserRunnerService.runParsing();
         return new APIResponse(200, "Parsing has been started");
     }
 
