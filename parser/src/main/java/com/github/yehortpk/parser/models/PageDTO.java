@@ -17,8 +17,9 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PageDTO {
+    private int pageID;
     private String pageURL;
     private Map<String, String> pageData = new HashMap<>();
     private Map<String, String> pageHeaders = new HashMap<>();
-    private Document doc;
+    private String body;
 }
