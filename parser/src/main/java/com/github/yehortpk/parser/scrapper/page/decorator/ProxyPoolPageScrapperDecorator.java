@@ -25,12 +25,15 @@ import java.util.concurrent.*;
 @Slf4j
 @RequiredArgsConstructor
 public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
-    private final PageScrapper pageScrapper;
     private final ProxyService proxyService = ProxyService.getInstance();
+    private final PageScrapper pageScrapper;
+    private int proxyPoolSize = 5;
+    private final int INITIAL_DELAY_BETWEEN_THREADS_MS = 200;
 
-    private int MAX_PARALLEL_INSTANCES_COUNT = 5;
-    private final int INITIAL_DELAY_BETWEEN_THREADS_MS = 500;
-
+    public ProxyPoolPageScrapperDecorator(PageScrapper pageScrapper, int proxyPoolSize) {
+        this.pageScrapper = pageScrapper;
+        this.proxyPoolSize = proxyPoolSize;
+    }
 
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
@@ -59,8 +62,8 @@ public class ProxyPoolPageScrapperDecorator implements PageScrapperDecorator {
         CompletionService<PageScrapperResponse> completionService = new ExecutorCompletionService<>(executor);
 
         List<Proxy> proxies = proxyService.getProxyPool();
-        MAX_PARALLEL_INSTANCES_COUNT = Math.min(MAX_PARALLEL_INSTANCES_COUNT, proxies.size());
-        for (int counter = 0; counter < MAX_PARALLEL_INSTANCES_COUNT; counter++) {
+        int maxParallelInstances = Math.min(proxyPoolSize, proxies.size());
+        for (int counter = 0; counter < maxParallelInstances; counter++) {
             Proxy proxy = proxyService.getRandomProxy();
             PageRequestParams pageRequestParamsClone = SerializationUtils.clone(pageRequestParams);
             pageRequestParamsClone.setProxy(proxy);
