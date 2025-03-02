@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -20,9 +21,14 @@ public class ParsingProgress {
     private String id;
 
     @Indexed(unique = true)
-    private String parsingHash;
+    @Field("parsing_hash")
+    private String  parsingHash;
+    @Field("parsed_vacancies")
     private Integer parsedVacancies;
+    @Field("new_vacancies")
     private Integer newVacancies;
+    @Field("finished")
     private Boolean finished;
+    @Field("parsers")
     private List<ParserProgress> parsers;
 }

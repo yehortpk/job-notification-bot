@@ -23,19 +23,16 @@ db.createCollection('parsing-history', {
           bsonType: 'array',
           items: {
             bsonType: 'object',
-            required: ['parser_id', 'company_title', 'total_pages', 'metadata_status', 'parsed_vacancies', 'new_vacancies', 'pages'],
+            required: ['parser_id', 'parser_title', 'parser_total_pages', 'parsed_vacancies', 'new_vacancies', 'outdated_vacancies', 'parser_pages'],
             properties: {
               parser_id: {
                 bsonType: 'int'
               },
-              company_title: {
+              parser_title: {
                 bsonType: 'string'
               },
-              total_pages: {
+              parser_total_pages: {
                 bsonType: 'int'
-              },
-              metadata_status: {
-                enum: ['pending', 'done', 'error']
               },
               parsed_vacancies: {
                 bsonType: 'int'
@@ -43,37 +40,37 @@ db.createCollection('parsing-history', {
               new_vacancies: {
                 bsonType: 'int'
               },
-              pages: {
+              parser_pages: {
                 bsonType: 'array',
                 items: {
                   bsonType: 'object',
-                  required: ['id', 'status', 'parsed_vacancies', 'logs'],
+                  required: ['page_id', 'page_status', 'page_parsed_vacancies', 'page_logs'],
                   properties: {
-                    id: {
+                    page_id: {
                       bsonType: 'int'
                     },
-                    status: {
-                      enum: ['pending', 'done', 'error']
+                    page_status: {
+                      enum: ['STEP_PENDING', 'STEP_DONE', 'STEP_ERROR']
                     },
-                    parsed_vacancies: {
+                    page_parsed_vacancies: {
                       bsonType: 'int'
                     },
-                    logs: {
+                    page_logs: {
                       bsonType: 'array',
                       items: {
                         bsonType: 'object',
-                        required: ['page_id', 'level', 'timestamp', 'message'],
+                        required: ['log_id', 'log_level', 'log_timestamp', 'log_message'],
                         properties: {
-                          page_id: {
+                          log_id: {
                             bsonType: 'int'
                           },
-                          level: {
+                          log_level: {
                             bsonType: 'string'
                           },
-                          timestamp: {
+                          log_timestamp: {
                             bsonType: 'date'
                           },
-                          message: {
+                          log_message: {
                             bsonType: 'string'
                           }
                         }
