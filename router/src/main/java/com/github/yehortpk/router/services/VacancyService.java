@@ -6,7 +6,9 @@ import com.github.yehortpk.router.models.vacancy.VacancyDTO;
 import com.github.yehortpk.router.repositories.CompanyRepository;
 import com.github.yehortpk.router.repositories.VacancyRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +22,9 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VacancyService {
-    final private VacancyRepository vacancyRepository;
-    final private CompanyRepository companyRepository;
+    private final VacancyRepository vacancyRepository;
     private final ModelMapper modelMapper;
 
     /**
@@ -45,7 +47,13 @@ public class VacancyService {
         vacancyRepository.saveAll(newVacancies);
     }
 
+    @Transactional
     public void addVacancy(VacancyDTO vacancy) {
+        if (vacancyRepository.findByLink(vacancy.getLink()).isPresent()) {
+            log.error("Duplicated vacancy {}", vacancy.getLink());
+            return;
+        }
+
         Vacancy newVacancy = modelMapper.map(vacancy, Vacancy.class);
 
         vacancyRepository.save(newVacancy);
