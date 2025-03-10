@@ -5,7 +5,7 @@ import com.github.yehortpk.parser.exceptions.RequestMetadataParamNotImplemented;
 import com.github.yehortpk.parser.exceptions.RequestMetadataNotImplementedException;
 import com.github.yehortpk.parser.models.*;
 import com.github.yehortpk.parser.progress.ParserProgress;
-import com.github.yehortpk.parser.progress.ParsingProgressService;
+import com.github.yehortpk.parser.services.ParsingProgressService;
 import com.github.yehortpk.parser.scrapper.page.PageScrapper;
 import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
 import com.github.yehortpk.parser.scrapper.site.metadata.SiteMetadataParser;
@@ -35,9 +35,10 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
 
         ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
 
-        Map<String, String> requestData = company.getData();
-        Map<String, String> requestHeaders = company.getHeaders();
+        Map<String, String> requestData = new HashMap<>(company.getData());
+        Map<String, String> requestHeaders = new HashMap<>(company.getHeaders());
         Map<String, String> requestCookies = new HashMap<>();
+
         int pagesCount = 1;
 
         if (isRequestNeedMetadata()) {
@@ -78,10 +79,9 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
     private List<CompletableFuture<PageDTO>> scrapPages(int pagesCount, PageRequestParams pageRequestParams) {
         // Scrap all pages in parallel with specific interval
         List<CompletableFuture<PageDTO>> pageScrapperListFut = new ArrayList<>();
-//        @Cleanup ExecutorService es = Executors.newCachedThreadPool();
 
         for (int pageID = 1; pageID <= pagesCount; pageID++) {
-            PageRequestParams localPageRequestParams = generateRequestParamsForPage(pageRequestParams, pageID);
+            PageRequestParams localPageRequestParams = generatePageRequestParams(pageRequestParams, pageID);
 
             int finalPageID = pageID;
             Executor delayedExecutor =
@@ -95,7 +95,7 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
         return pageScrapperListFut;
     }
 
-    protected PageRequestParams generateRequestParamsForPage(PageRequestParams commonSiteParams, int pageID) {
+    protected PageRequestParams generatePageRequestParams(PageRequestParams commonSiteParams, int pageID) {
         PageRequestParams localPageRequestParams = SerializationUtils.clone(commonSiteParams);
 
         localPageRequestParams.setPageURL(generateVacanciesPageURL(pageID));
@@ -183,11 +183,11 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
     }
 
     protected PageRequestParams generateMetadataRequestConnectionParams() {
-        Map<String, String> requestData = company.getData();
+        Map<String, String> requestData = new HashMap<>(company.getData());
         requestData = requestData.entrySet().stream().filter(es -> !isValueBinding(es.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        Map<String, String> requestHeaders = company.getHeaders();
+        Map<String, String> requestHeaders = new HashMap<>(company.getHeaders());
         requestHeaders = requestHeaders.entrySet().stream().filter(es -> !isValueBinding(es.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
