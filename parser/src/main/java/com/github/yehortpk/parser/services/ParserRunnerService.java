@@ -159,7 +159,8 @@ public class ParserRunnerService {
         parsedVacancies.forEach(vacancy -> {
             vacancy.setCompanyID(company.getCompanyId());
             vacancy.setCompanyTitle(company.getTitle());
-        });
+            vacancy.setParsedAt(LocalDateTime.now());
+        }
 
         Set<String> persistedCompanyVacancies =
                 persistedVacanciesByCompanyId.getOrDefault((long) company.getCompanyId(), new HashSet<>());

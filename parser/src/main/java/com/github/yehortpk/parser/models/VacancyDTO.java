@@ -30,6 +30,6 @@ public class VacancyDTO implements Serializable {
      */
     @EqualsAndHashCode.Include
     private String link;
-    @Builder.Default
-    private final LocalDateTime parsedAt = LocalDateTime.now();
+
+    private LocalDateTime parsedAt;
 }
