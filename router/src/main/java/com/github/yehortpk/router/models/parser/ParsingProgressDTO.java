@@ -23,4 +23,7 @@ public class ParsingProgressDTO {
     @JsonProperty("new")
     @Builder.Default
     private int newVacanciesTotalCount = 0;
+    @JsonProperty("outdated")
+    @Builder.Default
+    private int outdatedVacanciesTotalCount = 0;
 }

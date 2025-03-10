@@ -21,7 +21,8 @@ export class ParserProgressComponent implements OnInit {
     parsers: [],
     finished: false,
     new: 0,
-    total: 0
+    total: 0,
+    outdated:0
   };
   private progressInterval: any;
   constructor(private parsingService: ParsingService){};
@@ -37,7 +38,7 @@ export class ParserProgressComponent implements OnInit {
   startParsing() {
     this.parsingService.startParsing();
     this.isParsingStartAllowed = false;
-    
+
     this.progressInterval = setInterval(() => {
         this.parsingService.getProgress().subscribe(
         (pr) => {

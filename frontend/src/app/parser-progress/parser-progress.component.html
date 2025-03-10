@@ -3,8 +3,8 @@
     No parsing process started
   </div>
   <div *ngIf="progress.parsers.length > 0">
-    <div 
-      *ngFor="let progress of progress.parsers; let barIndex = index" 
+    <div
+      *ngFor="let progress of progress.parsers; let barIndex = index"
       class="status-bar"
     >
       <div class="status-bar-header">
@@ -13,7 +13,7 @@
         </div>
         <div class="steps-wrapper">
           <div class="steps">
-            <div 
+            <div
               *ngFor="let page of progress.pages; let stepIndex = index"
               class="step"
               [ngClass]="{
@@ -34,9 +34,10 @@
     <div class="progress-res-block">
       <div>Parsed vacancies: {{ progress.total }}</div>
       <div>New vacancies: {{ progress.new }}</div>
+      <div>Outdated vacancies: {{ progress.outdated }}</div>
     </div>
   </div>
-  <button 
+  <button
     (click)="startParsing()"
   >
     Start parsing

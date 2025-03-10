@@ -21,4 +21,5 @@ export interface ParsingProgress {
     finished: boolean
     total: number
     new: number
+    outdated: number
 }

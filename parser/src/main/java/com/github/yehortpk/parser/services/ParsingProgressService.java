@@ -1,5 +1,7 @@
-package com.github.yehortpk.parser.progress;
+package com.github.yehortpk.parser.services;
 
+import com.github.yehortpk.parser.progress.ParserProgress;
+import com.github.yehortpk.parser.progress.ParsingProgressDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,15 @@ public class ParsingProgressService {
     @Setter
     @Getter
     private int parsedVacanciesCnt;
+
     @Setter
     @Getter
     private int newVacanciesCnt;
+
+    @Setter
+    @Getter
+    private int outdatedVacanciesCnt;
+
     @Setter
     @Getter
     private boolean finished;
@@ -74,6 +82,11 @@ public class ParsingProgressService {
                 .finished(finished)
                 .parsedVacanciesTotalCount(parsedVacanciesCnt)
                 .newVacanciesTotalCount(newVacanciesCnt)
+                .outdatedVacanciesTotalCount(outdatedVacanciesCnt)
                 .build();
+    }
+
+    public void addOutdatedVacancies(int outdatedVacancies) {
+        outdatedVacanciesCnt += outdatedVacancies;
     }
 }

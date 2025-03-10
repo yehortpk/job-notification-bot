@@ -1,7 +1,5 @@
 package com.github.yehortpk.parser.scrapper.page;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.yehortpk.parser.models.PageRequestParams;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
@@ -9,7 +7,6 @@ import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Default pages scrapper. Scrap page with Jsoup library

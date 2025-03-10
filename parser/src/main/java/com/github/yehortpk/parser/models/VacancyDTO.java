@@ -32,4 +32,9 @@ public class VacancyDTO implements Serializable {
     private String link;
 
     private LocalDateTime parsedAt;
+
+    /**
+     * Outdated data deletion timeout
+     */
+    private LocalDateTime deleteAt;
 }

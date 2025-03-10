@@ -1,9 +1,7 @@
 package com.github.yehortpk.router.services;
 
-import com.github.yehortpk.router.models.company.Company;
 import com.github.yehortpk.router.models.vacancy.Vacancy;
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
-import com.github.yehortpk.router.repositories.CompanyRepository;
 import com.github.yehortpk.router.repositories.VacancyRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -63,10 +61,6 @@ public class VacancyService {
         return vacancyRepository.findAll();
     }
 
-    public void removeVacancy(Long id) {
-        vacancyRepository.deleteById(id);
-    }
-
     public Page<Vacancy> getVacancies(Pageable pageable) {
         return vacancyRepository.findAll(pageable);
     }
@@ -75,9 +69,12 @@ public class VacancyService {
         return vacancyRepository.findByTitleContaining(query, pageable);
     }
 
-    public void removeVacanciesByUrlsIn(List<String> urls) {
-        vacancyRepository.deleteByLinkIn(urls);
+    public void updateVacancy(VacancyDTO vacancy) {
+        Vacancy updatedVacancy = modelMapper.map(vacancy, Vacancy.class);
+        vacancyRepository.save(updatedVacancy);
     }
 
-
+    public void removeVacancy(Long id) {
+        vacancyRepository.deleteById(id);
+    }
 }

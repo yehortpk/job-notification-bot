@@ -22,5 +22,10 @@ public class VacancyDTO implements Serializable {
     @EqualsAndHashCode.Include
     private String link;
     private LocalDateTime parsedAt;
+
+    /**
+     * Outdated vacancy deletion timeout
+     */
+    private LocalDateTime deleteAt;
 }
 

@@ -31,4 +31,9 @@ public class Vacancy {
     private int minSalary;
     private int maxSalary;
     private LocalDateTime parsedAt;
+
+    /**
+     * Outdated vacancy deletion timeout
+     */
+    private LocalDateTime deleteAt;
 }

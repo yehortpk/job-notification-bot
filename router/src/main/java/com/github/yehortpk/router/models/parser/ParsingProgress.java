@@ -27,6 +27,8 @@ public class ParsingProgress {
     private Integer parsedVacancies;
     @Field("new_vacancies")
     private Integer newVacancies;
+    @Field("outdated_vacancies")
+    private Integer outdatedVacancies;
     @Field("finished")
     private Boolean finished;
     @Field("parsers")

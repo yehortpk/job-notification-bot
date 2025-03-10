@@ -25,7 +25,7 @@ public class ParserProgress {
     @Field("new_vacancies")
     private int newVacanciesCnt;
     @Field("outdated_vacancies")
-    private int outdatedVacanciesCnt = 0;
+    private int outdatedVacanciesCnt;
 
 
     @Field("parser_pages")

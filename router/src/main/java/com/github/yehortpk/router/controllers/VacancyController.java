@@ -29,14 +29,14 @@ public class VacancyController {
         vacancyService.addVacancies(vacancies);
     }
 
+    @PutMapping
+    public void updateVacancy(@RequestBody VacancyDTO vacancy) {
+        vacancyService.updateVacancy(vacancy);
+    }
+
     @DeleteMapping("/{id}")
     public void removeVacancy(@PathVariable Long id) {
         vacancyService.removeVacancy(id);
-    }
-
-    @DeleteMapping
-    public void removeVacancies(@RequestBody List<String> urls) {
-        vacancyService.removeVacanciesByUrlsIn(urls);
     }
 
     @GetMapping
