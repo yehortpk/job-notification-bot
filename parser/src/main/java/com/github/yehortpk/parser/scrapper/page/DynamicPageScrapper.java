@@ -1,7 +1,7 @@
 package com.github.yehortpk.parser.scrapper.page;
 
 import com.github.yehortpk.parser.models.PageRequestParams;
-import com.github.yehortpk.parser.services.PlaywrightService;
+import com.github.yehortpk.parser.services.BrowserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DynamicPageScrapper implements PageScrapper {
     private final String dynamicElementQuerySelector;
-    private final PlaywrightService playwrightService = new PlaywrightService();
+    private final BrowserService browserService = new BrowserService();
 
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
@@ -26,7 +26,7 @@ public class DynamicPageScrapper implements PageScrapper {
         String proxy = pageRequestParams.getProxy() == null? null: convertProxyToString(pageRequestParams.getProxy());
         String pageURL = constructURLWithData(pageRequestParams.getPageURL(), pageRequestParams.getData());
 
-        return playwrightService.scrapPage(pageURL, dynamicElementQuerySelector, pageRequestParams.getTimeoutSec(), headers, proxy);
+        return browserService.scrapPage(pageURL, dynamicElementQuerySelector, pageRequestParams.getTimeoutSec(), headers, proxy);
     }
 
     /**

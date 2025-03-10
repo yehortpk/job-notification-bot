@@ -4,27 +4,18 @@ import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.WaitForSelectorState;
-import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.NO)
-public class PlaywrightService {
+public class BrowserService {
     private final Browser browser;
     private final Playwright playwright;
 
-    public PlaywrightService() {
+    public BrowserService() {
         playwright = Playwright.create();
-        System.setProperty("playwright.browser.installation.strategy", "SKIP");
-        System.setProperty("playwright.skip.browser.download", "true");
 
         browser = playwright.chromium().launch(
             new BrowserType.LaunchOptions()
@@ -56,16 +47,13 @@ public class PlaywrightService {
 
 
     public PageScrapperResponse scrapPage(String pageURL, String dynamicQuerySelector, int timeout, Map<String, String> headers, String proxy) throws IOException {
-        Browser.NewPageOptions context = createPageOptions(headers, proxy);
+        Browser.NewPageOptions pageOptions = createPageOptions(headers, proxy);
 
-        return scrapPage(pageURL, dynamicQuerySelector, timeout, context);
+        return scrapPage(pageURL, dynamicQuerySelector, timeout, pageOptions);
     }
 
     private PageScrapperResponse scrapPage(String pageURL, String dynamicQuerySelector, int timeout, Browser.NewPageOptions pageOptions) throws IOException {
-        Page page;
-        synchronized (this) {
-            page = browser.newPage(pageOptions);
-        }
+        Page page = browser.newPage(pageOptions);
 
         page.route("**/*.{png,jpg,jpeg,gif,webp}", Route::abort); // Block images
         page.route("**/*.css", Route::abort); // Block stylesheets
@@ -103,13 +91,8 @@ public class PlaywrightService {
         Map<String, String> headers = response.headers();
 
         page.close();
-        closeBrowser();
-        return new PageScrapperResponse(headers, cookies, body);
-    }
-
-    @PreDestroy
-    public void closeBrowser() {
         browser.close();
         playwright.close();
+        return new PageScrapperResponse(headers, cookies, body);
     }
 }
