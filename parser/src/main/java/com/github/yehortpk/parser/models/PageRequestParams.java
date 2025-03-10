@@ -20,6 +20,7 @@ public class PageRequestParams implements Serializable {
     private String pageURL;
     @Builder.Default
     private Map<String, String> data = new HashMap<>();
+    private String requestBody;
     @Builder.Default
     private Map<String, String> headers = new HashMap<>();
     @Builder.Default

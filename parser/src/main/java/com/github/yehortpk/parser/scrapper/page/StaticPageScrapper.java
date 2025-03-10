@@ -46,27 +46,17 @@ public class StaticPageScrapper implements PageScrapper {
                 .headers(pageRequestParams.getHeaders())
                 .ignoreContentType(true)
                 .method(pageRequestParams.getConnectionMethod())
-                .timeout(pageRequestParams.getTimeoutSec() * 1000);
+                .timeout(pageRequestParams.getTimeoutSec() * 1000)
+                .data(pageRequestParams.getData());
 
-        // Map data to json if content type is application/json
-        String contentTypeHeader = pageRequestParams.getHeaders().get("Content-Type");
-        if(contentTypeHeader != null && contentTypeHeader.equals("application/json")) {
-            try {
-                String requestBody = new ObjectMapper().writeValueAsString(pageRequestParams.getData());
-                connection = connection.requestBody(requestBody);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            for (Map.Entry<String, String> dataES : pageRequestParams.getData().entrySet()) {
-                if (dataES.getKey().endsWith("[]")) {
-                    for (String keyArrayPart : dataES.getValue().split(",")) {
-                        connection.data(dataES.getKey(), keyArrayPart);
-                    }
-                } else {
-                    connection.data(dataES.getKey(), dataES.getValue());
-                }
-            }
+        if (pageRequestParams.getConnectionMethod() == Connection.Method.POST &&
+                pageRequestParams.getRequestBody() != null) {
+            connection.requestBody(pageRequestParams.getRequestBody());
+        }
+
+        String userAgent = pageRequestParams.getHeaders().get("User-Agent");
+        if (userAgent != null) {
+            connection.userAgent(userAgent);
         }
         return connection;
     }
