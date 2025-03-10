@@ -1,24 +1,21 @@
-package com.github.yehortpk.router.controllers;
+package com.github.yehortpk.router.listener;
 
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
 import com.github.yehortpk.router.services.NotifierService;
 import com.github.yehortpk.router.services.VacancyService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
- * Controller that responsible for handling requests from KAFKA_PARSER_TOPIC from parser service
+ * Listener that responsible for handling requests from parser service
  */
 @Component
 @ConditionalOnProperty(name = "spring.kafka.bootstrap-servers")
 @RequiredArgsConstructor
-public class KafkaController {
+public class ParserListener {
     private final VacancyService vacancyService;
     private final NotifierService notifierService;
 
@@ -31,6 +28,4 @@ public class KafkaController {
             notifierService.notifyUsers(vacancy);
         }
     }
-
-
 }
