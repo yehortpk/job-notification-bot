@@ -21,6 +21,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new CompanyToCompanyShortDTOMapper());
         modelMapper.addMappings(new FilterToFilterDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyDTOMapper());
+        modelMapper.addMappings(new VacancyDTOToVacancyMapper());
         modelMapper.addMappings(new VacancyToVacancyShortDTOMapper());
         modelMapper.addMappings(new DataPageToVacanciesPageDTOMapper());
         modelMapper.addMappings(new VacancyToVacancyCompanyDTOMapper());

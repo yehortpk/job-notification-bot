@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @Entity
 @Table(name = "vacancy")
@@ -20,7 +21,8 @@ public class Vacancy {
     private Company company;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int vacancyId;
+    @Column(name = "vacancy_id")
+    private int vacancyID;
     @EqualsAndHashCode.Include
     @Column(unique = true, nullable = false)
     private String link;

@@ -11,6 +11,7 @@ import java.util.Set;
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

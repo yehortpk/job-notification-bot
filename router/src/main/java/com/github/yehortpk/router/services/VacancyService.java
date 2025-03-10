@@ -23,6 +23,7 @@ import java.util.List;
 public class VacancyService {
     final private VacancyRepository vacancyRepository;
     final private CompanyRepository companyRepository;
+    private final ModelMapper modelMapper;
 
     /**
      * Persists all the vacancies from the input list
@@ -37,15 +38,7 @@ public class VacancyService {
                 continue;
             }
 
-            Company vacancyCompany = companyRepository.getReferenceById((long) vacancy.getCompanyID());
-            Vacancy newVacancy = Vacancy.builder()
-                    .company(vacancyCompany)
-                    .title(vacancy.getTitle())
-                    .minSalary(vacancy.getMinSalary())
-                    .maxSalary(vacancy.getMaxSalary())
-                    .link(vacancy.getLink())
-                    .parsedAt(vacancy.getParsedAt())
-                    .build();
+            Vacancy newVacancy = modelMapper.map(vacancy, Vacancy.class);
 
             newVacancies.add(newVacancy);
         }
@@ -53,15 +46,7 @@ public class VacancyService {
     }
 
     public void addVacancy(VacancyDTO vacancy) {
-        Company vacancyCompany = companyRepository.getReferenceById((long) vacancy.getCompanyID());
-        Vacancy newVacancy = Vacancy.builder()
-                .company(vacancyCompany)
-                .title(vacancy.getTitle())
-                .minSalary(vacancy.getMinSalary())
-                .maxSalary(vacancy.getMaxSalary())
-                .link(vacancy.getLink())
-                .parsedAt(vacancy.getParsedAt())
-                .build();
+        Vacancy newVacancy = modelMapper.map(vacancy, Vacancy.class);
 
         vacancyRepository.save(newVacancy);
     }
