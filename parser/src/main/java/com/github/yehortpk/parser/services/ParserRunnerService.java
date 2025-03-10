@@ -139,13 +139,13 @@ public class ParserRunnerService {
         parserProgress.addPageLog(pageID, ParserProgress.LogLevelEnum.ERROR, errorLog);
     }
 
-    private void parsePageVacancies(PageDTO page, CompanyDTO company) {
+    private List<VacancyDTO> parsePageVacancies(PageDTO page, CompanyDTO company) {
         SiteParser siteParser = (SiteParser) applicationContext.getBean(company.getBeanClass());
         ParserProgress parserProgress = parsingProgressService.getParsers().get(company.getCompanyId());
 
         int pageID = page.getPageID();
 
-        Set<VacancyDTO> parsedVacancies;
+        List<VacancyDTO> parsedVacancies;
         try {
             parsedVacancies = siteParser.parseVacancies(page);
         } catch (Exception e) {
@@ -156,7 +156,7 @@ public class ParserRunnerService {
             throw new NoVacanciesOnPageException(page.getPageID());
         }
 
-        parsedVacancies.forEach(vacancy -> {
+        for (VacancyDTO vacancy : parsedVacancies) {
             vacancy.setCompanyID(company.getCompanyId());
             vacancy.setCompanyTitle(company.getTitle());
             vacancy.setParsedAt(LocalDateTime.now());

@@ -5,7 +5,7 @@ import com.github.yehortpk.parser.models.PageDTO;
 import com.github.yehortpk.parser.models.VacancyDTO;
 import com.github.yehortpk.parser.crawler.*;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Interface for all page parsers. Require method parseVacancies
@@ -17,7 +17,8 @@ import java.util.Set;
 public interface SiteParser {
     /**
      * Parse all vacancies from {@link PageDTO} page
-     * @return set of vacancies
+     *
+     * @return list of vacancies
      */
-    Set<VacancyDTO> parseVacancies(PageDTO page) throws Exception;
+    List<VacancyDTO> parseVacancies(PageDTO page) throws Exception;
 }
