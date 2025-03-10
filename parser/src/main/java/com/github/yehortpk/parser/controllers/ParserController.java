@@ -2,7 +2,7 @@ package com.github.yehortpk.parser.controllers;
 
 import com.github.yehortpk.parser.progress.ParsingProgressDTO;
 import com.github.yehortpk.parser.services.ParserRunnerService;
-import com.github.yehortpk.parser.progress.ParsingProgressService;
+import com.github.yehortpk.parser.services.ParsingProgressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
