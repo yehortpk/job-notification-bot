@@ -42,6 +42,7 @@ public class ParsingProgressService {
         this.parsingHash = UUID.randomUUID().toString().substring(0, 10);
         this.parsedVacanciesCnt = 0;
         this.newVacanciesCnt = 0;
+        this.outdatedVacanciesCnt = 0;
         this.finished = false;
 
         this.parsers = new LinkedHashMap<>();
