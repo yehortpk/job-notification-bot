@@ -36,7 +36,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_ROOT_PASS: ${MONGO_ROOT_PASS}
-      MONGO_PROGRESS_DB: ${MONGO_PROGRESS_DB}
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
@@ -73,6 +72,18 @@ services:
         condition: service_healthy
     profiles:
       - bot
+      - app
+
+  frontend:
+    container_name: notifier-frontend
+    build:
+      dockerfile: ./frontend/Dockerfile
+    ports:
+      - 4200:4200
+    networks:
+      - notifier-network
+    profiles:
+      - frontend
       - app
 
   redis:
