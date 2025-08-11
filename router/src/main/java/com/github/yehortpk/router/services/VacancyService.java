@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,16 +46,19 @@ public class VacancyService {
         vacancyRepository.saveAll(newVacancies);
     }
 
-    @Transactional
-    public void addVacancy(VacancyDTO vacancy) {
-        if (vacancyRepository.findByLink(vacancy.getLink()).isPresent()) {
-            log.error("Duplicated vacancy {}", vacancy.getLink());
-            return;
-        }
-
+    public boolean addVacancy(VacancyDTO vacancy) {
         Vacancy newVacancy = modelMapper.map(vacancy, Vacancy.class);
 
-        vacancyRepository.save(newVacancy);
+        try {
+            vacancyRepository.save(newVacancy);
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Duplicated vacancy {}", vacancy.getLink());
+            return false;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
+        }
     }
 
     public List<Vacancy> getAllVacancies() {

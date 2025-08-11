@@ -20,8 +20,8 @@ public class NotifierService {
      * @param newVacancies set of new vacancies
      */
     public void notifyNewVacancies(Set<VacancyDTO> newVacancies) {
-        synchronized (this) {
-            for (VacancyDTO newVacancy : newVacancies) {
+        for (VacancyDTO newVacancy : newVacancies) {
+            synchronized (this) {
                 routerService.sendDefault(newVacancy);
             }
         }

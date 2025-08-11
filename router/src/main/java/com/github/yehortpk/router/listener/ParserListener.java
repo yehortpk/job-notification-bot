@@ -3,7 +3,6 @@ package com.github.yehortpk.router.listener;
 import com.github.yehortpk.router.models.vacancy.VacancyDTO;
 import com.github.yehortpk.router.services.NotifierService;
 import com.github.yehortpk.router.services.VacancyService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,11 +19,10 @@ public class ParserListener {
     private final NotifierService notifierService;
 
     @KafkaListener(topics = {"#{environment['KAFKA_PARSER_TOPIC']}"}, containerFactory = "parserContainerFactory")
-    @Transactional
-    public void listenParserTopic(VacancyDTO vacancy) {
-        vacancyService.addVacancy(vacancy);
+    public synchronized void listenParserTopic(VacancyDTO vacancy) {
+        boolean created = vacancyService.addVacancy(vacancy);
 
-        if (notifierService.isNotifierEnabled()) {
+        if (created && notifierService.isNotifierEnabled()) {
             notifierService.notifyUsers(vacancy);
         }
     }

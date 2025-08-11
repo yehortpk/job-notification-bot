@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.util.backoff.FixedBackOff;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -44,6 +46,13 @@ public class InfrastructureConfig {
         return new NewTopic(parserTopic, 1, (short) 1);
     }
 
+    @Bean
+    public DefaultErrorHandler errorHandler() {
+        FixedBackOff fixedBackOff = new FixedBackOff(0L, 0); // no retries
+        return new DefaultErrorHandler(fixedBackOff);
+    }
+
+
     private Map<String, Object> getConsumerFactoryProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
@@ -68,10 +77,13 @@ public class InfrastructureConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> parserContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> parserContainerFactory(
+            DefaultErrorHandler errorHandler) {
         ConcurrentKafkaListenerContainerFactory<String, VacancyDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(parserConsumerFactory());
+
+        factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
 
