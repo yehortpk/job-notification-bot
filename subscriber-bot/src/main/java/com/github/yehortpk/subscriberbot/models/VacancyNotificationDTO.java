@@ -17,4 +17,5 @@ public class VacancyNotificationDTO {
     private int maxSalary;
     @EqualsAndHashCode.Include
     private String link;
+    private boolean isRemote;
 }

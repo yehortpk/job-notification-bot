@@ -27,5 +27,9 @@ public class VacancyDTO implements Serializable {
      * Outdated vacancy deletion timeout
      */
     private LocalDateTime deleteAt;
+    /**
+     * Whether remote type of work available for the vacancy
+     */
+    private boolean isRemote;
 }
 

@@ -46,6 +46,7 @@ public class NotifierService {
                         .companyTitle(vacancy.getCompanyTitle())
                         .chatId(filter.getClientId())
                         .link(vacancy.getLink())
+                        .isRemote(vacancy.isRemote())
                         .build();
 
                 notifyUser(vacancyNotification);
