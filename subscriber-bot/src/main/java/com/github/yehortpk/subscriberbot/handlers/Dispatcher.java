@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot.handlers;
 
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;

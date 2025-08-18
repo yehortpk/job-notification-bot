@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot.handlers.callback;
 
-import com.github.yehortpk.subscriberbot.dtos.*;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.*;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.markups.VacanciesListPageableMarkup;
 import com.github.yehortpk.subscriberbot.services.CompanyService;

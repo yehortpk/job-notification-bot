@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.handlers.callback.back;
 
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
 import com.github.yehortpk.subscriberbot.handlers.message.commands.StartCommandRequestHandler;
 import lombok.RequiredArgsConstructor;

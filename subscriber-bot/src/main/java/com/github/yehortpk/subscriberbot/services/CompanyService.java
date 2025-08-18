@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot.services;
 
-import com.github.yehortpk.subscriberbot.dtos.CompanyShortInfoDTO;
-import com.github.yehortpk.subscriberbot.dtos.VacancyShortDTO;
+import com.github.yehortpk.subscriberbot.models.CompanyShortInfoDTO;
+import com.github.yehortpk.subscriberbot.models.VacancyShortDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;

@@ -1,4 +1,4 @@
-package com.github.yehortpk.subscriberbot.dtos;
+package com.github.yehortpk.subscriberbot.models;
 
 import lombok.Data;
 

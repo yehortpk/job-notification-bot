@@ -1,9 +1,9 @@
 package com.github.yehortpk.subscriberbot.handlers.callback;
 
-import com.github.yehortpk.subscriberbot.dtos.FilterDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.FilterDTO;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.FilterInfoMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
 import com.github.yehortpk.subscriberbot.services.FilterService;

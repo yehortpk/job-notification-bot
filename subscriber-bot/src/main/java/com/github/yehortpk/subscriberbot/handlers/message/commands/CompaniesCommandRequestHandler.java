@@ -1,9 +1,9 @@
 package com.github.yehortpk.subscriberbot.handlers.message.commands;
 
-import com.github.yehortpk.subscriberbot.dtos.CompanyShortInfoDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.CompanyShortInfoDTO;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.CompaniesListMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.CompanyService;
 import com.github.yehortpk.subscriberbot.services.StateService;

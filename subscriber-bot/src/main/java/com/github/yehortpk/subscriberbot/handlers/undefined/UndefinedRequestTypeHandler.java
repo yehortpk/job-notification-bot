@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.handlers.undefined;
 
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandler;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandlerImpl;
 import org.springframework.stereotype.Component;

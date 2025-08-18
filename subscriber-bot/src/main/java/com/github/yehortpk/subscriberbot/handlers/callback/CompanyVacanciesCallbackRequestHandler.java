@@ -1,9 +1,9 @@
 package com.github.yehortpk.subscriberbot.handlers.callback;
 
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
-import com.github.yehortpk.subscriberbot.dtos.VacancyShortDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.VacancyShortDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.BackInlineMarkup;
 import com.github.yehortpk.subscriberbot.services.CompanyService;
 import com.github.yehortpk.subscriberbot.services.StateService;

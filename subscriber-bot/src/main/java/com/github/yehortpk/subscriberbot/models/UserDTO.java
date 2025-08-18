@@ -1,7 +1,7 @@
-package com.github.yehortpk.subscriberbot.dtos;
+package com.github.yehortpk.subscriberbot.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import lombok.*;
 
 import java.util.LinkedList;

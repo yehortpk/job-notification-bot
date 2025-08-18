@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.handlers;
 
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.github.yehortpk.subscriberbot.dtos.enums;
+package com.github.yehortpk.subscriberbot.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

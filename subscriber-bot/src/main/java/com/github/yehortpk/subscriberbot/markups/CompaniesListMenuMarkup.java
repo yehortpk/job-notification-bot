@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.markups;
 
-import com.github.yehortpk.subscriberbot.dtos.CompanyShortInfoDTO;
+import com.github.yehortpk.subscriberbot.models.CompanyShortInfoDTO;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 

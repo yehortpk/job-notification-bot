@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.handlers.callback;
 
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
 import com.github.yehortpk.subscriberbot.handlers.StateRequestHandlerImpl;
 import org.springframework.stereotype.Component;
 

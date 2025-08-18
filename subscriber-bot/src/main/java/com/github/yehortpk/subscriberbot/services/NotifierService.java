@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.services;
 
-import com.github.yehortpk.subscriberbot.dtos.VacancyNotificationDTO;
+import com.github.yehortpk.subscriberbot.models.VacancyNotificationDTO;
 import com.github.yehortpk.subscriberbot.utils.TelegramServiceUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

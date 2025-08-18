@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.services;
 
-import com.github.yehortpk.subscriberbot.dtos.*;
+import com.github.yehortpk.subscriberbot.models.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

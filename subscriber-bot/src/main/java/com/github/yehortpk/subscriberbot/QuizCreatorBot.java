@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot;
 
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.exceptions.MissedHandlerException;
 import com.github.yehortpk.subscriberbot.handlers.Dispatcher;
 import com.github.yehortpk.subscriberbot.handlers.RequestHandler;

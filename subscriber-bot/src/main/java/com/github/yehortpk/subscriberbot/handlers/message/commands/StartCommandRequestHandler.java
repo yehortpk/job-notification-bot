@@ -1,8 +1,8 @@
 package com.github.yehortpk.subscriberbot.handlers.message.commands;
 
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.markups.MainMenuMarkup;
 import com.github.yehortpk.subscriberbot.services.StateService;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot.services;
 
-import com.github.yehortpk.subscriberbot.dtos.UserDAO;
-import com.github.yehortpk.subscriberbot.dtos.UserDTO;
+import com.github.yehortpk.subscriberbot.models.UserDAO;
+import com.github.yehortpk.subscriberbot.models.UserDTO;
 import com.github.yehortpk.subscriberbot.repositories.StateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

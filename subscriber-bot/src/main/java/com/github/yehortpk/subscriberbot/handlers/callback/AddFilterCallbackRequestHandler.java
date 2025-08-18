@@ -1,7 +1,7 @@
 package com.github.yehortpk.subscriberbot.handlers.callback;
 
-import com.github.yehortpk.subscriberbot.dtos.UserRequestDTO;
-import com.github.yehortpk.subscriberbot.dtos.enums.UserState;
+import com.github.yehortpk.subscriberbot.models.UserRequestDTO;
+import com.github.yehortpk.subscriberbot.models.enums.UserState;
 import com.github.yehortpk.subscriberbot.handlers.message.commands.AddCommandRequestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

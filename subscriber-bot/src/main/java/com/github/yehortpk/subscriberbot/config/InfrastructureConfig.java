@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.config;
 
-import com.github.yehortpk.subscriberbot.dtos.VacancyNotificationDTO;
+import com.github.yehortpk.subscriberbot.models.VacancyNotificationDTO;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -62,7 +62,7 @@ public class InfrastructureConfig {
 
         props.put(ConsumerConfig.GROUP_ID_CONFIG, botNotifierTopicConsumerGroupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS,
-                "vacancy:com.github.yehortpk.subscriberbot.dtos.VacancyNotificationDTO");
+                "vacancy:com.github.yehortpk.subscriberbot.models.VacancyNotificationDTO");
 
         return new DefaultKafkaConsumerFactory<>(props);
     }

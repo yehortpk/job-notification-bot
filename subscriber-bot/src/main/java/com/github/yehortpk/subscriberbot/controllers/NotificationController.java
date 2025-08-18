@@ -1,6 +1,6 @@
 package com.github.yehortpk.subscriberbot.controllers;
 
-import com.github.yehortpk.subscriberbot.dtos.VacancyNotificationDTO;
+import com.github.yehortpk.subscriberbot.models.VacancyNotificationDTO;
 import com.github.yehortpk.subscriberbot.services.NotifierService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
