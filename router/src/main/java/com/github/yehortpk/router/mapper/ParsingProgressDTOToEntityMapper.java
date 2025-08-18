@@ -10,5 +10,6 @@ public class ParsingProgressDTOToEntityMapper extends PropertyMap<ParsingProgres
         map().setParsedVacancies(source.getParsedVacanciesTotalCount());
         map().setNewVacancies(source.getNewVacanciesTotalCount());
         map().setOutdatedVacancies(source.getOutdatedVacanciesTotalCount());
+        map().setFinishedAt(source.getFinishedAt());
     }
 }

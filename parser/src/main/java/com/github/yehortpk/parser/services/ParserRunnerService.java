@@ -97,8 +97,8 @@ public class ParserRunnerService {
 
                         // Wait for all futures to complete and collect results
                         List<VacancyDTO> parsedVacancies = vacancyFutures.stream()
-                                .map(CompletableFuture::join) // This will block until each future completes
-                                .flatMap(List::stream)         // Flatten the list of lists
+                                .map(CompletableFuture::join)
+                                .flatMap(List::stream)
                                 .toList();
 
 

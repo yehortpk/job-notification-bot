@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Setter
@@ -33,4 +34,6 @@ public class ParsingProgress {
     private Boolean finished;
     @Field("parsers")
     private List<ParserProgress> parsers;
+    @Field("finished_at")
+    private LocalDateTime finishedAt;
 }

@@ -3,6 +3,7 @@ package com.github.yehortpk.router.models.parser;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,4 +27,6 @@ public class ParsingProgressDTO {
     @JsonProperty("outdated")
     @Builder.Default
     private int outdatedVacanciesTotalCount = 0;
+    @JsonProperty("finished_at")
+    private LocalDateTime finishedAt;
 }
