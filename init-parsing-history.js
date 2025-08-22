@@ -19,6 +19,9 @@ db.createCollection('parsing-history', {
         finished: {
           bsonType: 'bool'
         },
+        finished_at: {
+          bsonType: 'date'
+        },
         parsers: {
           bsonType: 'array',
           items: {

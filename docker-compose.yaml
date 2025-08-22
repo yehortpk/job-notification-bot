@@ -196,7 +196,7 @@ services:
       - notifier-network
     volumes:
       - notifier-mongo-data:/data/db
-      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./init-parsing-history.js:/docker-entrypoint-initdb.d/init-parsing-history.js:ro
 
 networks:
   notifier-network:
