@@ -16,15 +16,17 @@ import java.io.IOException;
 public class StaticPageScrapper implements PageScrapper {
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
-        log.info("Connecting to the page {}, proxy: {},  data: {}, headers: {}",
+        log.info("Connecting to the page {}, method: {}, proxy: {},  data: {}, headers: {}",
                 pageRequestParams.getPageURL(),
+                pageRequestParams.getConnectionMethod(),
                 pageRequestParams.getProxy(),
                 pageRequestParams.getData(),
                 pageRequestParams.getHeaders()
         );
         Connection.Response response = toConnection(pageRequestParams).execute();
-        log.info("Connection to the page {}, proxy: {},  data: {}, headers: {} was established",
+        log.info("Connection to the page {}, method: {}, , proxy: {},  data: {}, headers: {} was established",
                 pageRequestParams.getPageURL(),
+                pageRequestParams.getConnectionMethod(),
                 pageRequestParams.getProxy(),
                 pageRequestParams.getData(),
                 pageRequestParams.getHeaders()

@@ -18,7 +18,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DynamicPageScrapper implements PageScrapper {
     private final String dynamicElementQuerySelector;
-    private final BrowserService browserService = new BrowserService();
 
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
@@ -26,7 +25,24 @@ public class DynamicPageScrapper implements PageScrapper {
         String proxy = pageRequestParams.getProxy() == null? null: convertProxyToString(pageRequestParams.getProxy());
         String pageURL = constructURLWithData(pageRequestParams.getPageURL(), pageRequestParams.getData());
 
-        return browserService.scrapPage(pageURL, dynamicElementQuerySelector, pageRequestParams.getTimeoutSec(), headers, proxy);
+        BrowserService browserService = new BrowserService();
+        log.info("Connecting to the page {}, method: {}, proxy: {},  data: {}, headers: {}",
+                pageRequestParams.getPageURL(),
+                pageRequestParams.getConnectionMethod(),
+                pageRequestParams.getProxy(),
+                pageRequestParams.getData(),
+                pageRequestParams.getHeaders()
+        );
+        PageScrapperResponse pageScrapperResponse = browserService.scrapPage(pageURL, dynamicElementQuerySelector, pageRequestParams.getTimeoutSec(), headers, proxy);
+
+        log.info("Connection to the page {}, method: {}, , proxy: {},  data: {}, headers: {} was established",
+                pageRequestParams.getPageURL(),
+                pageRequestParams.getConnectionMethod(),
+                pageRequestParams.getProxy(),
+                pageRequestParams.getData(),
+                pageRequestParams.getHeaders()
+        );
+        return pageScrapperResponse;
     }
 
     /**
