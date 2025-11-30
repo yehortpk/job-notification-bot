@@ -37,7 +37,7 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
 
         Map<String, String> requestData = new HashMap<>(company.getData());
         Map<String, String> requestHeaders = new HashMap<>(company.getHeaders());
-        Map<String, String> requestCookies = new HashMap<>();
+        Map<String, String> requestCookies = new HashMap<>(company.getCookies());
 
         int pagesCount = 1;
 
@@ -205,7 +205,7 @@ public abstract class SiteScrapperImpl implements SiteScrapper {
         return pageRequestParams;
     }
 
-    private boolean isRequestNeedMetadata() {
+    protected boolean isRequestNeedMetadata() {
         for (Map.Entry<String, String> dataEntry : company.getData().entrySet()) {
             if (isValueBinding(dataEntry.getValue())) {
                 return true;

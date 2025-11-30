@@ -16,20 +16,20 @@ import java.io.IOException;
 public class StaticPageScrapper implements PageScrapper {
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
-        log.info("Connecting to the page {}, method: {}, proxy: {},  data: {}, headers: {}",
+        log.info("Connecting to the page {}, method: {}, proxy: {},  data: {}, headers: {}, cookies: {}",
                 pageRequestParams.getPageURL(),
                 pageRequestParams.getConnectionMethod(),
                 pageRequestParams.getProxy(),
                 pageRequestParams.getData(),
-                pageRequestParams.getHeaders()
+                pageRequestParams.getHeaders(),
+                pageRequestParams.getCookies()
         );
         Connection.Response response = toConnection(pageRequestParams).execute();
-        log.info("Connection to the page {}, method: {}, , proxy: {},  data: {}, headers: {} was established",
+        log.info("Connection to the page {}, method: {}, proxy: {},  data: {} was established",
                 pageRequestParams.getPageURL(),
                 pageRequestParams.getConnectionMethod(),
                 pageRequestParams.getProxy(),
-                pageRequestParams.getData(),
-                pageRequestParams.getHeaders()
+                pageRequestParams.getData()
         );
         return new PageScrapperResponse(response.headers(), response.cookies(), response.body());
     }
@@ -43,6 +43,7 @@ public class StaticPageScrapper implements PageScrapper {
         Connection connection = Jsoup.connect(pageRequestParams.getPageURL())
                 .proxy(pageRequestParams.getProxy())
                 .headers(pageRequestParams.getHeaders())
+                .cookies(pageRequestParams.getCookies())
                 .ignoreContentType(true)
                 .method(pageRequestParams.getConnectionMethod())
                 .timeout(pageRequestParams.getTimeoutSec() * 1000)

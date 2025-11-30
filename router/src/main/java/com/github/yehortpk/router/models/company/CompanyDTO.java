@@ -56,6 +56,8 @@ public class CompanyDTO {
     private Map<String, String> data;
     @JsonProperty("company_headers")
     private Map<String, String> headers;
+    @JsonProperty("company_cookies")
+    private Map<String, String> cookies;
 
     // todo change to modelmapper
     public static CompanyDTO fromDAO(Company dao) {
@@ -74,6 +76,10 @@ public class CompanyDTO {
                 .headers(dao.getCompanyHeaders().stream().collect(Collectors.toMap(
                         CompanyHeader::getKey,
                         CompanyHeader::getValue
+                )))
+                .cookies(dao.getCompanyCookies().stream().collect(Collectors.toMap(
+                        CompanyCookie::getKey,
+                        CompanyCookie::getValue
                 )))
                 .build();
     }

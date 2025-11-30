@@ -39,4 +39,6 @@ public class Company {
     private Set<CompanyData> companyData;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
     private Set<CompanyHeader> companyHeaders;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
+    private Set<CompanyCookie> companyCookies;
 }

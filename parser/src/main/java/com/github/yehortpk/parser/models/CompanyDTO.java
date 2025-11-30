@@ -53,4 +53,6 @@ public class CompanyDTO {
     private Map<String, String> data;
     @JsonProperty("company_headers")
     private Map<String, String> headers;
+    @JsonProperty("company_cookies")
+    private Map<String, String> cookies;
 }
