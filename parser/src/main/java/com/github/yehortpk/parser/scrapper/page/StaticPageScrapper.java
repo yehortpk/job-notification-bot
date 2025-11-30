@@ -45,6 +45,7 @@ public class StaticPageScrapper implements PageScrapper {
                 .headers(pageRequestParams.getHeaders())
                 .cookies(pageRequestParams.getCookies())
                 .ignoreContentType(true)
+                .followRedirects(pageRequestParams.isFollowRedirects())
                 .method(pageRequestParams.getConnectionMethod())
                 .timeout(pageRequestParams.getTimeoutSec() * 1000)
                 .data(pageRequestParams.getData());

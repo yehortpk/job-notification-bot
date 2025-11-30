@@ -30,4 +30,6 @@ public class PageRequestParams implements Serializable {
     private Proxy proxy;
     @Builder.Default
     private int timeoutSec = 60;
+    @Builder.Default
+    private boolean followRedirects = true;
 }
