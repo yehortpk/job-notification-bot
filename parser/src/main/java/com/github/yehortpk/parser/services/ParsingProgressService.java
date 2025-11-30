@@ -39,7 +39,7 @@ public class ParsingProgressService {
 
     public void init() {
         progressLock.lock();
-        this.parsingHash = UUID.randomUUID().toString().substring(0, 10);
+        this.parsingHash = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
         this.parsedVacanciesCnt = 0;
         this.newVacanciesCnt = 0;
         this.outdatedVacanciesCnt = 0;
