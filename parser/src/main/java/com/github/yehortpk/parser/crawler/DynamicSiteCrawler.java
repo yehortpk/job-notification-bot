@@ -1,7 +1,7 @@
 package com.github.yehortpk.parser.crawler;
 
 import com.github.yehortpk.parser.parser.SiteParser;
-import com.github.yehortpk.parser.scrapper.page.DynamicPageScrapper;
+import com.github.yehortpk.parser.scrapper.page.PlaywrightPageScrapper;
 import com.github.yehortpk.parser.scrapper.page.PageScrapper;
 import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
 import com.github.yehortpk.parser.scrapper.site.SiteScrapperImpl;
@@ -40,7 +40,7 @@ public abstract class DynamicSiteCrawler extends SiteScrapperImpl implements Sit
 
     @Override
     protected PageScrapper generatePageScrapper(int pageID) {
-        return new DynamicPageScrapper(createDynamicElementQuerySelector());
+        return new PlaywrightPageScrapper(createDynamicElementQuerySelector());
     }
 
     /**

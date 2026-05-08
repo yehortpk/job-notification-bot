@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 @Component
 @Slf4j
-public class StaticPageScrapper implements PageScrapper {
+public class JsoupPageScrapper implements PageScrapper {
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
         log.info("Connecting to the page {}, method: {}, proxy: {},  data: {}, headers: {}, cookies: {}",

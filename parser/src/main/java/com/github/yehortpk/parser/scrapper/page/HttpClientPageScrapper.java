@@ -18,10 +18,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * java.net.httpHTTPRequest based pages scrapper. More low-level than {@link StaticPageScrapper}.
+ * java.net.httpHTTPRequest based pages scrapper. More low-level than {@link JsoupPageScrapper}.
  */
 @Slf4j
-public class JavaClientPageScrapper implements PageScrapper {
+public class HttpClientPageScrapper implements PageScrapper {
     @Override
     public PageScrapperResponse scrapPage(PageRequestParams pageRequestParams) throws IOException {
         // Build request based on HTTP method and payload configuration
@@ -34,7 +34,8 @@ public class JavaClientPageScrapper implements PageScrapper {
                     );
         } else {
             if (pageRequestParams.getRequestBody() != null) {
-                requestBuilder = requestBuilder.POST(HttpRequest.BodyPublishers.ofString(pageRequestParams.getRequestBody()));
+                requestBuilder = requestBuilder
+                        .POST(HttpRequest.BodyPublishers.ofString(pageRequestParams.getRequestBody()));
             } else {
                 String formBody = pageRequestParams.getData().entrySet().stream()
                         .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8)

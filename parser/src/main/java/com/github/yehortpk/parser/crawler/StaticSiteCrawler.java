@@ -1,9 +1,10 @@
 package com.github.yehortpk.parser.crawler;
 
 import com.github.yehortpk.parser.parser.SiteParser;
+import com.github.yehortpk.parser.scrapper.page.HttpClientPageScrapper;
 import com.github.yehortpk.parser.scrapper.page.PageScrapper;
 import com.github.yehortpk.parser.scrapper.page.PageScrapperResponse;
-import com.github.yehortpk.parser.scrapper.page.StaticPageScrapper;
+import com.github.yehortpk.parser.scrapper.page.JsoupPageScrapper;
 import com.github.yehortpk.parser.scrapper.site.SiteScrapperImpl;
 import com.github.yehortpk.parser.scrapper.site.metadata.SiteMetadataParser;
 import lombok.*;
@@ -39,7 +40,7 @@ public abstract class StaticSiteCrawler extends SiteScrapperImpl implements Site
 
     @Override
     protected PageScrapper generatePageScrapper(int pageID) {
-        return new StaticPageScrapper();
+        return new JsoupPageScrapper();
     }
 
     /**
