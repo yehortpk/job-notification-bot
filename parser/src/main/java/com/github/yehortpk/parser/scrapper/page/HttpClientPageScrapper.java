@@ -44,6 +44,10 @@ public class HttpClientPageScrapper implements PageScrapper {
                         .collect(Collectors.joining("&"));
                 requestBuilder = requestBuilder.POST(HttpRequest.BodyPublishers.ofString(formBody));
             }
+            requestBuilder = requestBuilder
+                    .uri(
+                        URI.create(pageRequestParams.getPageURL())
+                    );
         }
 
         // Apply headers and cookies to the request
