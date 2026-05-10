@@ -57,8 +57,9 @@ public class HttpClientPageScrapper implements PageScrapper {
             requestBuilder = requestBuilder.header("Cookie", cookies.get());
         }
 
-        HttpClient.Builder clientBuilder = HttpClient.newBuilder();
-        clientBuilder = clientBuilder.connectTimeout(Duration.ofSeconds(30));
+        HttpClient.Builder clientBuilder = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(pageRequestParams.getTimeoutSec()))
+            .followRedirects(HttpClient.Redirect.NORMAL);
 
         // Manage cookies for this request/response cycle
         CookieManager cookieManager = new CookieManager();
@@ -133,15 +134,12 @@ public class HttpClientPageScrapper implements PageScrapper {
     private String constructURLWithData(String pageUrl, Map<String, String> data) {
         if (!data.isEmpty()) {
             StringBuilder pageUrlBuilder = new StringBuilder(pageUrl + "?");
-            for (Map.Entry<String, String> dataES : data.entrySet()) {
-                if (dataES.getKey().endsWith("[]")) {
-                    for (String valuePart : dataES.getValue().split(",")) {
-                        pageUrlBuilder.append(dataES.getKey()).append("=").append(valuePart).append("&");
-                    }
-                } else {
+            if(!data.isEmpty()) {
+                for (Map.Entry<String, String> dataES : data.entrySet()) {
                     pageUrlBuilder.append(dataES.getKey()).append("=").append(dataES.getValue()).append("&");
                 }
 
+                pageUrlBuilder.deleteCharAt(pageUrlBuilder.length() - 1);
             }
             pageUrl = pageUrlBuilder.toString();
         }
